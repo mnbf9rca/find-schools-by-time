@@ -23,5 +23,7 @@ A personal, local web app: enter a UK postcode and a time limit, get the post-16
 - The backlog is the GitHub milestones and issues on `mnbf9rca/find-schools-by-time`, worked in milestone order. Each issue states its done condition and links to the research it rests on. Read the issue before starting it.
 - Design before building: a change gets a short spec in `docs/superpowers/specs/` and the user's approval, then a build with tests first.
 - Small changes get at most one review. Once built and passing, stop.
+- Never detach a process with `nohup`, `disown`, `setsid` or a bare `&` you walk away from. Every long-running job (imports, servers, downloads) runs under a harness-controlled task that can be stopped, so nothing is left running when the session ends.
+- Codex's sandbox kills backgrounded children: run short jobs in the foreground with escalation, and servers only in a Codex-managed background terminal you can stop. Stop servers yourself and confirm with escalated `pgrep` that none remain before replying.
 - Never merge to main, open terminal panes, or start the server on the user's behalf. Tell them the branch and the command.
 - Address the user as "human meatbag".
