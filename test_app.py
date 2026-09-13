@@ -81,7 +81,8 @@ RESULTS = {"students": 167.0, "progress": 0.18, "progress_banding": "Above avera
 
 def school(urn, lat, lng, **results):
     return {"urn": urn, "name": f"School {urn}", "type": "Academy", "postcode": "N1 1AA",
-            "website": "", "sixth_form": "Has a sixth form", "lat": lat, "lng": lng
+            "website": "", "sixth_form": "Has a sixth form", "gender": "Mixed",
+            "religious_character": "Church of England", "lat": lat, "lng": lng
             } | RESULTS | results
 
 class TestNearest(unittest.TestCase):
@@ -156,7 +157,7 @@ class TestResults(unittest.TestCase):
         self.assertEqual([r["urn"] for r in rows], ["1", "2"])
         self.assertEqual([r["minutes"] for r in rows], [2, 59])
         self.assertEqual(set(rows[0]), {
-            "urn", "name", "type", "postcode", "website", "sixth_form", "minutes",
+            "urn", "name", "type", "postcode", "website", "sixth_form", "gender", "religious_character", "minutes",
             "students", "progress", "progress_banding", "grade", "aps",
             "retained_percent", "aab_percent", "best3_grade", "best3_aps"})
 

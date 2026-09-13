@@ -106,6 +106,8 @@ def main(path, results_path):
                 "postcode": row["Postcode"],
                 "website": website(row["SchoolWebsite"]),
                 "sixth_form": row["OfficialSixthForm (name)"],
+                "gender": None if row["Gender (name)"] in ("", "Not applicable") else row["Gender (name)"],
+                "religious_character": None if row["ReligiousCharacter (name)"] in ("", "None", "Does not apply") else row["ReligiousCharacter (name)"],
                 "lat": lat,
                 "lng": lng,
             } | results.get(row["URN"], empty))

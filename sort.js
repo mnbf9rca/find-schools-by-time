@@ -8,6 +8,8 @@ export const COLUMNS = [
   { label: 'Type', key: 'type', value: (r) => r.type, cell: (r) => text(r.type) },
   { label: 'Postcode', key: 'postcode', value: (r) => r.postcode, cell: (r) => text(r.postcode) },
   { label: 'Sixth form', key: 'sixth_form', value: (r) => r.sixth_form, cell: (r) => text(r.sixth_form) },
+  { label: 'Gender', key: 'gender', value: (r) => r.gender, cell: (r) => text(r.gender) },
+  { label: 'Religious character', key: 'religious_character', value: (r) => r.religious_character, cell: (r) => text(r.religious_character) },
   { label: 'Minutes', key: 'minutes', value: (r) => r.minutes, cell: (r) => text(r.minutes) },
   { label: 'Students', key: 'students', value: (r) => r.students, cell: (r) => text(r.students) },
   { label: 'Progress', key: 'progress', value: (r) => r.progress, cell: (r) => pair(r.progress, r.progress_banding) },

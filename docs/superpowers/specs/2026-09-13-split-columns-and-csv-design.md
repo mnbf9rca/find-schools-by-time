@@ -29,7 +29,7 @@ The `Progress` column stays paired, as does every other column. Cells whose valu
 
 A `<button id="download">Download CSV</button>` sits next to the results count, `disabled` until a search returns at least one row, and disabled again at the start of each new search. It carries no styling beyond the page default.
 
-On click the page builds the CSV in the browser from the rows it already holds, in the order currently shown, and saves it with a `Blob` and a temporary anchor carrying a `download` attribute, revoking the object URL afterwards. The file is named `schools-<postcode with spaces removed>-<minutes>min.csv`, taking both values from the form as submitted.
+On click the page builds the CSV in the browser from the rows it already holds and saves it with a `Blob` and a temporary anchor carrying a `download` attribute, revoking the object URL afterwards. The file is named `schools-<postcode with spaces removed>-<minutes>min.csv`, taking both values from the form as submitted.
 
 The text starts with a UTF-8 byte order mark, `﻿`, so Excel reads school names with accented characters correctly rather than as mojibake. Rows are joined with `\r\n`.
 
@@ -57,4 +57,4 @@ Columns are `URN`, already present in every search response, then one field per 
 
 The four-way split needs no new check beyond the existing column mapping cases in `check_sort.mjs`, which already assert each column's key and cell text and gain one case per new column in the same form. The split does need one addition there: a case asserting that toggling a grade column and then its points neighbour starts ascending both times, since they share a comparison key.
 
-One thing `check_sort.mjs` cannot reach is whether the page hands `csvRows` the rows in the order on screen. `render` sorts a copy and leaves the stored rows in the order the server returned, so a download built from the stored rows would export server order while looking correct in every unit check. The builder runs this acceptance pass in the browser once, by hand, and does not commit a test for it: search, sort by a results column, change the postcode and minutes in the form without submitting again, download, and confirm three things. The exported row order matches the table on screen rather than travel time order. The filename carries the postcode and minutes that were submitted, not the edited ones still in the form. The file's first three bytes are `EF BB BF`, checked with `head -c 3 <file> | xxd`.
+The builder runs this acceptance pass in the browser once, by hand, and does not commit a test for it: search, change the postcode and minutes in the form without submitting again, download, and confirm two things. The filename carries the postcode and minutes that were submitted, not the edited ones still in the form. The file's first three bytes are `EF BB BF`, checked with `head -c 3 <file> | xxd`. Exported row order does not matter.

@@ -1,9 +1,5 @@
 import assert from 'node:assert/strict';
-import * as sorting from './sort.js';
-import { COLUMNS, comparator, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
-const { csvField, csvRows } = sorting;
-assert.equal(typeof csvField, 'function');
-assert.equal(typeof csvRows, 'function');
+import { COLUMNS, comparator, csvField, csvRows, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
 
 const rows = [
   { name: 'Beta', minutes: 10, progress: -0.42, grade: 'A', aps: 45.0, best3_grade: 'A', best3_aps: 46.0 },
@@ -87,6 +83,12 @@ assert.deepEqual(
   [2, 10, 20, 100]);
 
 const cell = (label, row) => COLUMNS.find((c) => c.label === label).cell(row);
+assert.equal(indexOf('Gender'), indexOf('Sixth form') + 1);
+assert.equal(keyOf('Gender'), 'gender');
+assert.equal(cell('Gender', { gender: 'Girls' }), 'Girls');
+assert.equal(indexOf('Religious character'), indexOf('Gender') + 1);
+assert.equal(keyOf('Religious character'), 'religious_character');
+assert.equal(cell('Religious character', { religious_character: 'Church of England' }), 'Church of England');
 assert.equal(cell('Students', { students: 167 }), '167');
 assert.equal(cell('Progress', { progress: 0.18, progress_banding: 'Above average' }), '0.18 (Above average)');
 assert.equal(cell('Progress', { progress: 0, progress_banding: null }), '0');
@@ -115,7 +117,7 @@ for (const [value, expected] of [
 
 const exportRow = {
   urn: 123456, name: 'École', type: 'Academy', postcode: 'SW1A 1AA',
-  sixth_form: 'Has a sixth form', minutes: 42, students: null,
+  sixth_form: 'Has a sixth form', gender: 'Girls', religious_character: 'Church of England', minutes: 42, students: null,
   progress: 0, progress_banding: 'Average', grade: 'A', aps: 50.44,
   retained_percent: 90.1, aab_percent: 65.7, best3_grade: 'B', best3_aps: 40.58,
   website: 'https://school.example',
@@ -130,7 +132,7 @@ assert.equal(fields.length, headers.length);
 assert.equal(fields[headers.indexOf('Students')], '');
 assert.deepEqual(Object.fromEntries(headers.map((h, i) => [h, fields[i]])), {
   URN: '123456', Name: 'École', Type: 'Academy', Postcode: 'SW1A 1AA',
-  'Sixth form': 'Has a sixth form', Minutes: '42', Students: '',
+  'Sixth form': 'Has a sixth form', Gender: 'Girls', 'Religious character': 'Church of England', Minutes: '42', Students: '',
   Progress: '0', 'Progress description': 'Average',
   'Average result grade': 'A', 'Average result points': '50.44',
   'Completed programme': '90.1', 'AAB or higher incl. 2 facilitating subjects': '65.7',
