@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Schools by travel time</title>
+<style>
+  body { font: 16px system-ui, sans-serif; margin: 2rem; max-width: 60rem; }
+  label { margin-right: 1rem; }
+  table { border-collapse: collapse; margin-top: 1rem; }
+  th, td { border-bottom: 1px solid #ddd; padding: 0.3rem 0.6rem; text-align: left; }
+  #error { color: #b00; }
+</style>
+<h1>Schools by travel time</h1>
+<form id="search">
+  <label>Postcode <input name="postcode" required></label>
+  <label>Minutes <input name="minutes" type="number" min="1" max="240" value="60" required></label>
+  <label>Mode
+    <select name="mode">
+      <option value="public_transport">Public transport</option>
+      <option value="driving">Driving</option>
+      <option value="cycling">Cycling</option>
+      <option value="walking">Walking</option>
+    </select>
+  </label>
+  <button id="go">Search</button>
+</form>
+<p id="error"></p>
+<p id="count"></p>
+<table id="results"></table>
+<p><small>Travel times by TravelTime</small></p>
+<script>
+const form = document.getElementById('search');
+const errorLine = document.getElementById('error');
+const countLine = document.getElementById('count');
+const table = document.getElementById('results');
+
+function cell(row, text, tag = 'td') {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  row.appendChild(el);
+  return el;
+}
+
+function render(rows) {
+  const header = table.insertRow();
+  for (const name of ['Name', 'Type', 'Postcode', 'Sixth form', 'Minutes', 'Website']) {
+    cell(header, name, 'th');
+  }
+  for (const r of rows) {
+    const tr = table.insertRow();
+    cell(tr, r.name);
+    cell(tr, r.type);
+    cell(tr, r.postcode);
+    cell(tr, r.sixth_form);
+    cell(tr, r.minutes);
+    const last = cell(tr, '');
+    if (r.website) {
+      const a = document.createElement('a');
+      a.href = r.website;
+      a.textContent = 'Website';
+      last.appendChild(a);
+    }
+  }
+}
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const go = document.getElementById('go');
+  go.disabled = true;
+  errorLine.textContent = '';
+  countLine.textContent = '';
+  table.textContent = '';
+  try {
+    const data = new FormData(form);
+    const geo = await fetch(
+      'https://api.postcodes.io/postcodes/' + encodeURIComponent(data.get('postcode').trim()));
+    const geoBody = geo.ok ? await geo.json() : null;
+    const place = geoBody && geoBody.result;
+    if (!place || place.latitude == null || place.longitude == null) {
+      errorLine.textContent = 'Postcode not found or has no coordinates';
+      return;
+    }
+    const search = await fetch('/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lat: place.latitude,
+        lng: place.longitude,
+        minutes: Number(data.get('minutes')),
+        mode: data.get('mode'),
+      }),
+    });
+    const rows = await search.json();
+    if (!search.ok) {
+      errorLine.textContent = rows.error || 'Search failed';
+      return;
+    }
+    countLine.textContent = rows.length + ' schools within ' + data.get('minutes') + ' minutes';
+    render(rows);
+  } catch (e) {
+    errorLine.textContent = String(e);
+  } finally {
+    go.disabled = false;
+  }
+});
+</script>

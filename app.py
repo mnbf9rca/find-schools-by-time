@@ -98,6 +98,7 @@ def time_filter(payload):
         data=json.dumps(payload).encode(),
         headers={
             "Content-Type": "application/json",
+            "User-Agent": "schools-by-travel-time/1.0",
             "X-Application-Id": os.environ["TRAVELTIME_APP_ID"],
             "X-Api-Key": os.environ["TRAVELTIME_API_KEY"],
         },
@@ -106,7 +107,11 @@ def time_filter(payload):
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
     except urllib.error.HTTPError as error:
-        raise RuntimeError(error.read().decode("utf-8", "replace")[:500]) from None
+        try:
+            message = json.load(error)["description"]
+        except (ValueError, KeyError, TypeError):
+            message = error.reason
+        raise RuntimeError(str(message)[:500]) from None
     except OSError as error:
         raise RuntimeError(str(error)) from None
 

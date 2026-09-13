@@ -32,6 +32,12 @@ class TestKeep(unittest.TestCase):
     def test_drops_blank_coordinates(self):
         self.assertFalse(keep(row(Easting="", Northing="")))
 
+    def test_drops_unusable_coordinates(self):
+        for field in ("Easting", "Northing"):
+            for value in ("-1", "nan", "inf", "not a number"):
+                with self.subTest(field=field, value=value):
+                    self.assertFalse(keep(row(**{field: value})))
+
     def test_keeps_age_range_without_sixth_form(self):
         self.assertTrue(
             keep(row(StatutoryLowAge="16", StatutoryHighAge="19",

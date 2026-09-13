@@ -155,6 +155,17 @@ class TestResults(unittest.TestCase):
 
 
 class TestHTTP(unittest.TestCase):
+    def test_upstream_request_identifies_app_and_uses_timeout(self):
+        def respond(request, timeout):
+            self.assertEqual(request.get_header("User-agent"), "schools-by-travel-time/1.0")
+            self.assertEqual(timeout, 30)
+            self.assertEqual(json.loads(request.data), {"locations": []})
+            return io.BytesIO(b'{"results": []}')
+
+        with patch.dict("os.environ", TRAVELTIME_APP_ID="test", TRAVELTIME_API_KEY="test"), \
+                patch("app.urllib.request.urlopen", side_effect=respond):
+            self.assertEqual(time_filter({"locations": []}), {"results": []})
+
     def handler(self, raw, length=None):
         handler = Handler.__new__(Handler)
         handler.path = "/search"
@@ -181,14 +192,24 @@ class TestHTTP(unittest.TestCase):
 
     def test_http_connection_and_timeout_errors_are_readable(self):
         errors = [urllib.error.HTTPError("https://example.org", 401, "Unauthorized", {},
-                                        io.BytesIO(b'{"message":"invalid credentials"}')),
+                                        io.BytesIO(b'{"description":"invalid credentials","error_code":1}')),
                   urllib.error.URLError("connection failed"), TimeoutError("timed out")]
         with patch.dict("os.environ", TRAVELTIME_APP_ID="test", TRAVELTIME_API_KEY="test"):
             for error in errors:
                 with self.subTest(error=type(error)), patch("app.urllib.request.urlopen", side_effect=error):
                     with self.assertRaises(RuntimeError) as caught:
                         time_filter({})
-                    self.assertTrue(str(caught.exception))
+                    expected = ("invalid credentials" if isinstance(error, urllib.error.HTTPError)
+                                else str(error))
+                    self.assertEqual(str(caught.exception), expected)
+
+    def test_unstructured_upstream_errors_use_http_reason(self):
+        with patch.dict("os.environ", TRAVELTIME_APP_ID="test", TRAVELTIME_API_KEY="test"):
+            for raw in (b"<html>Forbidden</html>", b"{}"):
+                error = urllib.error.HTTPError("https://example.org", 403, "Forbidden", {}, io.BytesIO(raw))
+                with patch("app.urllib.request.urlopen", side_effect=error):
+                    with self.assertRaisesRegex(RuntimeError, "^Forbidden$"):
+                        time_filter({})
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ Usage: uv run build_schools.py data/extract/edubasealldata20260913.csv > schools
 
 import csv
 import json
+import math
 import sys
 from urllib.parse import urlparse
 
@@ -26,7 +27,7 @@ def keep(row):
     if row["GOR (code)"] not in ENGLISH_REGIONS:
         return False
     try:
-        if float(row["Easting"]) <= 0 or float(row["Northing"]) <= 0:
+        if not 0 < float(row["Easting"]) < math.inf or not 0 < float(row["Northing"]) < math.inf:
             return False
     except ValueError:
         return False
