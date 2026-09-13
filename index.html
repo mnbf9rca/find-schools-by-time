@@ -24,18 +24,20 @@
   <button id="go">Search</button>
 </form>
 <p id="error"></p>
-<p id="count"></p>
+<p><span id="count"></span> <button id="download" disabled>Download CSV</button></p>
 <h2 id="results-heading" hidden>A level results, 2024/25</h2>
 <table id="results"></table>
 <p><small>Travel times by TravelTime</small></p>
 <script type="module">
-import { COLUMNS, comparator, sort, toggle, reset } from './sort.js';
+import { COLUMNS, comparator, csvRows, sort, toggle, reset } from './sort.js';
 const form = document.getElementById('search');
 const errorLine = document.getElementById('error');
 const countLine = document.getElementById('count');
 const table = document.getElementById('results');
 const resultsHeading = document.getElementById('results-heading');
+const download = document.getElementById('download');
 let rows = [];
+let filename = '';
 
 function cell(row, text, tag = 'td') {
   const el = document.createElement(tag);
@@ -51,12 +53,12 @@ function render(focusIndex) {
   for (const [index, column] of COLUMNS.entries()) {
     const th = cell(header, '', 'th');
     th.scope = 'col';
-    const active = sort.key === column.key;
+    const active = sort.column === index;
     th.setAttribute('aria-sort', active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none');
     const button = document.createElement('button');
     button.textContent = column.label + (active ? (sort.direction === 'asc' ? ' ▲' : ' ▼') : '');
     button.addEventListener('click', () => {
-      toggle(column.key);
+      toggle(index);
       render(index);
     });
     th.appendChild(button);
@@ -76,10 +78,23 @@ function render(focusIndex) {
   }
 }
 
+download.addEventListener('click', () => {
+  const lines = csvRows([...rows].sort(comparator(sort.key, sort.direction)));
+  const url = URL.createObjectURL(new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+});
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const go = document.getElementById('go');
   go.disabled = true;
+  download.disabled = true;
   errorLine.textContent = '';
   countLine.textContent = '';
   table.textContent = '';
@@ -111,8 +126,10 @@ form.addEventListener('submit', async (event) => {
     }
     countLine.textContent = found.length + ' schools within ' + data.get('minutes') + ' minutes';
     rows = found;
+    filename = `schools-${data.get('postcode').replaceAll(' ', '')}-${data.get('minutes')}min.csv`;
     reset();
     if (rows.length) render();
+    download.disabled = !rows.length;
   } catch (e) {
     errorLine.textContent = String(e);
   } finally {

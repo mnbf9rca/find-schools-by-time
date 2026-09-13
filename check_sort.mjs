@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
+import * as sorting from './sort.js';
 import { COLUMNS, comparator, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
+const { csvField, csvRows } = sorting;
+assert.equal(typeof csvField, 'function');
+assert.equal(typeof csvRows, 'function');
 
 const rows = [
   { name: 'Beta', minutes: 10, progress: -0.42, grade: 'A', aps: 45.0, best3_grade: 'A', best3_aps: 46.0 },
@@ -10,7 +14,12 @@ const rows = [
 
 const order = (key, direction) =>
   [...rows].sort(comparator(key, direction)).map((r) => r.name);
-const keyOf = (label) => COLUMNS.find((c) => c.label === label).key;
+const indexOf = (label) => {
+  const index = COLUMNS.findIndex((c) => c.label === label);
+  assert.notEqual(index, -1, `Missing column: ${label}`);
+  return index;
+};
+const keyOf = (label) => COLUMNS[indexOf(label)].key;
 
 // Numbers compare numerically: text ordering would put 100 between 10 and 2.
 assert.deepEqual(order('minutes', 'asc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
@@ -26,9 +35,9 @@ assert.deepEqual(order('name', 'asc'), ['alpha', 'Beta', 'Delta', 'Gamma']);
 
 // The Average result and Best 3 A levels columns sort on their point scores. Sorting by
 // grade text would give Beta, alpha, Gamma, the reverse of the first pair below.
-assert.deepEqual(order(keyOf('Average result'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
-assert.deepEqual(order(keyOf('Best 3 A levels'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
-assert.deepEqual(order(keyOf('Average result'), 'desc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
+assert.deepEqual(order(keyOf('Average result grade'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
+assert.deepEqual(order(keyOf('Best 3 A levels grade'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
+assert.deepEqual(order(keyOf('Average result grade'), 'desc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
 
 // Null sorts last whichever direction is asked for.
 assert.equal(order('aps', 'asc').at(-1), 'Delta');
@@ -49,19 +58,30 @@ for (const direction of ['asc', 'desc']) {
   assert.equal(comparator('students', direction)({ students: 0 }, { students: '' }), -1);
 }
 
-// The same header toggles to descending; a different header starts ascending again.
-assert.deepEqual(reset(), { key: 'minutes', direction: 'asc' });
-assert.deepEqual(toggle('aps'), { key: 'aps', direction: 'asc' });
-assert.deepEqual(toggle('aps'), { key: 'aps', direction: 'desc' });
-assert.deepEqual(toggle('name'), { key: 'name', direction: 'asc' });
-assert.deepEqual(sort, { key: 'name', direction: 'asc' });
+// Header identity is its position: adjacent grade/points headers share a key.
+const minutesColumn = indexOf('Minutes');
+const nameColumn = indexOf('Name');
+assert.deepEqual(reset(), { column: minutesColumn, key: 'minutes', direction: 'asc' });
+for (const [grade, points, key] of [
+  ['Average result grade', 'Average result points', 'aps'],
+  ['Best 3 A levels grade', 'Best 3 A levels points', 'best3_aps'],
+]) {
+  const column = indexOf(grade);
+  const neighbour = indexOf(points);
+  assert.equal(neighbour, column + 1);
+  assert.deepEqual(toggle(column), { column, key, direction: 'asc' });
+  assert.deepEqual(toggle(neighbour), { column: neighbour, key, direction: 'asc' });
+  assert.deepEqual(toggle(neighbour), { column: neighbour, key, direction: 'desc' });
+  assert.deepEqual(toggle(column), { column, key, direction: 'asc' });
+  assert.deepEqual(toggle(column), { column, key, direction: 'desc' });
+}
+assert.deepEqual(toggle(nameColumn), { column: nameColumn, key: 'name', direction: 'asc' });
+assert.deepEqual(sort, { column: nameColumn, key: 'name', direction: 'asc' });
 
 // A fresh search resets to travel time ascending, from wherever the user left the sort.
-toggle('aps');
-toggle('aps');
 assert.notDeepEqual(sort, DEFAULT_SORT);
 assert.deepEqual(reset(), DEFAULT_SORT);
-assert.deepEqual(sort, { key: 'minutes', direction: 'asc' });
+assert.deepEqual(sort, { column: minutesColumn, key: 'minutes', direction: 'asc' });
 assert.deepEqual(
   [...rows].sort(comparator(sort.key, sort.direction)).map((r) => r.minutes),
   [2, 10, 20, 100]);
@@ -70,12 +90,61 @@ const cell = (label, row) => COLUMNS.find((c) => c.label === label).cell(row);
 assert.equal(cell('Students', { students: 167 }), '167');
 assert.equal(cell('Progress', { progress: 0.18, progress_banding: 'Above average' }), '0.18 (Above average)');
 assert.equal(cell('Progress', { progress: 0, progress_banding: null }), '0');
-assert.equal(cell('Average result', { grade: 'A', aps: 50.44 }), 'A (50.44)');
+for (const [label, key, expected] of [
+  ['Average result grade', 'aps', 'A'],
+  ['Average result points', 'aps', '50.44'],
+  ['Best 3 A levels grade', 'best3_aps', 'B'],
+  ['Best 3 A levels points', 'best3_aps', '40.58'],
+]) {
+  assert.equal(keyOf(label), key);
+  assert.equal(cell(label, { grade: 'A', aps: 50.44, best3_grade: 'B', best3_aps: 40.58 }), expected);
+}
 assert.equal(cell('Completed programme', { retained_percent: 0 }), '0%');
 assert.equal(cell('AAB or higher incl. 2 facilitating subjects', { aab_percent: 65.7 }), '65.7%');
-assert.equal(cell('Best 3 A levels', { best3_grade: 'A', best3_aps: 50.58 }), 'A (50.58)');
-for (const column of COLUMNS.slice(5, 11)) assert.equal(column.cell({}), '');
+for (const column of COLUMNS) assert.equal(column.cell({}), '');
 for (const direction of ['asc', 'desc']) {
   assert.equal(comparator('aps', direction)({ aps: null }, { aps: null }), 0);
 }
-console.log('sort.js ok');
+// CSV quoting must also handle a standalone CR, without changing raw numbers.
+for (const [value, expected] of [
+  ['plain', 'plain'], ['School, London', '"School, London"'],
+  ['School "A"', '"School ""A"""'], ['line\nfeed', '"line\nfeed"'],
+  ['carriage\rreturn', '"carriage\rreturn"'], [null, ''], [undefined, ''],
+  [0, '0'], [65.7, '65.7'], ['École', 'École'],
+]) assert.equal(csvField(value), expected);
+
+const exportRow = {
+  urn: 123456, name: 'École', type: 'Academy', postcode: 'SW1A 1AA',
+  sixth_form: 'Has a sixth form', minutes: 42, students: null,
+  progress: 0, progress_banding: 'Average', grade: 'A', aps: 50.44,
+  retained_percent: 90.1, aab_percent: 65.7, best3_grade: 'B', best3_aps: 40.58,
+  website: 'https://school.example',
+};
+const headers = ['URN', ...COLUMNS.flatMap(c => c.key === 'progress'
+  ? [c.label, 'Progress description'] : [c.label])];
+const exported = csvRows([exportRow, { ...exportRow, urn: 654321, name: 'Second' }]);
+assert.equal(exported.length, 3);
+assert.deepEqual(exported[0].split(','), headers);
+const fields = exported[1].split(',');
+assert.equal(fields.length, headers.length);
+assert.equal(fields[headers.indexOf('Students')], '');
+assert.deepEqual(Object.fromEntries(headers.map((h, i) => [h, fields[i]])), {
+  URN: '123456', Name: 'École', Type: 'Academy', Postcode: 'SW1A 1AA',
+  'Sixth form': 'Has a sixth form', Minutes: '42', Students: '',
+  Progress: '0', 'Progress description': 'Average',
+  'Average result grade': 'A', 'Average result points': '50.44',
+  'Completed programme': '90.1', 'AAB or higher incl. 2 facilitating subjects': '65.7',
+  'Best 3 A levels grade': 'B', 'Best 3 A levels points': '40.58',
+  Website: 'https://school.example',
+});
+assert.equal(exported[2].split(',')[0], '654321');
+assert.deepEqual(csvRows([]), [exported[0]]);
+assert.equal(csvRows([{}])[1], ','.repeat(headers.length - 1));
+assert.equal(csvRows([{ ...exportRow, name: 'School, "A"' }])[1].split(',Academy')[0],
+  '123456,"School, ""A"""');
+for (const column of COLUMNS) {
+  const field = column.label === 'Average result grade' ? 'grade'
+    : column.label === 'Best 3 A levels grade' ? 'best3_grade' : column.key;
+  assert.equal(column.value(exportRow), exportRow[field]);
+}
+console.log('sort.js: sorting, split columns and CSV checks passed');
