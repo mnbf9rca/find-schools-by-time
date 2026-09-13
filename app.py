@@ -5,7 +5,12 @@ Start with: make run
 
 import json
 import math
-from datetime import timedelta
+import os
+import sys
+import urllib.error
+import urllib.request
+from datetime import datetime, timedelta
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -80,3 +85,90 @@ def build_request(lat, lng, minutes, mode, schools, now):
             "properties": ["travel_time"],
         }],
     }
+
+
+TIME_FILTER_URL = "https://api.traveltimeapp.com/v4/time-filter"
+RESULT_KEYS = ("urn", "name", "type", "postcode", "website", "sixth_form")
+
+
+def time_filter(payload):
+    """POST one search to TravelTime. Raises RuntimeError carrying the upstream message."""
+    request = urllib.request.Request(
+        TIME_FILTER_URL,
+        data=json.dumps(payload).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "X-Application-Id": os.environ["TRAVELTIME_APP_ID"],
+            "X-Api-Key": os.environ["TRAVELTIME_API_KEY"],
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        raise RuntimeError(error.read().decode("utf-8", "replace")[:500]) from None
+    except OSError as error:
+        raise RuntimeError(str(error)) from None
+
+
+def results(schools, response):
+    """Join travel seconds back onto school records, sorted before rounding."""
+    by_urn = {str(s["urn"]): s for s in schools}
+    rows = []
+    for location in sorted(response["results"][0]["locations"],
+                           key=lambda location: location["properties"][0]["travel_time"]):
+        school = by_urn[location["id"]]
+        seconds = location["properties"][0]["travel_time"]
+        rows.append({k: school[k] for k in RESULT_KEYS}
+                    | {"minutes": math.ceil(seconds / 60)})
+    return rows
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path != "/":
+            return self._send(404, b"not found", "text/plain")
+        self._send(200, (HERE / "index.html").read_bytes(), "text/html; charset=utf-8")
+
+    def do_POST(self):
+        if self.path != "/search":
+            return self._send(404, b"not found", "text/plain")
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+            if not 0 <= length <= 4096:
+                raise ValueError("body must be at most 4 KB with a non-negative Content-Length")
+            lat, lng, minutes, mode = validate(json.loads(self.rfile.read(length)))
+        except ValueError as error:
+            return self._json(400, {"error": str(error)})
+        schools = nearest(SCHOOLS, lat, lng)
+        payload = build_request(lat, lng, minutes, mode, schools, datetime.now(LONDON))
+        try:
+            response = time_filter(payload)
+        except RuntimeError as error:
+            return self._json(502, {"error": str(error)})
+        self._json(200, results(schools, response))
+
+    def _json(self, status, data):
+        self._send(status, json.dumps(data).encode(), "application/json")
+
+    def _send(self, status, body, content_type):
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, fmt, *args):
+        sys.stderr.write(f"{self.command} {self.path}\n")
+
+
+def main():
+    for name in ("TRAVELTIME_APP_ID", "TRAVELTIME_API_KEY"):
+        if not os.environ.get(name):
+            sys.exit(f"{name} is not set; start the server with `make run`")
+    print("Serving on http://127.0.0.1:8000", file=sys.stderr)
+    HTTPServer(("127.0.0.1", 8000), Handler).serve_forever()
+
+
+if __name__ == "__main__":
+    main()

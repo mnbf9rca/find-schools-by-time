@@ -1,9 +1,13 @@
+import io
+import json
 import unittest
+import urllib.error
+from unittest.mock import Mock, patch
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app import build_request, departure_time, nearest, validate
+from app import Handler, build_request, departure_time, nearest, results, time_filter, validate
 
 LONDON = ZoneInfo("Europe/London")
 
@@ -126,6 +130,65 @@ class TestBuildRequest(unittest.TestCase):
         self.assertEqual(search["travel_time"], 3600)
         self.assertEqual(search["properties"], ["travel_time"])
         self.assertEqual(search["departure_time"], "2026-09-17T07:30:00+01:00")
+
+
+class TestResults(unittest.TestCase):
+    def test_sorts_by_seconds_before_rounding(self):
+        schools = [school("1", 51.51, -0.12), school("2", 51.52, -0.13)]
+        response = {"results": [{"locations": [
+            {"id": "2", "properties": [{"travel_time": 119}]},
+            {"id": "1", "properties": [{"travel_time": 61}]},
+        ]}]}
+        self.assertEqual([r["urn"] for r in results(schools, response)], ["1", "2"])
+
+    def test_joins_sorts_and_rounds_up(self):
+        schools = [school("1", 51.51, -0.12), school("2", 51.52, -0.13), school("3", 51.9, -0.1)]
+        response = {"results": [{"locations": [
+            {"id": "2", "properties": [{"travel_time": 3540}]},
+            {"id": "1", "properties": [{"travel_time": 61}]},
+        ]}]}
+        rows = results(schools, response)
+        self.assertEqual([r["urn"] for r in rows], ["1", "2"])
+        self.assertEqual([r["minutes"] for r in rows], [2, 59])
+        self.assertEqual(set(rows[0]), {"urn", "name", "type", "postcode", "website",
+                                        "sixth_form", "minutes"})
+
+
+class TestHTTP(unittest.TestCase):
+    def handler(self, raw, length=None):
+        handler = Handler.__new__(Handler)
+        handler.path = "/search"
+        handler.headers = {"Content-Length": str(len(raw)) if length is None else length}
+        handler.rfile = io.BytesIO(raw)
+        handler._json = Mock()
+        return handler
+
+    def test_invalid_requests_return_400_without_upstream_call(self):
+        for raw, length in ((b"{", None), (b"[]", None), (b"{}", None),
+                            (b"\xff", None), (b" " * 4097, None),
+                            (b"{}", "-1"), (b"{}", "bad")):
+            with self.subTest(raw=raw[:20], length=length), patch("app.time_filter") as upstream:
+                handler = self.handler(raw, length)
+                handler.do_POST()
+                self.assertEqual(handler._json.call_args.args[0], 400)
+                upstream.assert_not_called()
+
+    def test_upstream_failure_returns_502(self):
+        handler = self.handler(json.dumps(body()).encode())
+        with patch("app.time_filter", side_effect=RuntimeError("upstream unavailable")):
+            handler.do_POST()
+        handler._json.assert_called_once_with(502, {"error": "upstream unavailable"})
+
+    def test_http_connection_and_timeout_errors_are_readable(self):
+        errors = [urllib.error.HTTPError("https://example.org", 401, "Unauthorized", {},
+                                        io.BytesIO(b'{"message":"invalid credentials"}')),
+                  urllib.error.URLError("connection failed"), TimeoutError("timed out")]
+        with patch.dict("os.environ", TRAVELTIME_APP_ID="test", TRAVELTIME_API_KEY="test"):
+            for error in errors:
+                with self.subTest(error=type(error)), patch("app.urllib.request.urlopen", side_effect=error):
+                    with self.assertRaises(RuntimeError) as caught:
+                        time_filter({})
+                    self.assertTrue(str(caught.exception))
 
 
 if __name__ == "__main__":
