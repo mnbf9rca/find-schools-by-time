@@ -10,6 +10,8 @@ How the user runs work on this repo with several agents in Herdr. Read this only
 - One-off reviews of a spec can run as parallel subagents on Sonnet or Opus.
 - Clearing any agent's context with `/clear` before a new task is always fine.
 - Tabs and panes are created only when the user asks. Never open a pane or start the server for the user.
+- `builder` and `design` run in the repo's main working tree. When the coordinator or a job is using that tree, brief them to create a git worktree (`git worktree add /Users/rob/git/find-schools-by-time-<issue> -b <branch> main`) and work there, and never to run `git checkout` in the main tree. Remove the worktree once the branch is pushed.
+- Brief with `herdr agent prompt <name> "<text>"`, wait with `herdr agent wait <name>`, and read the reply with `herdr agent read <name>`. Ask each brief to end with a fixed `DONE` line so the wait has something to match.
 
 ## Pipeline after the user approves a spec
 
