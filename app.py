@@ -88,7 +88,9 @@ def build_request(lat, lng, minutes, mode, schools, now):
 
 
 TIME_FILTER_URL = "https://api.traveltimeapp.com/v4/time-filter"
-RESULT_KEYS = ("urn", "name", "type", "postcode", "website", "sixth_form")
+RESULT_KEYS = ("urn", "name", "type", "postcode", "website", "sixth_form",
+               "students", "progress", "progress_banding", "grade", "aps",
+               "retained_percent", "aab_percent", "best3_grade", "best3_aps")
 
 
 def time_filter(payload):

@@ -74,10 +74,15 @@ class TestValidate(unittest.TestCase):
                 validate(body(**{field: value}))
 
 
-def school(urn, lat, lng):
-    return {"urn": urn, "name": f"School {urn}", "type": "Academy", "postcode": "N1 1AA",
-            "website": "", "sixth_form": "Has a sixth form", "lat": lat, "lng": lng}
+RESULTS = {"students": 167.0, "progress": 0.18, "progress_banding": "Above average",
+           "grade": "A", "aps": 50.44, "retained_percent": 90.1, "aab_percent": 65.7,
+           "best3_grade": "A", "best3_aps": 50.58}
 
+
+def school(urn, lat, lng, **results):
+    return {"urn": urn, "name": f"School {urn}", "type": "Academy", "postcode": "N1 1AA",
+            "website": "", "sixth_form": "Has a sixth form", "lat": lat, "lng": lng
+            } | RESULTS | results
 
 class TestNearest(unittest.TestCase):
     def test_sorts_by_straight_line_distance(self):
@@ -150,9 +155,27 @@ class TestResults(unittest.TestCase):
         rows = results(schools, response)
         self.assertEqual([r["urn"] for r in rows], ["1", "2"])
         self.assertEqual([r["minutes"] for r in rows], [2, 59])
-        self.assertEqual(set(rows[0]), {"urn", "name", "type", "postcode", "website",
-                                        "sixth_form", "minutes"})
+        self.assertEqual(set(rows[0]), {
+            "urn", "name", "type", "postcode", "website", "sixth_form", "minutes",
+            "students", "progress", "progress_banding", "grade", "aps",
+            "retained_percent", "aab_percent", "best3_grade", "best3_aps"})
 
+
+    def test_carries_results_and_missing_results_through_the_join(self):
+        schools = [school("1", 51.51, -0.12),
+                   school("2", 51.52, -0.13, **dict.fromkeys(RESULTS, None))]
+        response = {"results": [{"locations": [
+            {"id": "1", "properties": [{"travel_time": 600}]},
+            {"id": "2", "properties": [{"travel_time": 1200}]},
+        ]}]}
+        populated, missing = results(schools, response)
+        self.assertEqual(populated["aps"], 50.44)
+        self.assertEqual(populated["grade"], "A")
+        self.assertEqual(populated["progress_banding"], "Above average")
+        self.assertEqual(populated["best3_aps"], 50.58)
+        self.assertTrue(all(missing[k] is None for k in RESULTS))
+        self.assertEqual(missing["name"], "School 2")
+        self.assertEqual(set(populated), set(missing))
 
 class TestHTTP(unittest.TestCase):
     def test_upstream_request_identifies_app_and_uses_timeout(self):
