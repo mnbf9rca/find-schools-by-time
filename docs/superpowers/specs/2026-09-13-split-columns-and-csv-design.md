@@ -21,7 +21,7 @@ In scope: splitting the two paired results columns into four, and a Download CSV
 | Best 3 A levels grade | `best3_grade` | `best3_aps` |
 | Best 3 A levels points | `best3_aps` | `best3_aps` |
 
-The existing rule that a grade column orders by its point score is what keeps the two grade columns sorting sensibly, since grade letters do not sort in grade order. Two columns therefore share a sort key with their neighbour; clicking either one sorts the same way, and the `aria-sort` marker and the arrow appear on both. That is the honest consequence of the split and needs no extra code.
+The existing rule that a grade column orders by its point score is what keeps the two grade columns sorting sensibly, since grade letters do not sort in grade order. Each grade column therefore shares its comparison key with the points column beside it, so the sort state can no longer be identified by that key alone. It gains a third value, the active column, taken from the column's position in `COLUMNS`: `toggle` takes that position, `sort` records it alongside `key` and `direction`, and `reset` restores the Minutes column's position with the default key. `aria-sort` and the direction arrow are applied to the active column only, so a grade header and its points header never both claim the sort. Iteration 2's rule is unchanged and now applies by position: clicking a different header always starts ascending, including when that header shares a comparison key with the one clicked before, and only clicking the same header again reverses the direction.
 
 The `Progress` column stays paired, as does every other column. Cells whose value is `None` still render empty.
 
@@ -33,7 +33,7 @@ On click the page builds the CSV in the browser from the rows it already holds, 
 
 The text starts with a UTF-8 byte order mark, `﻿`, so Excel reads school names with accented characters correctly rather than as mojibake. Rows are joined with `\r\n`.
 
-Fields are the raw values, not the table's display text: grades as their letters, numbers unformatted and without a per cent sign, `null` and `undefined` as an empty field. A field is wrapped in double quotes only when it contains a comma, a double quote, or a newline, and any double quote inside it is doubled.
+Fields are the raw values, not the table's display text: grades as their letters, numbers unformatted and without a per cent sign, `null` and `undefined` as an empty field. A field is wrapped in double quotes only when it matches `/[",\r\n]/`, that is when it contains a comma, a double quote, a line feed, or a carriage return, and any double quote inside it is doubled. A carriage return is quoted whether or not a line feed follows it, because a lone carriage return breaks a CSV row just as a line feed does.
 
 Columns are `URN`, already present in every search response, then one field per table column in table order, using each column's underlying value rather than its rendered cell. The one addition: `Progress` exports two fields, the score and `Progress description` carrying the banding, because it is the only column still pairing two values and dropping the banding would lose data the table shows. `Website` exports the URL.
 
@@ -51,8 +51,10 @@ Columns are `URN`, already present in every search response, then one field per 
 
 `check_sort.mjs` gains cases:
 
-- `csvField` leaves a plain value alone, quotes a name containing a comma, quotes and doubles the quote in a name containing one, quotes a value containing a newline, and returns an empty field for `null`.
+- `csvField` leaves a plain value alone, quotes a name containing a comma, quotes and doubles the quote in a name containing one, quotes a value containing a line feed, quotes a value containing a standalone carriage return with no line feed after it, and returns an empty field for `null`.
 - `csvRows` on a row with a null cell emits an empty field in that position and keeps the row's field count equal to the header's.
 - The header row names `URN` first and then the table columns in table order, checked against `COLUMNS` rather than a hand-written list, so a reordered column cannot pass silently.
 
-The four-way split needs no new check: the existing column mapping cases in `check_sort.mjs` already assert each column's key and cell text, and gain one case per new column in the same form.
+The four-way split needs no new check beyond the existing column mapping cases in `check_sort.mjs`, which already assert each column's key and cell text and gain one case per new column in the same form. The split does need one addition there: a case asserting that toggling a grade column and then its points neighbour starts ascending both times, since they share a comparison key.
+
+One thing `check_sort.mjs` cannot reach is whether the page hands `csvRows` the rows in the order on screen. `render` sorts a copy and leaves the stored rows in the order the server returned, so a download built from the stored rows would export server order while looking correct in every unit check. The builder runs this acceptance pass in the browser once, by hand, and does not commit a test for it: search, sort by a results column, change the postcode and minutes in the form without submitting again, download, and confirm three things. The exported row order matches the table on screen rather than travel time order. The filename carries the postcode and minutes that were submitted, not the edited ones still in the form. The file's first three bytes are `EF BB BF`, checked with `head -c 3 <file> | xxd`.
