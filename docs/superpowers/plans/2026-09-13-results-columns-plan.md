@@ -27,7 +27,7 @@
 
 ### Two notes on reconciling the spec
 
-The spec's "Page" section says `sort.js` exports one function taking a key and a direction. Its "Testing" section also asks `check_sort.mjs` to cover the direction toggle on a repeated key and the reset to travel time ascending after a fresh search. Those two behaviours are only runnable under `node` if they live in `sort.js` too, so `sort.js` exports three things: `comparator`, `nextSort`, and `DEFAULT_SORT`. This is the smallest way to make the spec's own checks executable; it is not a design change, and the page keeps only the wiring.
+The spec's "Page" section says `sort.js` exports one function taking a key and a direction. Its "Testing" section also asks `check_sort.mjs` to cover the direction toggle on a repeated key, the reset to travel time ascending after a fresh search, and the grade columns ordering by their point scores rather than their grade letters. None of those three is runnable under `node` unless the behaviour lives in `sort.js`, so `sort.js` holds the comparator, the current sort state with its toggle and reset, and the column list that maps each column to the key it sorts on. All of it is plain data and pure functions with no DOM, and `index.html` keeps only the wiring. This is the smallest way to make the spec's own checks executable, and it is not a design change.
 
 The spec says `index.html` loads the comparator with a plain `<script src="sort.js">` tag. A file using `export` has to be loaded as a module, so the page's existing inline `<script>` becomes `<script type="module">` and imports from `./sort.js` directly. That replaces the separate tag rather than adding one. This is a mechanical consequence of using an ES module, not a design change.
 
@@ -287,17 +287,19 @@ build:
 
 Run: `make build`
 
-Then run this check, which asserts the record count, the join count, and one known school's values against the published figures:
+Then run this check, which asserts the record count, the number of records carrying at least one measure, and one known school's values against the published figures:
 
 ```bash
 python3 -c "
 import json
+RESULTS = ('students', 'progress', 'progress_banding', 'grade', 'aps',
+           'retained_percent', 'aab_percent', 'best3_grade', 'best3_aps')
 s = json.load(open('schools.json'))
 by = {x['urn']: x for x in s}
-joined = sum(1 for x in s if x['aps'] is not None or x['progress'] is not None or x['students'] is not None)
-print(len(s), 'schools,', joined, 'with results')
+populated = sum(1 for x in s if any(x[k] is not None for k in RESULTS))
+print(len(s), 'schools,', populated, 'with at least one measure')
 assert len(s) == 4373, len(s)
-assert joined == 2715, joined
+assert populated == 2578, populated
 city = by['100003']
 assert city['aps'] == 50.44 and city['grade'] == 'A', city
 assert city['progress'] == 0.18 and city['progress_banding'] == 'Above average', city
@@ -307,7 +309,26 @@ print('ok')
 "
 ```
 
-Expected: `4373 schools, 2715 with results` followed by `ok`. The file grows from roughly 1.0 MB to roughly 1.5 MB.
+Expected: `4373 schools, 2578 with at least one measure` followed by `ok`. The file grows from roughly 1.0 MB to roughly 1.5 MB.
+
+The 2,578 figure is not the same as the 2,715 URNs the spec's Build section mentions. 2,715 schools have a matching 2024/25 A level row, but 137 of those rows carry a suppression code in all nine columns, so they come out of the merge indistinguishable from a school with no row at all. `schools.json` cannot tell the two apart, so the check counts populated records. To confirm the 2,715 figure as well, count matching URNs in the source CSV instead:
+
+```bash
+python3 -c "
+import csv, json
+urns = {x['urn'] for x in json.load(open('schools.json'))}
+path = 'data/a-level-and-other-16-to-18-results_2024-25/data/institution_performance_202225_API.csv'
+with open(path, newline='') as f:
+    matching = {r['school_urn'] for r in csv.DictReader(f)
+                if r['time_period'] == '202425' and r['exam_cohort'] == 'A level'
+                and r['disadvantage_status'] == 'Total'}
+joined = len(urns & matching)
+print(joined, 'matching URNs')
+assert joined == 2715, joined
+"
+```
+
+Expected: `2715 matching URNs`.
 
 - [ ] **Step 7: Commit**
 
@@ -416,56 +437,67 @@ git commit -m "Return the A level result fields from /search"
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks.
-- Produces, all from `sort.js`: `comparator(key, direction)` returning a comparison function for `Array.prototype.sort`, where `direction` is the string `'asc'` or `'desc'`; `nextSort(current, key)` taking and returning an object of the shape `{ key, direction }`; and `DEFAULT_SORT`, the constant `{ key: 'minutes', direction: 'asc' }`. Task 5 imports all three. `app.py` serves `sort.js` at `GET /sort.js` with content type `application/javascript`.
+- Produces, all from `sort.js`: `COLUMNS`, the array of `{ label, key, cell }` column descriptions in display order, where `cell(row)` returns the cell's text as a string and the Website column additionally carries `link: true`; `comparator(key, direction)` returning a comparison function for `Array.prototype.sort`, where `direction` is the string `'asc'` or `'desc'`; `DEFAULT_SORT`, the constant `{ key: 'minutes', direction: 'asc' }`; the live binding `sort`, the current `{ key, direction }`; `toggle(key)`, which advances `sort` and returns it; and `reset()`, which restores `sort` to `DEFAULT_SORT` and returns it. Task 5 imports `COLUMNS`, `comparator`, `sort`, `toggle`, and `reset`. `app.py` serves `sort.js` at `GET /sort.js` with content type `application/javascript`.
 
 - [ ] **Step 1: Write the failing check**
 
 Create `check_sort.mjs`. It runs the comparator against rows shaped like `/search` responses.
 
+Every fixture value here is chosen so that a wrong implementation fails. The minutes are 2, 10, 20, and 100, so a comparator that compares numbers as text puts 100 before 2 and the assertion fails. The progress scores are -1.5, -0.42, and 0.18, which text ordering also gets wrong. The grades are `E`, `A`, and `A+` against point scores 9.5, 45.0, and 50.44, so grade text order and point-score order disagree on every pair, and a column wired to sort by grade text fails. The check reads the sort key from `COLUMNS` rather than naming `aps` itself, so rewiring the Average result column to any other key is caught here.
+
 ```js
 import assert from 'node:assert/strict';
-import { comparator, nextSort, DEFAULT_SORT } from './sort.js';
+import { COLUMNS, comparator, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
 
 const rows = [
-  { name: 'Beta', minutes: 30, progress: 0.18, aps: 50.44, best3_aps: 50.58 },
-  { name: 'alpha', minutes: 10, progress: -0.42, aps: 30.1, best3_aps: 29.0 },
-  { name: 'Gamma', minutes: 20, progress: null, aps: null, best3_aps: null },
+  { name: 'Beta', minutes: 10, progress: -0.42, grade: 'A', aps: 45.0, best3_grade: 'A', best3_aps: 46.0 },
+  { name: 'alpha', minutes: 2, progress: 0.18, grade: 'A+', aps: 50.44, best3_grade: 'A+', best3_aps: 50.58 },
+  { name: 'Gamma', minutes: 20, progress: -1.5, grade: 'E', aps: 9.5, best3_grade: 'E', best3_aps: 9.0 },
+  { name: 'Delta', minutes: 100, progress: null, grade: null, aps: null, best3_grade: null, best3_aps: null },
 ];
 
 const order = (key, direction) =>
   [...rows].sort(comparator(key, direction)).map((r) => r.name);
+const keyOf = (label) => COLUMNS.find((c) => c.label === label).key;
 
-// Numbers compare numerically, in both directions.
-assert.deepEqual(order('minutes', 'asc'), ['alpha', 'Gamma', 'Beta']);
-assert.deepEqual(order('minutes', 'desc'), ['Beta', 'Gamma', 'alpha']);
+// Numbers compare numerically: text ordering would put 100 between 10 and 2.
+assert.deepEqual(order('minutes', 'asc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
+assert.deepEqual(order('minutes', 'desc'), ['Delta', 'Gamma', 'Beta', 'alpha']);
 
-// A negative progress score sorts below a positive one.
-assert.deepEqual(order('progress', 'asc'), ['alpha', 'Beta', 'Gamma']);
+// Negative progress scores sort below positive ones, and below each other correctly:
+// text ordering would put -0.42 before -1.5.
+assert.deepEqual(order('progress', 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
+assert.deepEqual(order('progress', 'desc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
 
 // Text compares with localeCompare, so case does not split the order.
-assert.deepEqual(order('name', 'asc'), ['alpha', 'Beta', 'Gamma']);
+assert.deepEqual(order('name', 'asc'), ['alpha', 'Beta', 'Delta', 'Gamma']);
 
-// The grade columns sort on their point scores, not their grade letters.
-assert.deepEqual(order('aps', 'asc'), ['alpha', 'Beta', 'Gamma']);
-assert.deepEqual(order('best3_aps', 'desc'), ['Beta', 'alpha', 'Gamma']);
+// The Average result and Best 3 A levels columns sort on their point scores. Sorting by
+// grade text would give Beta, alpha, Gamma, the reverse of the first pair below.
+assert.deepEqual(order(keyOf('Average result'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
+assert.deepEqual(order(keyOf('Best 3 A levels'), 'asc'), ['Gamma', 'Beta', 'alpha', 'Delta']);
+assert.deepEqual(order(keyOf('Average result'), 'desc'), ['alpha', 'Beta', 'Gamma', 'Delta']);
 
 // Null sorts last whichever direction is asked for.
-assert.equal(order('aps', 'asc').at(-1), 'Gamma');
-assert.equal(order('aps', 'desc').at(-1), 'Gamma');
+assert.equal(order('aps', 'asc').at(-1), 'Delta');
+assert.equal(order('aps', 'desc').at(-1), 'Delta');
 
 // The same header toggles to descending; a different header starts ascending again.
-assert.deepEqual(nextSort({ key: 'aps', direction: 'asc' }, 'aps'),
-  { key: 'aps', direction: 'desc' });
-assert.deepEqual(nextSort({ key: 'aps', direction: 'desc' }, 'aps'),
-  { key: 'aps', direction: 'asc' });
-assert.deepEqual(nextSort({ key: 'aps', direction: 'desc' }, 'name'),
-  { key: 'name', direction: 'asc' });
+assert.deepEqual(reset(), { key: 'minutes', direction: 'asc' });
+assert.deepEqual(toggle('aps'), { key: 'aps', direction: 'asc' });
+assert.deepEqual(toggle('aps'), { key: 'aps', direction: 'desc' });
+assert.deepEqual(toggle('name'), { key: 'name', direction: 'asc' });
+assert.deepEqual(sort, { key: 'name', direction: 'asc' });
 
-// A fresh search resets to travel time ascending.
-assert.deepEqual(DEFAULT_SORT, { key: 'minutes', direction: 'asc' });
+// A fresh search resets to travel time ascending, from wherever the user left the sort.
+toggle('aps');
+toggle('aps');
+assert.notDeepEqual(sort, DEFAULT_SORT);
+assert.deepEqual(reset(), DEFAULT_SORT);
+assert.deepEqual(sort, { key: 'minutes', direction: 'asc' });
 assert.deepEqual(
-  [...rows].sort(comparator(DEFAULT_SORT.key, DEFAULT_SORT.direction)).map((r) => r.minutes),
-  [10, 20, 30]);
+  [...rows].sort(comparator(sort.key, sort.direction)).map((r) => r.minutes),
+  [2, 10, 20, 100]);
 
 console.log('sort.js ok');
 ```
@@ -477,10 +509,34 @@ Expected: FAIL with `ERR_MODULE_NOT_FOUND`, naming `sort.js`.
 
 - [ ] **Step 3: Write `sort.js`**
 
-Create `sort.js`. The null handling is the part worth reading closely: null is pushed last by returning a fixed sign before the direction is applied, so it stays last when the direction reverses.
+Create `sort.js`. Three parts, in this order: the column list, the comparator, and the sort state.
+
+The column list lives here rather than in `index.html` so the check above can exercise the mapping from a column to the key it sorts on. Each `cell` function returns a string and touches no DOM, so the module still runs under `node` with no browser. `index.html` builds the actual elements from this list.
+
+The null handling in the comparator is the part worth reading closely: null is pushed last by returning a fixed sign before the direction is applied, so it stays last when the direction reverses.
+
+The sort state is an exported `let`. Reassigning it inside the module updates the live binding that `index.html` and the check both read, so there is only ever one current sort and no copy to keep in step.
 
 ```js
-export const DEFAULT_SORT = { key: 'minutes', direction: 'asc' };
+const text = (value) => (value == null ? '' : String(value));
+const pair = (main, extra) =>
+  main == null ? '' : extra == null ? String(main) : `${main} (${extra})`;
+const percent = (value) => (value == null ? '' : `${value}%`);
+
+export const COLUMNS = [
+  { label: 'Name', key: 'name', cell: (r) => text(r.name) },
+  { label: 'Type', key: 'type', cell: (r) => text(r.type) },
+  { label: 'Postcode', key: 'postcode', cell: (r) => text(r.postcode) },
+  { label: 'Sixth form', key: 'sixth_form', cell: (r) => text(r.sixth_form) },
+  { label: 'Minutes', key: 'minutes', cell: (r) => text(r.minutes) },
+  { label: 'Students', key: 'students', cell: (r) => text(r.students) },
+  { label: 'Progress', key: 'progress', cell: (r) => pair(r.progress, r.progress_banding) },
+  { label: 'Average result', key: 'aps', cell: (r) => pair(r.grade, r.aps) },
+  { label: 'Completed programme', key: 'retained_percent', cell: (r) => percent(r.retained_percent) },
+  { label: 'AAB or higher incl. 2 facilitating subjects', key: 'aab_percent', cell: (r) => percent(r.aab_percent) },
+  { label: 'Best 3 A levels', key: 'best3_aps', cell: (r) => pair(r.best3_grade, r.best3_aps) },
+  { label: 'Website', key: 'website', cell: () => '', link: true },
+];
 
 export function comparator(key, direction) {
   const sign = direction === 'desc' ? -1 : 1;
@@ -495,9 +551,19 @@ export function comparator(key, direction) {
   };
 }
 
-export function nextSort(current, key) {
-  const ascending = current.key !== key || current.direction === 'desc';
-  return { key, direction: ascending ? 'asc' : 'desc' };
+export const DEFAULT_SORT = { key: 'minutes', direction: 'asc' };
+
+export let sort = { ...DEFAULT_SORT };
+
+export function toggle(key) {
+  const ascending = sort.key !== key || sort.direction === 'desc';
+  sort = { key, direction: ascending ? 'asc' : 'desc' };
+  return sort;
+}
+
+export function reset() {
+  sort = { ...DEFAULT_SORT };
+  return sort;
 }
 ```
 
@@ -578,7 +644,7 @@ git commit -m "Add the sort comparator and serve it from the server"
 - Modify: `index.html`
 
 **Interfaces:**
-- Consumes: `comparator`, `nextSort`, and `DEFAULT_SORT` from `sort.js` (Task 4), and the widened `/search` response from Task 3.
+- Consumes: `COLUMNS`, `comparator`, `sort`, `toggle`, and `reset` from `sort.js` (Task 4), and the widened `/search` response from Task 3.
 - Produces: nothing later tasks depend on. This is the last task.
 
 - [ ] **Step 1: Turn the inline script into a module and hold the rows**
@@ -586,14 +652,13 @@ git commit -m "Add the sort comparator and serve it from the server"
 At the top of the existing `<script>` block in `index.html`, change the opening tag to `<script type="module">` and add the import:
 
 ```js
-import { comparator, nextSort, DEFAULT_SORT } from './sort.js';
+import { COLUMNS, comparator, sort, toggle, reset } from './sort.js';
 ```
 
-Below the existing element lookups, add the two pieces of state the page now keeps:
+Below the existing element lookups, add the one piece of state the page keeps for itself. The current sort lives in `sort.js` and is read through the imported `sort` binding, so the page does not hold a second copy:
 
 ```js
 let rows = [];
-let sort = { ...DEFAULT_SORT };
 ```
 
 - [ ] **Step 2: Add the results heading and the header-button style**
@@ -610,41 +675,21 @@ Between `<p id="count"></p>` and `<table id="results"></table>`, add the heading
 <h2>A level results, 2024/25</h2>
 ```
 
-- [ ] **Step 3: Describe the columns in one table**
+- [ ] **Step 3: Read the column list**
 
-Replace the body of `render` with a column list, so each column's heading, its sort key, and its cell text stay in one place. Order matters: the six new columns sit after Minutes and before Website.
-
-```js
-const text = (value) => (value == null ? '' : String(value));
-const pair = (main, extra) =>
-  main == null ? '' : extra == null ? String(main) : `${main} (${extra})`;
-const percent = (value) => (value == null ? '' : `${value}%`);
-
-const COLUMNS = [
-  { label: 'Name', key: 'name', cell: (r) => text(r.name) },
-  { label: 'Type', key: 'type', cell: (r) => text(r.type) },
-  { label: 'Postcode', key: 'postcode', cell: (r) => text(r.postcode) },
-  { label: 'Sixth form', key: 'sixth_form', cell: (r) => text(r.sixth_form) },
-  { label: 'Minutes', key: 'minutes', cell: (r) => text(r.minutes) },
-  { label: 'Students', key: 'students', cell: (r) => text(r.students) },
-  { label: 'Progress', key: 'progress', cell: (r) => pair(r.progress, r.progress_banding) },
-  { label: 'Average result', key: 'aps', cell: (r) => pair(r.grade, r.aps) },
-  { label: 'Completed programme', key: 'retained_percent', cell: (r) => percent(r.retained_percent) },
-  { label: 'AAB or higher incl. 2 facilitating subjects', key: 'aab_percent', cell: (r) => percent(r.aab_percent) },
-  { label: 'Best 3 A levels', key: 'best3_aps', cell: (r) => pair(r.best3_grade, r.best3_aps) },
-  { label: 'Website', key: 'website', cell: () => '', link: true },
-];
-```
+The column list now lives in `sort.js` (Task 4) and is imported, so nothing is declared here. Read it once before writing `render` in the next step: its order is the column order on screen, with the six new columns after Minutes and before Website, and each entry's `key` is the field that column sorts on.
 
 - [ ] **Step 4: Render the sortable header and the sorted rows**
 
-Rewrite `render` so it takes no arguments, reads the module-level `rows` and `sort`, and redraws the whole table. Every heading holds a native `<button>`, so the control is reachable and operable by keyboard; the active heading carries `aria-sort` and shows the direction as a visible arrow.
+Rewrite `render` so it takes no arguments, reads the module-level `rows` and the imported `sort`, and redraws the whole table. Every heading holds a native `<button>`, so the control is reachable and operable by keyboard; the active heading carries `aria-sort` and shows the direction as a visible arrow.
+
+Redrawing destroys the button that was activated, which takes keyboard focus back to the top of the document and means a second Enter or Space cannot toggle the same column without navigating to it again. So after redrawing, move focus to the replacement button in the same position. The column's index in `COLUMNS` is also its cell index in the header row, which is why the loop takes both.
 
 ```js
-function render() {
+function render(focusIndex) {
   table.textContent = '';
   const header = table.insertRow();
-  for (const column of COLUMNS) {
+  for (const [index, column] of COLUMNS.entries()) {
     const th = cell(header, '', 'th');
     th.scope = 'col';
     const active = sort.key === column.key;
@@ -652,10 +697,11 @@ function render() {
     const button = document.createElement('button');
     button.textContent = column.label + (active ? (sort.direction === 'asc' ? ' ▲' : ' ▼') : '');
     button.addEventListener('click', () => {
-      sort = nextSort(sort, column.key);
-      render();
+      toggle(column.key);
+      render(index);
     });
     th.appendChild(button);
+    if (index === focusIndex) button.focus();
   }
   for (const r of [...rows].sort(comparator(sort.key, sort.direction))) {
     const tr = table.insertRow();
@@ -672,6 +718,8 @@ function render() {
 }
 ```
 
+A fresh search calls `render()` with no argument, so nothing is focused and the page does not steal focus from the form.
+
 - [ ] **Step 5: Reset the sort on a fresh search**
 
 In the submit handler, the existing local `const rows = await search.json();` would shadow the new module-level `rows`, so rename that local to `found`. The `FormData` variable is already called `data` and keeps its name. Replace the four lines from `const rows = await search.json();` to `if (rows.length) render(rows);` with:
@@ -684,7 +732,7 @@ In the submit handler, the existing local `const rows = await search.json();` wo
     }
     countLine.textContent = found.length + ' schools within ' + data.get('minutes') + ' minutes';
     rows = found;
-    sort = { ...DEFAULT_SORT };
+    reset();
     if (rows.length) render();
 ```
 
@@ -701,6 +749,9 @@ Confirm all of the following:
 - Sorting on Average result or Best 3 A levels orders by the point score in brackets, not by the grade letter.
 - Schools with empty results cells sink to the bottom whichever direction a results column is sorted.
 - Tabbing to a heading and pressing Enter or Space sorts it.
+- Pressing Enter or Space a second and third time on that same heading, without touching the mouse or pressing Tab in between, keeps toggling the direction. Focus must stay on the heading you activated, and the arrow beside its label must flip each time.
+- After a heading has been activated by keyboard, pressing Tab moves to the next heading rather than back to the top of the page.
+- Running a second search leaves focus on the form, not on a table heading.
 - A second search resets the order to travel time ascending.
 
 - [ ] **Step 7: Run everything one last time**
