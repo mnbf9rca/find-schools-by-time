@@ -22,7 +22,7 @@ Out of scope for the MVP: a map, accounts, saved searches, Ofsted ratings, admis
 
 - Establishment data: the "All establishment data" CSV from https://get-information-schools.service.gov.uk/Downloads. The file is named `edubasealldataYYYYMMDD.csv`, is about 65 MB, and is encoded as Windows-1252. Coordinates are British National Grid eastings and northings. A copy lives in `data/extract/` and is not committed.
 - Postcode geocoding: https://api.postcodes.io. No key, allows cross-origin browser requests, returns latitude and longitude.
-- Travel times: TravelTime "Time Filter" endpoint, `POST https://api.traveltimeapp.com/v4/time-filter`. One search accepts up to 2,000 destinations and returns travel minutes for each reachable one. Authenticated with the `X-Application-Id` and `X-Api-Key` headers. The free plan allows 60 searches a minute during the trial and 5 a minute afterwards, and is licensed for evaluation use only.
+- Travel times: TravelTime "Time Filter (Fast)" endpoint, `POST https://api.traveltimeapp.com/v4/time-filter/fast`. Its `arrival_searches.one_to_many` form takes one departure point and up to 100,000 arrival points with an `arrival_time_period` of `weekday_morning`, and returns travel seconds for each reachable one. Maximum `travel_time` is 10,800 seconds (3 hours). Authenticated with the `X-Application-Id` and `X-Api-Key` headers. The free plan allows 60 searches a minute during the trial and 5 a minute afterwards, and is licensed for evaluation use only.
 
 ## Components
 
@@ -41,9 +41,8 @@ Python 3 standard library only. Started with `make run`, which wraps it in `op r
 Routes:
 
 - `GET /` serves `index.html`.
-- `POST /search` with a JSON body `{"lat": number, "lng": number, "minutes": integer, "mode": string}`. The server picks the 2,000 schools nearest the origin by straight-line distance, sends one TravelTime Time Filter request with an arrival search: the schools are the departure points and the origin is the arrival point, arriving at 08:30 local time on the next weekday, and responds with a JSON array of `{"urn", "name", "type", "postcode", "website", "minutes"}` for reachable schools, sorted by minutes. Mode is passed to TravelTime as one of `public_transport`, `driving`, `cycling`, `walking`; any other value is a 400. Minutes must be between 1 and 240; anything else is a 400. If TravelTime returns an error, the server responds 502 with the TravelTime message in the body.
+- `POST /search` with a JSON body `{"lat": number, "lng": number, "minutes": integer, "mode": string}`. The server sends one Time Filter (Fast) request with a single `one_to_many` arrival search: the origin is the departure point, every school is an arrival point, and `arrival_time_period` is `weekday_morning`, which models arriving for the start of the school day. It responds with a JSON array of `{"urn", "name", "type", "postcode", "website", "minutes"}` for reachable schools, sorted by minutes. Mode is one of `public_transport`, `driving`, `cycling`, `walking`, mapped to the fast endpoint's transportation types `public_transport`, `driving+ferry`, `cycling+ferry`, `walking+ferry`; any other value is a 400. Minutes must be between 1 and 180; anything else is a 400. If TravelTime returns an error, the server responds 502 with the TravelTime message in the body.
 
-The nearest-2,000 cut is a deliberate simplification and is marked with a `ponytail:` comment. From any origin in England it covers a radius of well over 50 km, which is beyond any plausible daily journey.
 
 ### `index.html` (the page)
 
@@ -65,7 +64,7 @@ Two targets: `build` runs the build script against the newest CSV in `data/extra
 
 ## Data flow
 
-Browser form submit, then postcodes.io returns latitude and longitude, then the browser posts to `/search`, then the server selects the nearest 2,000 schools, calls TravelTime once, joins the returned minutes back to the school records, sorts, and returns JSON, then the browser renders the table.
+Browser form submit, then postcodes.io returns latitude and longitude, then the browser posts to `/search`, then the server calls TravelTime once with every school as an arrival point, joins the returned minutes back to the school records, sorts, and returns JSON, then the browser renders the table.
 
 ## Error handling
 
@@ -79,6 +78,6 @@ Browser form submit, then postcodes.io returns latitude and longitude, then the 
 Two small standard-library `unittest` files, run with `python3 -m unittest`:
 
 - `test_build.py` feeds the filter and conversion functions a handful of hand-written rows and checks that only open post-16 rows with coordinates survive and that a known easting and northing converts to the expected latitude and longitude within a small tolerance.
-- `test_app.py` checks the nearest-2,000 selection, the request body shape sent to TravelTime, the join and sort of a stubbed TravelTime response, and the 400 cases. The TravelTime call is replaced with a stub; no network access in tests.
+- `test_app.py` checks the request body shape sent to TravelTime, the join and sort of a stubbed TravelTime response, and the 400 cases. The TravelTime call is replaced with a stub; no network access in tests.
 
 No browser tests. The page is short enough to check by hand.
