@@ -1,0 +1,122 @@
+[
+  {
+    "path": "motis-spike/motis-macos-arm64.tar.bz2",
+    "source": "https://github.com/motis-project/motis/releases/download/v2.11.3/motis-macos-arm64.tar.bz2",
+    "downloaded": "2026-09-13",
+    "bytes": 46907302,
+    "sha256": "c626683b52cc808a401a0b31a929523014ed4839b2ae72c700fcfefcd74e5baa",
+    "valid_from": null,
+    "valid_to": null,
+    "licence": "MOTIS 2 (routing engine, run offline)"
+  },
+  {
+    "path": "motis-spike/feeds/bods.zip",
+    "source": "https://data.bus-data.dft.gov.uk/timetable/download/gtfs-file/all/",
+    "downloaded": "2026-09-13",
+    "bytes": 1344428986,
+    "sha256": "d69d71ecf6d1cc85ff8a62d6f72b83fdb4f23cd2c6978e7306a2f12c5353f5ec",
+    "valid_from": "2026-09-13",
+    "valid_to": "2027-12-07",
+    "licence": "Bus Open Data Service national GTFS, supplemented by Traveline National Dataset"
+  },
+  {
+    "path": "motis-spike/england-260912.osm.pbf",
+    "source": "https://download.geofabrik.de/europe/united-kingdom/england-260912.osm.pbf",
+    "downloaded": "2026-09-13",
+    "bytes": 1693160170,
+    "sha256": "3a1954073cd06ff856ce2c64ac0c7eb674d6b411d8715b2b36b939267b08195e",
+    "valid_from": null,
+    "valid_to": null,
+    "licence": "OpenStreetMap England extract (street network for routing)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953ALF.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 231301,
+    "sha256": "8f3faf0d7212dff929bd94044a6466e0a4efe9f5f0b7f58c75053718f2fcbeb9",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953DAT.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 618,
+    "sha256": "598e16b1269f1f6056959ddb05aaa29cd03c01ba693d8e157df43eeacb8e22d2",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953FLF.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 101104,
+    "sha256": "21fa36c552750f1d3567a96f1c5099bd426b33b9e4a5176d3ffd4b15738d0841",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953MCA.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 715060746,
+    "sha256": "cde680547493f46d6d0876fe5f7fa6edb3c7cdae020bc8d50082a181a86c66ff",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953MSN.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 340270,
+    "sha256": "1eb51cbcb033b6673ff95aa699da4ed701989acf7fb15aed9d7d5c1ef5207b80",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953REJ.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 246,
+    "sha256": "e6c8ad587ab189162c257d379b8a537e5150aae53ad2bf9f45003903012f0811",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953SET.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 499,
+    "sha256": "20453cd54811d8599e9f1ae6313bb478af1a2f312ba07330d9d6bde3638c926c",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953TSI.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 714,
+    "sha256": "bdf204abe1aba43f6a9d772221387a8e260a418f88bdea2c4d735aae10e45f77",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/timetable_full/RJTTF953ZTR.txt",
+    "source": "Rail Data Marketplace user subscription to Rail Delivery Group, Timetable - Full Refresh - Weekly, product P-4b4a43c6-3507-4c6f-aeed-82d853264236. https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview",
+    "downloaded": "2026-09-13",
+    "bytes": 2931910,
+    "sha256": "be8c01ee73ef30e4f747a015a84c25a25b1dc110cbf60bd7c137540ba4128634",
+    "valid_from": "2026-05-17",
+    "valid_to": "2027-05-15",
+    "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  }
+]
