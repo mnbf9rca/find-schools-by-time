@@ -19,6 +19,7 @@ A personal, local web app: enter a UK postcode and a time limit, get the post-16
 ## How work happens here
 
 - Keep it minimal. Prefer deleting to adding. No new dependencies without a reason the user has agreed to.
+- Every data source, API or tool gets a row in `LICENSES/README.md` before it is used, and its verbatim licence text goes in `LICENSES/`.
 - Design before building: a change gets a short spec in `docs/superpowers/specs/` and the user's approval, then a build with tests first.
 - Small changes get at most one review. Once built and passing, stop.
 - Never merge to main, open terminal panes, or start the server on the user's behalf. Tell them the branch and the command.
