@@ -135,6 +135,10 @@ def results(schools, response):
 
 
 class Handler(BaseHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
     def do_GET(self):
         page = STATIC.get(self.path)
         if not page:

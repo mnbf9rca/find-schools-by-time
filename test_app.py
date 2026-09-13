@@ -180,6 +180,22 @@ class TestResults(unittest.TestCase):
         self.assertEqual(set(populated), set(missing))
 
 class TestHTTP(unittest.TestCase):
+    def test_every_response_disables_caching(self):
+        for method, path, status in (("GET", "/", 200), ("GET", "/sort.js", 200),
+                                     ("GET", "/schools.json", 404),
+                                     ("POST", "/search", 400), ("HEAD", "/", 501)):
+            with self.subTest(method=method, path=path):
+                request = f"{method} {path} HTTP/1.1\r\nContent-Length: 2\r\n\r\n{{}}".encode()
+                output = io.BytesIO()
+                connection = Mock()
+                connection.makefile.return_value = io.BytesIO(request)
+                connection.sendall.side_effect = output.write
+                with patch.object(Handler, "log_message"):
+                    Handler(connection, ("127.0.0.1", 12345), None)
+                headers = output.getvalue().split(b"\r\n\r\n", 1)[0].split(b"\r\n")
+                self.assertEqual(int(headers[0].split()[1]), status)
+                self.assertEqual(headers.count(b"Cache-Control: no-store"), 1)
+
     def test_upstream_request_identifies_app_and_uses_timeout(self):
         def respond(request, timeout):
             self.assertEqual(request.get_header("User-agent"), "schools-by-travel-time/1.0")
