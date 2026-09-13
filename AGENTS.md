@@ -13,6 +13,8 @@ A personal, local web app: enter a UK postcode and a time limit, get the post-16
 - `docs/superpowers/specs/` holds the contracts, one per iteration. The design is decided there, not in the code.
 - `docs/superpowers/research/2026-09-13-results-data.md` explains the results dataset, its columns, and its coverage gaps.
 - `docs/superpowers/plans/` holds the implementation plans that were executed. Reference only.
+- `docs/decisions/` holds one file per design decision with its rationale. Check there before proposing a change to how travel times, coverage, or secrets work.
+- `docs/agent-workflow.md` describes the multi-agent setup and delivery pipeline. Read it only if you are coordinating other agents.
 
 ## How work happens here
 
