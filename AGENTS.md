@@ -19,6 +19,7 @@ A personal, local web app: enter a UK postcode and a time limit, get the post-16
 ## How work happens here
 
 - Keep it minimal. Prefer deleting to adding. No new dependencies without a reason the user has agreed to.
+- Two writing skills are mandatory for every agent. Replies follow `communicating-clearly` and prose deliverables (specs, plans, decision records, research notes, issue comments, pull request bodies) follow `writing-clearly`. Claude agents invoke them with the Skill tool; Codex reads the files at `~/.claude/plugins/marketplaces/mnbf9rca-plugins/plugins/writing-tools/skills/communicating-clearly/SKILL.md` and `.../writing-clearly/SKILL.md` before writing. Claude agents also use the superpowers skills `brainstorming` before a spec, `writing-plans` before a plan and `test-driven-development` before a build.
 - Every data source, API or tool gets a row in `LICENSES/README.md` before it is used, and its verbatim licence text goes in `LICENSES/`.
 - The backlog is the GitHub milestones and issues on `mnbf9rca/find-schools-by-time`, worked in milestone order. Each issue states its done condition and links to the research it rests on. Read the issue before starting it.
 - Design before building: a change gets a short spec in `docs/superpowers/specs/` and the user's approval, then a build with tests first.
