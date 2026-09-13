@@ -25,7 +25,7 @@
 </form>
 <p id="error"></p>
 <p id="count"></p>
-<h2>A level results, 2024/25</h2>
+<h2 id="results-heading" hidden>A level results, 2024/25</h2>
 <table id="results"></table>
 <p><small>Travel times by TravelTime</small></p>
 <script type="module">
@@ -34,6 +34,7 @@ const form = document.getElementById('search');
 const errorLine = document.getElementById('error');
 const countLine = document.getElementById('count');
 const table = document.getElementById('results');
+const resultsHeading = document.getElementById('results-heading');
 let rows = [];
 
 function cell(row, text, tag = 'td') {
@@ -44,6 +45,7 @@ function cell(row, text, tag = 'td') {
 }
 
 function render(focusIndex) {
+  resultsHeading.hidden = false;
   table.textContent = '';
   const header = table.insertRow();
   for (const [index, column] of COLUMNS.entries()) {
@@ -81,6 +83,7 @@ form.addEventListener('submit', async (event) => {
   errorLine.textContent = '';
   countLine.textContent = '';
   table.textContent = '';
+  resultsHeading.hidden = true;
   try {
     const data = new FormData(form);
     const geo = await fetch(

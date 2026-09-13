@@ -23,9 +23,9 @@ export function comparator(key, direction) {
   return (a, b) => {
     const x = a[key];
     const y = b[key];
-    if (x == null && y == null) return 0;
-    if (x == null) return 1;
-    if (y == null) return -1;
+    if ((x == null || x === '') && (y == null || y === '')) return 0;
+    if (x == null || x === '') return 1;
+    if (y == null || y === '') return -1;
     if (typeof x === 'number' && typeof y === 'number') return sign * (x - y);
     return sign * String(x).localeCompare(String(y));
   };

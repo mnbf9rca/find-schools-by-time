@@ -34,6 +34,21 @@ assert.deepEqual(order(keyOf('Average result'), 'desc'), ['alpha', 'Beta', 'Gamm
 assert.equal(order('aps', 'asc').at(-1), 'Delta');
 assert.equal(order('aps', 'desc').at(-1), 'Delta');
 
+// Blank text fields share null's missing-last ordering, without hiding numeric zero.
+for (const direction of ['asc', 'desc']) {
+  const compare = comparator('website', direction);
+  const websites = ['', 'https://b.example', null, 'https://a.example', undefined];
+  const ordered = websites.map(website => ({ website })).sort(compare).map(r => r.website);
+  assert.deepEqual(ordered, direction === 'asc'
+    ? ['https://a.example', 'https://b.example', '', null, undefined]
+    : ['https://b.example', 'https://a.example', '', null, undefined]);
+  for (const missing of ['', null, undefined]) {
+    assert.equal(compare({ website: '' }, { website: missing }), 0);
+    assert.equal(compare({ website: missing }, { website: '' }), 0);
+  }
+  assert.equal(comparator('students', direction)({ students: 0 }, { students: '' }), -1);
+}
+
 // The same header toggles to descending; a different header starts ascending again.
 assert.deepEqual(reset(), { key: 'minutes', direction: 'asc' });
 assert.deepEqual(toggle('aps'), { key: 'aps', direction: 'asc' });
