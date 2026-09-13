@@ -54,6 +54,42 @@ def to_latlng(easting, northing):
     return round(lat, 6), round(lng, 6)
 
 
+FILTERS = {"time_period": "202425", "exam_cohort": "A level", "disadvantage_status": "Total"}
+
+RESULT_COLUMNS = {
+    "students": "aps_per_entry_student_count",
+    "progress": "value_added",
+    "progress_banding": "progress_banding",
+    "grade": "aps_per_entry_grade",
+    "aps": "aps_per_entry",
+    "retained_percent": "retained_percent",
+    "aab_percent": "aab_percent",
+    "best3_grade": "best_three_alevels_grade",
+    "best3_aps": "best_three_alevels_aps",
+}
+
+
+def measure(value):
+    """A float for a number, None for a blank or a suppression code, the string otherwise."""
+    value = (value or "").strip()
+    if value in ("", "z", "c", "x"):
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+
+def load_results(path):
+    """Map URN to the nine A level measures, for 2024/25 total-cohort rows only."""
+    with open(path, encoding="utf-8", newline="") as f:
+        return {
+            row["school_urn"]: {k: measure(row[c]) for k, c in RESULT_COLUMNS.items()}
+            for row in csv.DictReader(f)
+            if all(row[k] == v for k, v in FILTERS.items())
+        }
+
+
 def main(path):
     schools = []
     with open(path, encoding="cp1252", newline="") as f:
