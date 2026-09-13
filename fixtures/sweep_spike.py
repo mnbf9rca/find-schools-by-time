@@ -5,6 +5,7 @@ Run from the repo root with the MOTIS graph built in motis-spike/ (see motis-spi
     uv run --with pyproj fixtures/sweep_spike.py            # full sweep, starts and stops ./motis server itself
     uv run --with pyproj fixtures/sweep_spike.py --schools 2  # smoke run on the first two schools
     uv run --with pyproj fixtures/sweep_spike.py --check      # self-test, no server needed
+    uv run --with pyproj fixtures/sweep_spike.py --workers 8 --cap 90 --out w8-cap90   # issue #5 timing runs
 
 Candidate origins: centres of the EPSG:27700 1 km grid cells within RADIUS_KM of the school
 (one of the two options in section 6 of the hosting research note; no download, no licence, and
@@ -12,9 +13,12 @@ the denser option, so its count is an upper bound for issue #5). No land mask: s
 back unreachable. Query day: Wednesday 2026-09-16, a term-time weekday inside the imported window.
 
 Output (gitignored): motis-spike/sweep/results.csv, one row per reachable (school, mode, origin),
-and motis-spike/sweep/requests.csv, one row per MOTIS request with its elapsed time.
+motis-spike/sweep/requests.csv, one row per MOTIS request with its elapsed time, and summary.json
+with wall time and the server's peak resident memory. --out NAME puts them in motis-spike/sweep/NAME/.
+--workers N runs N school-mode sweeps at once; --cap MINUTES limits every mode (default 240).
 """
-import csv, json, math, os, signal, socket, subprocess, sys, time
+import csv, json, math, os, signal, socket, subprocess, sys, threading, time
+from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +28,7 @@ OUT = os.path.join(SPIKE, 'sweep')
 BASE = 'http://127.0.0.1:8080'
 ARRIVE = '2026-09-16T08:30:00+01:00'
 RADIUS_KM = 30
-MAX_SECONDS = 4 * 3600
+MAX_SECONDS = 4 * 3600  # overridden by --cap
 STREET_BATCH = 250  # ponytail: GET URL must stay under the 8 KB header limit; ~20 bytes per coordinate
 MODES = ['TRANSIT', 'WALK', 'BIKE', 'CAR']
 
@@ -120,6 +124,21 @@ def stop_server(proc):
         proc.wait()
 
 
+def peak_rss_sampler(stop):
+    """Sample the motis server's resident set every 2 s; return a dict whose 'kb' is the peak."""
+    peak = {'kb': 0}
+    def run():
+        while not stop.is_set():
+            pid = subprocess.run(['pgrep', '-f', '^./motis server'], capture_output=True, text=True).stdout.split()
+            if pid:
+                out = subprocess.run(['ps', '-o', 'rss=', '-p', pid[0]], capture_output=True, text=True).stdout.strip()
+                if out.isdigit():
+                    peak['kb'] = max(peak['kb'], int(out))
+            stop.wait(2)
+    threading.Thread(target=run, daemon=True).start()
+    return peak
+
+
 def check():
     o = grid_origins(51.508, -0.128)
     assert 2780 <= len(o) <= 2860, len(o)  # pi * 30^2 = 2827 cells, give or take the rim
@@ -129,34 +148,58 @@ def check():
     print('ok')
 
 
+def arg(name, default):
+    return type(default)(sys.argv[sys.argv.index(name) + 1]) if name in sys.argv else default
+
+
 def main():
+    global MAX_SECONDS
     if '--check' in sys.argv:
         return check()
-    limit = int(sys.argv[sys.argv.index('--schools') + 1]) if '--schools' in sys.argv else None
-    schools = list(csv.DictReader(open(SAMPLE)))[:limit]
-    os.makedirs(OUT, exist_ok=True)
+    schools = list(csv.DictReader(open(SAMPLE)))[:arg('--schools', 0) or None]
+    workers, cap, out = arg('--workers', 1), arg('--cap', 240), os.path.join(OUT, arg('--out', ''))
+    MAX_SECONDS = cap * 60
+    os.makedirs(out, exist_ok=True)
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     proc = start_server()
+    stop = threading.Event()
+    peak = peak_rss_sampler(stop)
+    t_start = time.monotonic()
+    n_requests = 0
     try:
-        with open(os.path.join(OUT, 'results.csv'), 'w', newline='') as rf, \
-             open(os.path.join(OUT, 'requests.csv'), 'w', newline='') as qf:
+        with open(os.path.join(out, 'results.csv'), 'w', newline='') as rf, \
+             open(os.path.join(out, 'requests.csv'), 'w', newline='') as qf:
             results, requests = csv.writer(rf, lineterminator='\n'), csv.writer(qf, lineterminator='\n')
             results.writerow(['urn', 'mode', 'origin_lat', 'origin_lng', 'seconds'])
             requests.writerow(['urn', 'mode', 'n_origins', 'n_reachable', 'elapsed_s', 'status'])
-            for i, s in enumerate(schools, 1):
-                origins = grid_origins(float(s['lat']), float(s['lng']))
-                for mode in MODES:
-                    n_reach = n_req = 0
-                    t0 = time.monotonic()
-                    for n, elapsed, status, rows in sweep(s, mode, origins):
+            origins = {s['urn']: grid_origins(float(s['lat']), float(s['lng'])) for s in schools}
+
+            def task(s, mode):
+                t0 = time.monotonic()
+                batches = list(sweep(s, mode, origins[s['urn']]))
+                return s, mode, batches, time.monotonic() - t0
+
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = [pool.submit(task, s, mode) for s in schools for mode in MODES]
+                for i, f in enumerate(futures, 1):
+                    s, mode, batches, took = f.result()
+                    n_reach = 0
+                    for n, elapsed, status, rows in batches:
                         requests.writerow([s['urn'], mode, n, len(rows), f'{elapsed:.3f}', status])
                         results.writerows([s['urn'], mode, a, b, sec] for a, b, sec in rows)
-                        n_reach += len(rows); n_req += 1
+                        n_reach += len(rows)
+                    n_requests += len(batches)
                     rf.flush(); qf.flush()
-                    print(f'{i:3}/{len(schools)} {s["urn"]} {mode:7} {len(origins)} origins '
-                          f'{n_reach} reachable {n_req} req {time.monotonic() - t0:.1f}s', flush=True)
+                    print(f'{(i + 3) // 4:3}/{len(schools)} {s["urn"]} {mode:7} {len(origins[s["urn"]])} origins '
+                          f'{n_reach} reachable {len(batches)} req {took:.1f}s', flush=True)
     finally:
+        stop.set()
         stop_server(proc)
+    summary = {'schools': len(schools), 'workers': workers, 'cap_minutes': cap, 'requests': n_requests,
+               'wall_s': round(time.monotonic() - t_start, 1), 'peak_server_rss_kb': peak['kb'],
+               'results_bytes': os.path.getsize(os.path.join(out, 'results.csv'))}
+    json.dump(summary, open(os.path.join(out, 'summary.json'), 'w'), indent=1)
+    print(summary, flush=True)
 
 
 if __name__ == '__main__':
