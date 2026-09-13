@@ -245,5 +245,28 @@ class TestHTTP(unittest.TestCase):
                         time_filter({})
 
 
+class TestStaticFiles(unittest.TestCase):
+    def handler(self, path):
+        handler = Handler.__new__(Handler)
+        handler.path = path
+        handler._send = Mock()
+        return handler
+
+    def test_serves_the_page_and_the_sort_module(self):
+        for path, content_type in (("/", "text/html; charset=utf-8"),
+                                   ("/sort.js", "application/javascript")):
+            with self.subTest(path=path):
+                handler = self.handler(path)
+                handler.do_GET()
+                status, body, sent_type = handler._send.call_args.args
+                self.assertEqual(status, 200)
+                self.assertEqual(sent_type, content_type)
+                self.assertTrue(body)
+
+    def test_unknown_paths_return_404(self):
+        handler = self.handler("/secrets")
+        handler.do_GET()
+        self.assertEqual(handler._send.call_args.args[0], 404)
+
 if __name__ == "__main__":
     unittest.main()

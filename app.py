@@ -20,6 +20,8 @@ LONDON = ZoneInfo("Europe/London")
 
 HERE = Path(__file__).parent
 SCHOOLS = json.loads((HERE / "schools.json").read_text())
+STATIC = {"/": ("index.html", "text/html; charset=utf-8"),
+          "/sort.js": ("sort.js", "application/javascript")}
 
 
 def _number(value, low, high, name):
@@ -133,9 +135,11 @@ def results(schools, response):
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path != "/":
+        page = STATIC.get(self.path)
+        if not page:
             return self._send(404, b"not found", "text/plain")
-        self._send(200, (HERE / "index.html").read_bytes(), "text/html; charset=utf-8")
+        name, content_type = page
+        self._send(200, (HERE / name).read_bytes(), content_type)
 
     def do_POST(self):
         if self.path != "/search":
