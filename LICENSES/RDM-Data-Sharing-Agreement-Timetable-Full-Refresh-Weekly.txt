@@ -1,0 +1,297 @@
+Product: Timetable - Full Refresh - Weekly
+Product id: P-4b4a43c6-3507-4c6f-aeed-82d853264236
+URL: https://raildata.org.uk/dataProduct/P-4b4a43c6-3507-4c6f-aeed-82d853264236/overview
+Accepted by the user on 2026-09-13.
+
+DATA SHARING AGREEMENT
+This licence is entered into between the Data Publisher and the Data Consumer.
+Whilst the Rail Delivery Group operates the Rail Data Marketplace it is neither buyer
+nor seller of the Licensed Data. The Rail Delivery Group is not a party to this licence
+and makes no warranty in connection with the Licensed Data.
+
+1. DEFINITIONS
+In these terms and conditions, the following meanings shall apply:
+‘Account’ the facility provided by Rail Delivery Group allowing the Data
+Consumer to access the Rail Data Marketplace;
+‘Agreement’ the entire contract between the Data Publisher and the Data
+Consumer for the provision of the Licensed Data
+incorporating these terms and conditions and Schedule 1 to
+the exclusion of all other terms;
+‘Data’ the information and other materials (including any Open
+Access Content) in whatever form from time to time made
+available to the Data Consumer pursuant to this Agreement;
+‘Data Consumer’ as defined in Schedule 1 of this contract;
+‘Data Publisher’ as defined in Schedule 1 of this contract;
+‘Intellectual Property’ copyright, database and other intellectual property and
+related rights of Publisher and its licensors, including the
+right to control the use and disclosure of confidential
+information;
+‘Licensed Data’ the Data identified in Schedule 1;
+‘Licence Fees’ the charges, if any, for use of the Licensed Data more
+particularly described in Schedule 2;
+‘Licensed Rights’ has the meaning set out in Clause 2.2;
+‘Open Access Content’ means Data made available by a way of a licence from the
+rights holder that is Creative Commons, Open Government
+3.0 or similar and any such content remains subject to its
+own licensing terms notwithstanding its inclusion with the
+Licensed Data;
+‘Personal Data’ means any information which is related to an identified or
+identifiable natural person; ‘Rail Data Marketplace’ the
+services and information available from www.raildata.org.uk;
+‘Rail Delivery Group’ Rail Settlement Plan Limited, First Floor North, 1 Puddle
+Dock, London, England, EC4V 3DS, UK;
+
+‘Rights’ copyright, database and other intellectual property and
+related rights of Publisher and its licensors, including the
+right to control the use and disclosure of confidential
+information;
+‘Special Condition’ means any additional commercial terms as may be agreed
+between the parties and set out in Schedule 1; and
+
+‘Term’ the duration of the Agreement, as set out in Schedule 1,
+including where applicable, any autorenewal of the
+Agreement.
+
+2. PROVISION OF LICENSED DATA
+2.1 All Intellectual Property in the Licensed Data are and shall remain the property of
+the Data Publisher and its licensors.
+2.2 The Data Publisher will provide the Licensed Data in accordance with the terms and
+conditions of the Agreement and grants the Data Consumer a non-exclusive,
+nontransferable, licence to use the Licensed Data subject to:
+2.2.1 payment of the appropriate Licence Fees (if any); and
+2.2.2 the permissions, and limitations if any, set out in Schedule 1 (the ‘Licensed
+Rights’).
+2.3 Save as provided in this Agreement, all other Rights are reserved by the Publisher
+and its licensors. Any copying, storage, transmission, publication, or use, other than as
+set out in this Agreement is not permitted.
+2.4 In order for the Data Publisher to provide the Licensed Data, the Data Consumer
+must continue to abide by the terms of accordance with the terms and conditions of the
+Rail Data Marketplace including without limitation the RDM Platform Agreement – Data
+Consumer.
+3. CUSTOMER OBLIGATIONS
+3.1 The Data Consumer agrees to maintain at all times the integrity of the Licensed
+Data and will implement reasonable technical and organisational measures to protect
+the Licensed Data against accidental or unlawful loss, alteration, disclosure or access.
+3.2 The Data Consumer agrees to comply with the terms and conditions of this
+Agreement and any reasonable instructions which the Data Publisher may from time to
+time notify to it in writing in connection with the Data Consumer’s use of the Licensed
+Data.
+3.3 As a condition of the Data Consumer’s exercise of the Licensed Rights, the Data
+Consumer must:
+3.3.1 give an appropriate credit to the Data Publisher by identifying the Data
+Publisher (and any other third party licensors designated to receive attribution in
+Schedule 1) as the source of the Licensed Data. The Data Consumer may do so
+in any reasonable manner, but not in a way that that suggests the Data
+
+Publisher or its licensors endorse the Data Consumer or the Data Consumer’s
+use of the Licensed Data;
+3.3.2 where the Licensed Rights so permit, ensure that any onward distribution of
+the Licensed Data is accompanied by appropriate notices relating to accuracy of
+the Data together with any relevant limitation or exclusion of liability provisions
+that the Data Publisher requires as a condition of such onward distribution; and
+3.3.3 promptly notify the Data Publisher in writing of any defects, inaccuracies or
+other deficiencies in the Licensed Data upon becoming aware of same.
+3.4 The Data Consumer is responsible for the provision of the telecommunications
+services and equipment to enable the Data Consumer to access and receive the Data.
+Neither Rail Delivery Group nor the Data Publisher will be able to issue refunds or
+accept responsibility for delay for the Data Consumer’s inability to access the Data due
+to any faults with the Data Consumer’s telecommunications service or equipment.
+3.5 Where the Licensed Rights permit the Data Consumer to distribute or otherwise
+make the output available to third parties, the Data Consumer shall use reasonable
+efforts not to do so in a manner that would or is likely to cause the output to be
+inaccurate, incomplete or otherwise fails to comply with the terms of this Agreement.
+4. LICENCE FEES
+4.1 The Data Publisher shall charge the Data Consumer the Licence Fee for the access
+and use of the Licensed Data using the charging basis set out in Schedule 2.
+4.2 The Data Consumer must pay the Licence Fees due and the Rail Delivery Group
+will invoice and collect the agreed Licence Fees in the manner set out in the Rail Data
+Marketplace Platform Agreement – Data Consumer. If the Data Consumer does not pay
+the agreed Licence Fees, the Rail Delivery Group may suspend the Data Consumer’s
+Account until payment in full is made.
+4.3 All Licence Fees are quoted exclusive of any applicable value added tax which shall
+be payable by the Data Consumer in addition.
+5. TERM, SUSPENSION AND TERMINATION
+5.1 Once accepted by the Data Consumer, the Agreement shall commence and
+continue for the Term unless terminated earlier in accordance with the following
+provisions.
+5.2 The Data Publisher can terminate the Agreement:
+5.2.1 immediately upon notice if: (a) the Data Consumer breaches any provision
+of this Agreement (including without limitation the obligation to the pay the
+Licence Fees) and fails to remedy that breach within seven days upon notice
+
+from the Data Publisher; (b) the Data Consumer enters into liquidation or any
+arrangement or composition with the Data Consumer’s creditors or if a receiver
+or administrator or administrative receiver is appointed against any of the Data
+Consumer’s assets or business; (c) the Data Publisher loses any rights to sub-licence any aspect of the Licensed Data or loses its rights to publish through the
+Rail Data Marketplace; (d) the Data Publisher suffers a force majeure event as
+set out in Clause 8.3.
+5.2.2 on at least three months’ notice where the Data Publisher has taken the
+decision that it will no longer distribute or make the Licensed Data available
+under licence.
+5.3 Without prejudice to its rights under Clause 5.2, in consultation with Rail Delivery
+Group, the Data Publisher may limit or suspend access to the Licensed Data where the
+Licensed Data contains Data pertaining to the UK’s critical national infrastructure.
+Where applicable, the Data Publisher will issue the Data Consumer with a refund in
+accordance with Rail Delivery Group’s refund policy.
+5.4 The Data Consumer can terminate the Agreement:
+5.4.1 immediately upon notice if:
+(a) the Data Publisher breaches any provision of this Agreement and fails
+to remedy that breach within seven days upon notice from the Data
+Consumer;
+(b) the Data Publisher enters into liquidation or any arrangement or
+composition with the Data Publisher’s creditors or if a receiver or
+administrator or administrative receiver is appointed against any of the
+Data Publisher’s assets or business;
+(c) the Licensed Data is materially amended or replaced by the Data
+Publisher;
+5.4.2 for convenience, where applicable, upon giving the Data Publisher notice,
+where such notice is set out in Schedule 1.
+5.5 On expiry or termination of this Agreement for any reason:
+5.5.1 the Data Consumer shall immediately settle any outstanding invoices for
+use of the Licensed Data incurred prior to the date of expiry or termination; and
+5.5.2 if required under Schedule 1, the Data Consumer shall procure the
+destruction of any copies of the Licensed Data and promptly confirm such
+destruction to the Data Publisher.
+
+5.6 Termination or expiry of this Agreement shall not affect any rights, remedies,
+obligations or liabilities of the parties have accrued up to the date of termination or
+expiry.
+6. LIABILITY
+6.1 The Data Publishers liability to the Data Consumer in respect of the Licensed Data
+shall be limited to: 100% of the Licence Fees paid [and payable] during the Term,
+subject to the provisions of this Clause 6.
+ 6.2 The Data Publisher excludes all liability for loss of business revenue or profits,
+anticipated savings or wasted expenditure, corruption or destruction of data and for any
+consequential loss whatever arising out of or in connection with this Agreement.
+6.3 Notwithstanding the provisions of this Clause 6, the Data Publisher does not limit or
+exclude its liability for death or personal injury caused by its negligence or any other
+liability the limitation or exclusion of which is prohibited by law.
+6.4 In the event of any matter falling with this Clause 6 where a third party claim is made
+or threatened against the Data Consumer’s or the Data Publisher, the parties shall
+provide all reasonable assistance to each other in connection with any such action.
+7. WARRANTIES
+7.1 The Data Publisher warrants and undertakes to the Data Consumer:
+7.1.1 it has the right to grant the Licensed Rights;
+7.1.2 it has used reasonable skill and care in the creation and supply of the
+Licensed Data; 7.1.3 will use reasonable endeavours to describe its data quality
+fairly; and
+7.1.4 as far as it is aware, the Data does not contain Personal Data.
+7.2 Save as provided in clause 7.1, the Licensed Data is provided on an ‘as is’ basis.
+The Data Publisher makes no representations as to the accuracy or fitness for purpose
+of the Licensed Data and all warranties, conditions, or other terms implied by statute,
+common law or otherwise are excluded to the fullest extent permitted by law. Be that as
+it may and without any liability to the Data Consumer, the Data Publisher may indicate
+in good faith what it believes to be the level of accuracy of the Licensed Data in
+Schedule 1.
+7.3 The Data Consumer must contact the Publisher immediately if anyone makes or
+threatens to make a claim against the Data Consumer relating to the Data Consumer’s
+use of the Licensed Data and the Data Consumer will comply with any reasonable
+request from the Publisher in relation to such claim.
+8. GENERAL
+
+8.1 It is the Rail Data Marketplace that enables the Data Consumer to access the
+Licensed Data. The Data Publisher cannot guarantee that the Rail Data Marketplace will
+never be faulty or that it will be available at all times as the Rail Delivery Group may, for
+example, need to temporarily suspend the whole or any part, of the platform. Please
+see the Rail Data Marketplace Platform Agreement for more information on platform
+performance and availability.
+8.2 The Data Consumer is not allowed to transfer or attempt to transfer this Agreement
+in whole or in part.
+8.3 The Data Publisher will not be liable if the Data Publisher cannot perform its
+obligations under this Agreement because of circumstances beyond its reasonable
+control such as technical failure, severe weather, fire or explosion, civil disorder, war, or
+military operations, natural or local emergency, anything done by government or other
+competent authority or industrial disputes of any kind.
+8.4 Notices given under the Agreement may be given by the Data Publisher to the Data
+Consumer online through the Rail Data Marketplace in writing to the address as
+currently stated in the Data Consumer’s account details and by the Data Consumer to
+the Data Publisher through the Rail Data Marketplace to the address Rail Settlement
+Plan Limited, First Floor North, 1 Puddle Dock, London, England, EC4V 3DS, UK.
+8.5 The parties do not intend that any term of this Agreement shall be enforceable
+solely by virtue of the Contracts (Rights of Third Parties) Act 1999 by any person who is
+a party to this Agreement.
+8.6 This Agreement is the entire and only agreement between the parties concerning its
+subject matter and supersedes any and all prior agreements, arrangements and
+understandings (whether written or oral) relating thereto. Neither party has relied upon
+any statement, representation or warranty of any person other than as expressly set out
+in this Agreement.
+8.7 If either party delays in acting upon a breach of this Agreement by the other party,
+that delay will not be regarded as a waiver of the breach. If a party does expressly
+waive a breach of this Agreement by the other party, that waiver is limited to that
+particular breach.
+8.8 In the event of conflict between these terms and conditions and any Special
+Conditions, the order of precedence is as follows:
+8.8.1 these terms and conditions;
+8.8.2 Schedule 1 (excluding any Special Conditions); and
+8.8.3 any Special Conditions.
+
+8.9 This Agreement is governed by, and construed in accordance with, English law and
+the Data Consumer and the Data Publisher submit to the exclusive jurisdiction of the
+English courts as regards any claim or matter arising in relation to this Agreement, save
+in the case of injunctive relief where a claim may be brought in any court of competent
+jurisdiction.
+
+AGREED BY
+1.          DATA PUBLISHER
+Rail Delivery Group
+2nd Floor
+1 Puddledock
+London
+London
+United Kingdom
+EC4V 3DS
+2.          DATA CONSUMER
+
+SCHEDULE 1
+LICENSED RIGHTS
+3.          LICENCED DATA
+Timetable - Full Refresh - Weekly (P-4b4a43c6-3507-4c6f-aeed-82d853264236)
+4.          PERMITTED RECIPIENTS
+All registered users
+5.          PERMITTED PURPOSES
+The permitted purposes are:
+The raw data may be used, copied, cleansed, adapted and / or aggregated with data from other
+ sources for research & analysis purposes only
+6.          TERM AND TERMINATION
+The start date of this agreement shall be null
+The Term shall be:
+1 year and the term shall renew automatically on the anniversary of the term on the same terms and conditions
+The notice period for Data Consumer termination for convenience shall be:
+1 month
+7.          TERRITORIAL USE RESTRICTIONS
+Exercise of these Licensed Rights is permitted within the territories selected below and / or, if
+applicable, prohibited in the prohibited territories selected below:
+UK and Europe
+Prohibited Countries:
+
+8.          ATTRIBUTION
+The following organisations must be attributed if the data is subsequently published.
+9.          RETENTION
+At the end of the term, the Data Consumer;
+May retain any data which has been received
+If the Data Consumer is required under the clause above to delete any data, they must provide
+a written statement to the Data Publisher, within the specified timeframe, confirming that
+the data has been securely and irretrievably deleted.
+
+10.        SPECIAL CONDITIONS
+The following special conditions apply:
+CONTRACT CODE:
+
+SCHEDULE 2
+LICENSED FEES
+1.          LICENCE FEE TYPE
+Open
+The Data Consumer can access the Licensed Data without charge. Access to the data will cease upon
+ suspension, termination, or expiry of the Agreement.
+2.          FAIR USAGE POLICY
+Not applicable
+3.          NON-CHARGEABLE LIMIT
+Not applicable
+4.          CHARGES APPLICABLE FOLLOWING NON-CHARGEABLE LIMIT
+Not applicable
+5.          PREPAID
+No
+6.          PURCHASE ORDER NUMBER
+Not applicable
+7.          UPDATE FREQUENCY
+Weekly
