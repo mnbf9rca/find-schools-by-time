@@ -11,6 +11,7 @@ How the user runs work on this repo with several agents in Herdr. Read this only
 - Clearing any agent's context with `/clear` before a new task is always fine.
 - Tabs and panes are created only when the user asks. Never open a pane or start the server for the user.
 - `builder` and `design` run in the repo's main working tree. When the coordinator or a job is using that tree, brief them to create a git worktree (`git worktree add /Users/rob/git/find-schools-by-time-<issue> -b <branch> main`) and work there, and never to run `git checkout` in the main tree. Remove the worktree once the branch is pushed.
+- Observed on the M1 spike (September 2026): `builder` can take material scope with limited oversight when the brief names the inputs and the constraints, and it followed every constraint given; it also found per-request overhead in the sweep timings unprompted. Its weakness is prose: asked for a short note it wrote a dense one with notation in the text, so a brief for any document it writes must give a length budget and the writing rules. `design` did two rounds of decision records cleanly and caught a wrong figure in the coordinator's brief; trust it to push back on inputs.
 - Brief with `herdr agent prompt <name> "<text>"`, wait with `herdr agent wait <name>`, and read the reply with `herdr agent read <name>`. Ask each brief to end with a fixed `DONE` line so the wait has something to match.
 
 ## Pipeline after the user approves a spec
