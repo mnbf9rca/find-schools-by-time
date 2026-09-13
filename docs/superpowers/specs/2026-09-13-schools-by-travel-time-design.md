@@ -24,7 +24,7 @@ Travel times are measured to each establishment's single registered location in 
 
 - Establishment data: the "All establishment data" CSV from https://get-information-schools.service.gov.uk/Downloads. The file is named `edubasealldataYYYYMMDD.csv`, is about 65 MB, and is encoded as Windows-1252. Coordinates are British National Grid eastings and northings. A copy lives in `data/extract/` and is not committed.
 - Postcode geocoding: https://api.postcodes.io. No key, allows cross-origin browser requests, returns latitude and longitude.
-- Travel times: TravelTime "Time Filter (Fast)" endpoint, `POST https://api.traveltimeapp.com/v4/time-filter/fast`. Its `arrival_searches.one_to_many` form takes one departure point and up to 100,000 arrival points with an `arrival_time_period` of `weekday_morning`, and returns travel seconds for each reachable one. Maximum `travel_time` is 10,800 seconds (3 hours). Authenticated with the `X-Application-Id` and `X-Api-Key` headers. The free plan allows 60 searches a minute during the trial and 5 a minute afterwards, and is licensed for evaluation use only.
+- Travel times: TravelTime "Time Filter" endpoint, `POST https://api.traveltimeapp.com/v4/time-filter`. The request carries a `locations` array, where each entry has an `id` and a `coords` object, and a `departure_searches` array. A departure search takes `id`, `departure_location_id`, `arrival_location_ids`, `transportation`, `departure_time`, `travel_time`, and `properties`, and returns travel seconds for each reachable arrival location. A search may name at most 2,000 arrival location ids, and the maximum `travel_time` is 14,400 seconds (4 hours). Authenticated with the `X-Application-Id` and `X-Api-Key` headers. The free plan allows 60 searches a minute during the trial and 5 a minute afterwards, and is licensed for evaluation use only.
 
 ## Components
 
@@ -63,10 +63,16 @@ Request validation, all failures returning 400:
 - The body must be valid JSON and a JSON object, and must be at most 4 KB.
 - All four fields must be present.
 - `lat` and `lng` must be finite numbers inside the British Isles bounding box: latitude 49 to 61, longitude -8 to 2.
-- `minutes` must be an integer, not a boolean, between 1 and 180.
-- `mode` must be one of `public_transport`, `driving`, `cycling`, or `walking`, which map to the fast endpoint's transportation types `public_transport`, `driving+ferry`, `cycling+ferry`, and `walking+ferry`.
+- `minutes` must be an integer, not a boolean, between 1 and 240. The upper bound is the endpoint cap of 14,400 seconds.
+- `mode` must be one of `public_transport`, `driving`, `cycling`, or `walking`. These are passed straight through as `transportation.type`; the standard endpoint takes these plain names, not the `+ferry` variants the fast endpoint uses.
 
-The server then sends one Time Filter (Fast) request with a single `one_to_many` arrival search: the origin is the departure point, every school is an arrival point, and `arrival_time_period` is `weekday_morning`, which models arriving for the start of the school day. Each location id is the establishment's URN as a string, `properties` is `["travel_time"]`, and `travel_time` is the requested minutes multiplied by 60.
+The server then sends one Time Filter request with a single departure search. The `locations` array holds the origin plus the selected schools, each school keyed by its URN as a string. In the departure search, `departure_location_id` is the origin, `arrival_location_ids` are the selected school ids, `transportation.type` is the requested mode, `travel_time` is the requested minutes multiplied by 60, and `properties` is `["travel_time"]`.
+
+`departure_time` is 08:30 Europe/London on the next weekday, minus the requested minutes. So "within 60 minutes" means "leave at 07:30 and arrive by 08:30" against the real published timetable, rather than against a generic morning profile.
+
+The endpoint accepts at most 2,000 arrival location ids, so the server sends the 2,000 schools nearest the origin by straight-line distance. A realistic search returns well under 100 schools, so this discards nothing a user would have seen.
+
+<!-- ponytail: nearest-2,000 by straight-line distance; switch to chunked requests if a search ever fills the cap. -->
 
 It joins the returned seconds back to the school records, sorts by seconds ascending, and responds with a JSON array of `{"urn", "name", "type", "postcode", "website", "sixth_form", "minutes"}`, where `minutes` is the returned seconds rounded up to a whole minute.
 
@@ -110,6 +116,6 @@ Two targets: `build` runs the build script under `uv run` against the newest `da
 Two small standard-library `unittest` files, run with `uv run --with pyproj python -m unittest`:
 
 - `test_build.py` feeds the filter and conversion functions a handful of hand-written rows and checks that the region, coordinate, and age-or-sixth-form rules keep and drop the right rows, that website normalisation adds a scheme and drops unusable values, and that a known easting and northing converts to the expected latitude and longitude within a small tolerance.
-- `test_app.py` checks the request body shape sent to TravelTime, the join and sort of a stubbed TravelTime response, and the 400 and 502 cases. The TravelTime call is replaced with a stub; no network access in tests.
+- `test_app.py` checks the request body shape sent to TravelTime, the selection of the nearest 2,000 schools by straight-line distance, the `departure_time` calculation (08:30 Europe/London on the next weekday minus the requested minutes, including the case where today is a Friday, Saturday, or Sunday), the join and sort of a stubbed TravelTime response, and the 400 and 502 cases. The TravelTime call is replaced with a stub; no network access in tests.
 
 No browser tests. The page is short enough to check by hand.
