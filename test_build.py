@@ -1,8 +1,11 @@
+import io
+import json
+from contextlib import redirect_stdout
 import tempfile
 import unittest
 from pathlib import Path
 
-from build_schools import keep, load_results, measure, to_latlng, website
+from build_schools import keep, load_results, main, measure, to_latlng, website
 
 
 def row(**overrides):
@@ -131,6 +134,54 @@ class TestLoadResults(unittest.TestCase):
                 values = PERF_ROW.split(",")
                 values[columns.index(field)] = wrong
                 self.assertEqual(load_results(perf_csv(self, ",".join(values))), {})
+
+GIAS_HEADER = ("URN,EstablishmentName,TypeOfEstablishment (name),Postcode,SchoolWebsite,"
+               "OfficialSixthForm (name),EstablishmentStatus (name),GOR (code),"
+               "Easting,Northing,StatutoryLowAge,StatutoryHighAge")
+GIAS_ROW = ("{urn},School {urn},Academy,N1 1AA,,Has a sixth form,Open,H,"
+            "530000,180000,11,18")
+
+
+def gias_csv(test, *urns):
+    directory = tempfile.TemporaryDirectory()
+    test.addCleanup(directory.cleanup)
+    path = Path(directory.name) / "gias.csv"
+    rows = [GIAS_ROW.format(urn=urn) for urn in urns]
+    path.write_text("\n".join([GIAS_HEADER] + rows) + "\n", encoding="cp1252")
+    return path
+
+
+def build(test, urns, *perf_rows):
+    out = io.StringIO()
+    with redirect_stdout(out):
+        main(gias_csv(test, *urns), perf_csv(test, *perf_rows))
+    return {s["urn"]: s for s in json.loads(out.getvalue())}
+
+
+class TestMerge(unittest.TestCase):
+    def test_school_with_a_performance_row_carries_the_nine_values(self):
+        school = build(self, ["100003"], PERF_ROW)["100003"]
+        self.assertEqual(school["aps"], 50.44)
+        self.assertEqual(school["grade"], "A")
+        self.assertEqual(school["progress"], 0.18)
+        self.assertEqual(school["progress_banding"], "Above average")
+        self.assertEqual(school["students"], 167.0)
+        self.assertEqual(school["aab_percent"], 65.7)
+        self.assertEqual(school["best3_grade"], "A")
+        self.assertEqual(school["best3_aps"], 50.58)
+        self.assertIsNone(school["retained_percent"])
+        self.assertEqual(school["name"], "School 100003")
+
+    def test_school_without_a_performance_row_carries_nine_nones(self):
+        school = build(self, ["999999"], PERF_ROW)["999999"]
+        for key in ("students", "progress", "progress_banding", "grade", "aps",
+                    "retained_percent", "aab_percent", "best3_grade", "best3_aps"):
+            with self.subTest(key=key):
+                self.assertIsNone(school[key])
+
+    def test_every_record_has_the_same_keys(self):
+        schools = build(self, ["100003", "999999"], PERF_ROW)
+        self.assertEqual(set(schools["100003"]), set(schools["999999"]))
 
 if __name__ == "__main__":
     unittest.main()

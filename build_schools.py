@@ -4,7 +4,7 @@
 # ///
 """Turn the Get Information About Schools CSV into schools.json.
 
-Usage: uv run build_schools.py data/extract/edubasealldata20260913.csv > schools.json
+Usage: uv run build_schools.py data/extract/edubasealldata20260913.csv data/a-level-and-other-16-to-18-results_2024-25/data/institution_performance_202225_API.csv > schools.json
 """
 
 import csv
@@ -90,7 +90,9 @@ def load_results(path):
         }
 
 
-def main(path):
+def main(path, results_path):
+    results = load_results(results_path)
+    empty = dict.fromkeys(RESULT_COLUMNS, None)
     schools = []
     with open(path, encoding="cp1252", newline="") as f:
         for row in csv.DictReader(f):
@@ -106,9 +108,9 @@ def main(path):
                 "sixth_form": row["OfficialSixthForm (name)"],
                 "lat": lat,
                 "lng": lng,
-            })
+            } | results.get(row["URN"], empty))
     json.dump(schools, sys.stdout)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
