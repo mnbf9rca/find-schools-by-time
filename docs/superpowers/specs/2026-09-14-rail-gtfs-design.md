@@ -4,44 +4,52 @@ Date: September 14, 2026
 
 ## Goal
 
-Give MOTIS a National Rail timetable, which the BODS feed lacks. In scope: a conversion script, a rail GTFS zip, its MOTIS registration, and the validation. Neither the CIF bundle nor the zip is committed.
+Give MOTIS the National Rail timetable the BODS feed lacks. Neither the bundle nor the zip is committed.
 
 ## The conversion script
 
-Run as `Rscript fixtures/rail_cif_to_gtfs.R <cif-directory> <output-zip>`. Both paths are arguments, so it runs from a worktree against the main tree.
+Run as `Rscript fixtures/rail_cif_to_gtfs.R <cif-directory> <output-zip>`; both paths are arguments, so it runs from a worktree. It fails unless the directory holds the MCA, MSN and FLF files UK2GTFS needs.
 
-`atoc2gtfs()` reads a zip and identifies the files inside by extension, requiring `.mca`, `.msn` and `.flf`. The nine RSPS5046 files all end in `.txt`, so the script stages renamed copies of those three into a temporary zip, deleted afterwards. The originals are untouched; the other six are unused.
+`atoc2gtfs()` identifies files in the zip by extension, requiring `.mca`, `.msn` and `.flf`, but the nine RSPS5046 files all end in `.txt`. The script stages renamed copies of those three in a temporary zip, deleted afterwards; the other six are unused, the originals untouched.
 
-Before `library(UK2GTFS)` it sets `options(UK2GTFS_opt_updateCachedDataOnLibaryLoad = FALSE)`, so a load cannot swap the cached data under a run, and records the version or checksums of the cached UK2GTFS-data files used: the tiploc locations and the ATOC agency table.
+Before `library(UK2GTFS)` it sets `options(UK2GTFS_opt_updateCachedDataOnLibaryLoad = FALSE)`, so a load cannot swap the cached data. It records `packageDescription("UK2GTFS")$RemoteSha`, the same for UK2GTFS-data, and checksums of the cached tiploc and agency tables. A version will not do: UK2GTFS has no tag matching the reported 0.4.0 (tags run 0.001 to 0.003). Both SHAs go in `NOTES.md` and the licence rows.
 
-It calls `atoc2gtfs()` with `public_only = TRUE` and `working_timetable = FALSE`, keeping the public timetable and its pickup and set-down rules; `transfers = TRUE` for interchange times; `missing_tiplocs = TRUE` and `locations = "tiplocs"` for coordinates; `agency = "atoc_agency"`; `shapes = FALSE`; and `ncores = 4`. Overlays and cancellations are handled inside `atoc2gtfs()`, so the script filters nothing itself.
+The call passes `public_only = TRUE` and `working_timetable = FALSE`, keeping the public timetable with its pickup and set-down rules, plus `transfers = TRUE` for interchange times, `missing_tiplocs = TRUE` with `locations = "tiplocs"` for coordinates, `agency = "atoc_agency"`, `shapes = FALSE` and `ncores = 4`. Six of the seven are package defaults, written out so the call documents itself. Only `ncores` changes anything, and not the MCA parse, which UK2GTFS runs at one core regardless; it speeds the schedule-to-routes step. Overlays and cancellations are handled inside `atoc2gtfs()`, so the script filters nothing.
 
-The result goes through `gtfs_validate_internal()`. Any Error severity is fatal and exits non-zero; Warning and Note rows are printed for the record. `gtfs_write()` writes the zip, taking the output path split into folder and stem.
+`transfers = TRUE` builds `transfers.txt` from the FLF fixed links and MSN minimum change times alone; the ALF file is never read, because `importALF` is commented out in the package's `atoc.R`. Cross-station walks such as King's Cross to St Pancras therefore rely on MOTIS's footpath routing (`osr_footpath: true`, `link_stop_distance: 100`), not the feed.
 
-The calendar is left as supplied; MOTIS imports only seven days from `first_day: 2026-09-14`. The script checks trips run on Wednesday 2026-09-16, reading the `calendar.txt` start and end dates with the Wednesday flag, then applying the `calendar_dates.txt` exceptions, and exits non-zero if none do.
+`gtfs_validate_internal()` then runs: any Error severity is fatal and exits non-zero, while Warning and Note rows are printed. `gtfs_write()` writes the zip, the output path split into folder and stem.
+
+The calendar is left as supplied, because MOTIS imports a narrow window anyway, though not seven days from `first_day`: `import.cc` starts a day earlier and spans `num_days` plus one, so 2026-09-14 with `num_days: 7` covers 2026-09-13 to 2026-09-20. Milestone 1's metrics recorded firstDay 2026-09-12, lastDay 2026-09-20. The script checks trips run on Wednesday 2026-09-16 from the `calendar.txt` bounds and Wednesday flag plus the `calendar_dates.txt` exceptions, and exits non-zero if none do.
 
 ## Licensing
 
-The tiploc locations and the ATOC agency table come from the separate ITSleeds/UK2GTFS-data repository, not from the timetable or the converter code, under its own licence, reported as AGPL-3.0. Before use, add a UK2GTFS-data row to `LICENSES/README.md` with its licence, attribution and conditions, and its verbatim text in `LICENSES/` unless it is MIT or GPL-3, already there.
+The tiploc locations and ATOC agency table come from the separate ITSleeds/UK2GTFS-data repository under its own licence, reported as AGPL-3.0. Before use, add a UK2GTFS-data row to `LICENSES/README.md` with its licence, attribution and conditions, plus its verbatim text in `LICENSES/` unless it is MIT or GPL-3.
 
-The National Rail row is complete, recorded on main by pull request #44. This pull request only removes the pending wording from the UK2GTFS row and adds the UK2GTFS-data row.
+The National Rail row is complete (pull request #44); this one only removes the UK2GTFS row's pending wording and adds the UK2GTFS-data row.
 
 ## Importing
 
-The zip is written to `motis-spike/feeds/rail.zip` by absolute path. Import reads `motis-spike/config.yml`, not `motis-spike/data/config.yml`, which is a copy it overwrites. So: rename `motis-spike/data` to `data.bods-only`, keeping the milestone 1 measurements reproducible; add a `rail` entry to `motis-spike/config.yml` beside `bods` under `timetable.datasets`, with `path: feeds/rail.zip` and the same five per-dataset flags `bods` carries; then run `./motis import` from `motis-spike/` so relative paths resolve. `merge_dupes_inter_src` stays `false`.
+The zip is written to `motis-spike/feeds/rail.zip`. `motis import` and `motis server` both take `-c <config>` and `-d <data-dir>`, so nothing is renamed. Copy `config.yml` to `motis-spike/config.rail.yml`, adding a `rail` entry beside `bods` under `timetable.datasets` with `path: feeds/rail.zip` and the same five per-dataset flags. Run `./motis import -c config.rail.yml -d data.rail` from `motis-spike/` so relative paths resolve, and serve with `./motis server -c config.rail.yml -d data.rail`. Milestone 1's `data/` and `config.yml` are untouched. `merge_dupes_inter_src` stays `false`.
 
 ## Validation
 
-1. Record the `agency_id` and `stop_id` overlap between the two zips. MOTIS namespaces identifiers by source, so an overlap is recorded, not fatal.
-2. Check every rail stop's latitude falls between 49.8 and 61.0 and longitude between -8.7 and 1.9, and count stops missing coordinates. Check London King's Cross, Cambridge, Manchester Piccadilly, Leeds, Brighton and London Victoria each land within 500 m of their known coordinates. Count and list tiplocs whose coordinates came from the MSN fallback.
-3. Spot check three services on Wednesday 2026-09-16 against the published timetable, each named by headcode or departure time so the check repeats: London King's Cross to Cambridge, Manchester Piccadilly to Leeds, and Brighton to London Victoria. Compare each stop against its published passenger time, allowing the CIF working time where the public field is blank, because `working_timetable = FALSE` falls back to it when the public field is `0000`, and working times carry half minutes.
-4. Ordinary services do not show the harder features survived, so check one of each by finding the CIF record and its GTFS counterpart: an overlay with short-term plan indicator O, a cancellation with indicator C, a restricted pickup or set-down, and an interchange time in `transfers.txt`.
-5. Confirm the import exits zero. Record `data/timetable_metrics.json` against the milestone 1 figures; higher counts are evidence, not proof.
+1. Record the `agency_id` and `stop_id` overlap between the two zips. The issue's no-collision condition is met by per-source namespacing, not disjoint id sets: `docs/setup.md` says the dataset tag prefixes stop and trip ids and agencies register per source; an overlap is recorded, not a defect.
+2. Check every rail stop sits between latitude 49.8 and 61.0 and longitude -8.7 and 1.9, and count stops with no coordinates. Check the six spot-check stations land within 500 m of their known positions, and list tiplocs whose coordinates came from the MSN fallback.
+3. Spot check three services on Wednesday 2026-09-16 against the published timetable, each named by headcode or departure time: London King's Cross to Cambridge, Manchester Piccadilly to Leeds, and Brighton to London Victoria. Compare each stop against its published passenger time, allowing the CIF working time where the public field is blank, since `working_timetable = FALSE` falls back to it when that field is `0000`; working times carry half minutes.
+4. Check each harder feature against its CIF record and GTFS counterpart: an overlay (short-term plan indicator O), a cancellation (indicator C), a restricted pickup or set-down, and an interchange time in `transfers.txt`.
+5. Confirm the import exits zero and record `data.rail/timetable_metrics.json` against milestone 1; higher counts are evidence, not proof.
 
 ## Done when
 
-A plan request returns an itinerary from London King's Cross to Cambridge arriving by 08:30 on Wednesday 2026-09-16 with a leg whose route comes from the rail dataset. A rail mode alone is not enough: an Underground leg would match. Use `GET /api/v6/plan`, the current endpoint on MOTIS 2.11.3, with `fromPlace` and `toPlace` as latitude and longitude, `time` as an ISO timestamp for 08:30 London time that day, `arriveBy=true` and `timetableView=false`.
+This request returns an itinerary from King's Cross to Cambridge arriving by 08:30 on Wednesday 2026-09-16, with a leg traced to the rail dataset:
+
+```
+GET /api/v6/plan?fromPlace=51.5320,-0.1233&toPlace=52.1943,0.1372&time=2026-09-16T08:30:00%2B01%3A00&arriveBy=true&timetableView=false
+```
+
+The timestamp carries the +01:00 British Summer Time offset, and there is no date parameter. Matching a rail mode is not enough: the v6 rail modes are HIGHSPEED_RAIL, LONG_DISTANCE, NIGHT_RAIL, REGIONAL_RAIL, SUBURBAN and SUBWAY, and SUBWAY matches an Underground leg. Trace it to the rail dataset through the dataset tag prefixing its stop and trip ids.
 
 ## Notes
 
-A "Rail GTFS (issue #8)" section is appended to `motis-spike/NOTES.md`: the R, UK2GTFS and UK2GTFS-data versions, the conversion time and zip size, the validator's counts by severity, each GTFS table's row count, every check above with its result, the import timing and metrics, and the plan response.
+A "Rail GTFS (issue #8)" section in `motis-spike/NOTES.md` records the R version, both commit SHAs, every timing and size, the validator counts, each table's rows, every check's result, and the plan response.
