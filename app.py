@@ -149,9 +149,10 @@ class Handler(BaseHTTPRequestHandler):
         payload = build_request(lat, lng, minutes, mode, schools, datetime.now(LONDON))
         try:
             response = time_filter(payload)
-        except RuntimeError as error:
+            rows = results(schools, response)
+        except (RuntimeError, LookupError) as error:
             return self._json(502, {"error": str(error)})
-        self._json(200, results(schools, response))
+        self._json(200, rows)
 
     def _json(self, status, data):
         self._send(status, json.dumps(data).encode(), "application/json")
@@ -162,9 +163,6 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
-
-    def log_message(self, fmt, *args):
-        sys.stderr.write(f"{self.command} {self.path}\n")
 
 
 def main():

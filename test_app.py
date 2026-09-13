@@ -190,6 +190,16 @@ class TestHTTP(unittest.TestCase):
             handler.do_POST()
         handler._json.assert_called_once_with(502, {"error": "upstream unavailable"})
 
+    def test_malformed_upstream_results_return_502(self):
+        for response in ({"results": []}, {"results": [{"locations": [
+                {"id": "unknown", "properties": [{"travel_time": 60}]}]}]}):
+            with self.subTest(response=response), patch("app.time_filter", return_value=response):
+                handler = self.handler(json.dumps(body()).encode())
+                handler.do_POST()
+                status, payload = handler._json.call_args.args
+                self.assertEqual(status, 502)
+                self.assertTrue(payload["error"])
+
     def test_http_connection_and_timeout_errors_are_readable(self):
         errors = [urllib.error.HTTPError("https://example.org", 401, "Unauthorized", {},
                                         io.BytesIO(b'{"description":"invalid credentials","error_code":1}')),

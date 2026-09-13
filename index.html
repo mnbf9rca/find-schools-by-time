@@ -94,7 +94,7 @@ form.addEventListener('submit', async (event) => {
       return;
     }
     countLine.textContent = rows.length + ' schools within ' + data.get('minutes') + ' minutes';
-    render(rows);
+    if (rows.length) render(rows);
   } catch (e) {
     errorLine.textContent = String(e);
   } finally {
