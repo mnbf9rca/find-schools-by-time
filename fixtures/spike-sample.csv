@@ -1,0 +1,101 @@
+urn,name,lat,lng,reason
+150099,Medina College,50.711574,-1.282553,island
+136753,Lift Ryde,50.723159,-1.174169,ferry
+140845,"Cowes Enterprise College, An Ormiston Academy",50.76276,-1.306101,ferry
+150935,Leigh Academy Minster,51.419352,0.784987,island
+145119,Atlantic Academy Portland,50.529475,-2.451915,island
+137598,Berwick Academy,55.755746,-2.002587,border
+136979,The Marches School,52.852863,-3.061419,border
+137382,Wyedean School and Sixth Form Centre,51.642348,-2.660188,border
+111424,Bishop Heber High School,53.029793,-2.760528,border
+137107,Kirkby Stephen Grammar School,54.474154,-2.352521,remote
+112451,Sedbergh School,54.320905,-2.527516,remote
+122328,Haydon Bridge High School,54.975406,-2.252791,remote
+144496,Teesdale School and Sixth Form,54.550397,-1.912851,remote
+143981,Helston Community College,50.106927,-5.273505,remote
+121667,Whitby School,54.481915,-0.624338,coast
+136217,Skegness Academy,53.151335,0.330527,coast
+112045,Budehaven Community School,50.825656,-4.5353,coast
+139553,The Ilfracombe Church of England Academy,51.204678,-4.11435,coast
+118082,Hornsea School and Language College,53.913882,-0.17402,coast
+135290,The Marsh Academy,50.986625,0.948284,marsh
+137282,University Academy Holbeach,52.809238,0.01636,fen
+136791,West Somerset College,51.196415,-3.462625,moor
+149645,Buxton Community School,53.250586,-1.921097,moor
+148602,Lady Lumley's Academy,54.251517,-0.783896,moor
+136902,Keswick School,54.608102,-3.146536,lakes
+121689,Settle College,54.072097,-2.285226,dales
+142262,King Edward VI Grammar School,53.364104,-0.00955,wolds
+150196,The Duchess's Community High School,55.398118,-1.697866,rural
+148737,The Purbeck School,50.682699,-2.123162,rural
+130819,East Coast College,52.482373,1.743636,rural
+110533,The Cottesloe School,51.892394,-0.721597,rural
+136367,Kingsbridge Academy,50.280718,-3.783146,rural
+120339,Dixie Grammar School,52.624617,-1.403024,rural
+136322,Samuel Ward Academy,52.089385,0.447402,rural
+148753,St Paul's Catholic College,50.966381,-0.154573,rural
+148338,The De Montfort School,52.085112,-1.938792,rural
+104964,Christ The King Catholic High School and Sixth Form Centre,53.626502,-3.002202,rural
+138623,St John's Marlborough,51.415284,-1.728408,rural
+138116,Campsmount Academy,53.625091,-1.186955,rural
+117045,Lucton School,52.275736,-2.82501,rural
+124899,Felixstowe International College,51.968088,1.367097,rural
+137621,Sheringham High School,52.936268,1.198164,rural
+140549,Magnus Church of England Academy,53.068393,-0.802107,rural
+116521,Lord Wandsworth College,51.214423,-0.929437,rural
+149602,Sidmouth College,50.69749,-3.233037,rural
+123905,King's Bruton,51.110294,-2.455017,rural
+137613,Manor School,52.342832,-0.530921,rural
+121694,Ripon Grammar School,54.139158,-1.539107,rural
+140534,Attleborough Academy,52.519653,1.018865,rural
+140867,English Martyrs Catholic School and Sixth Form College,54.675537,-1.236457,rural
+112388,Millom School,54.213131,-3.269483,rural
+138235,The Parker E-ACT Academy,52.264552,-1.164206,rural
+136383,Bodmin College,50.459758,-4.711223,rural
+150261,Bacup and Rawtenstall Grammar School,53.693432,-2.247403,rural
+124489,Stafford Grammar School,52.783179,-2.127893,town
+140294,Simon Balle All-Through School,51.793171,-0.069174,town
+144008,Wood Green School,51.792422,-1.471052,town
+130728,EKC Group,51.354162,1.435027,town
+136128,Knole Academy,51.287122,0.183761,town
+135061,Wolverley CofE Secondary School,52.41693,-2.253981,town
+136505,The Ecclesbourne School,52.985796,-1.491022,town
+139658,Kings Priory School,55.019013,-1.425774,town
+144782,Priestley College,53.379588,-2.584369,town
+136500,Bishop Wordsworth's Church of England Grammar School,51.065797,-1.794719,town
+137874,The Boswells School,51.749398,0.490494,town
+136617,"Archbishop Holgate's School, A Church of England Academy",53.952356,-1.041082,town
+136833,Howard of Effingham School,51.273294,-0.395558,town
+123282,The Oratory School,51.532147,-1.058414,town
+144243,St Philip Howard Catholic School,50.833628,-0.644954,town
+112453,Austin Friars,54.907026,-2.95029,town
+136674,The Mirfield Free Grammar,53.686722,-1.702518,town
+136731,Ripley St Thomas Church of England Academy,54.039209,-2.802341,town
+136333,Arden,52.385188,-1.738296,town
+136578,The Crypt School,51.83961,-2.251123,town
+138318,Neston High School,53.296829,-3.055052,town
+137902,Netherthorpe School,53.267095,-1.34125,town
+110544,St Mary's School,51.593336,-0.552266,suburban
+126512,Stonar School,51.389077,-2.217892,suburban
+110910,The Peterborough School,52.57384,-0.260124,suburban
+136463,Comberton Village College,52.184811,0.010766,suburban
+112041,Torpoint Community College,50.376437,-4.20603,suburban
+138326,The Frances Bardsley Academy for Girls,51.573174,0.199062,suburban
+105591,The Manchester Grammar School,53.449102,-2.210249,suburban
+138482,Rushcliffe Spencer Academy,52.915369,-1.124474,suburban
+104255,St Francis of Assisi Catholic College,52.598838,-1.911565,suburban
+142577,The Brakenhale School,51.407318,-0.750897,suburban
+141185,Thorp Academy,54.972218,-1.774911,suburban
+117499,The Priory School,51.962497,-0.283051,suburban
+108113,The Grammar School At Leeds,53.864173,-1.5194,suburban
+148878,The City of Leicester College,52.62547,-1.061485,suburban
+137353,The St Marylebone CofE School,51.52221,-0.15217,urban
+103591,Birchfield Independent Girls' School,52.507323,-1.891844,urban
+131065,North Liverpool Academy,53.424148,-2.968316,urban
+135296,William Hulme's Grammar School,53.445811,-2.248595,urban
+139036,Kings Langley School,51.715928,-0.462774,urban
+135761,Nottingham University Samworth Academy,52.963802,-1.234906,urban
+136352,Gosforth Academy,55.013064,-1.623704,urban
+150869,Walderslade School,51.351159,0.524401,urban
+110137,Reddam House Berkshire,51.415843,-0.883741,urban
+108079,Pudsey Grammar School,53.798843,-1.662905,urban
