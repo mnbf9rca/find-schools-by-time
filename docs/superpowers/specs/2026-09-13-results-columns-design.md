@@ -10,7 +10,7 @@ This extends the iteration 1 design in `2026-09-13-schools-by-travel-time-design
 
 ## Scope
 
-In scope: six result measures from the A level cohort, joined at build time; nine new columns in the results table; click-to-sort on every column.
+In scope: six result measures from the A level cohort, joined at build time; six new display columns carrying nine data fields in the results table; click-to-sort on every column.
 
 Out of scope: vocational cohorts (Applied general, Tech level), disadvantage breakdowns, confidence intervals, national or local authority comparisons, filters on any results column, and charts.
 
@@ -57,6 +57,8 @@ One line changes in `app.py`: the nine new keys are added to `RESULT_KEYS`, the 
 
 ## Page
 
+A visible heading `A level results, 2024/25` sits above the table, so the year and the cohort the results describe are on screen rather than implied.
+
 `index.html` gains nine values across six new columns, placed after Minutes and before Website:
 
 | Column | Cell contents | Sorts on |
@@ -65,12 +67,14 @@ One line changes in `app.py`: the nine new keys are added to `RESULT_KEYS`, the 
 | Progress | `progress` with `progress_banding` in brackets, for example `0.18 (Above average)` | `progress` |
 | Average result | `grade` with `aps` in brackets, for example `A (50.44)` | `aps` |
 | Completed programme | `retained_percent` with a per cent sign | `retained_percent` |
-| AAB or higher | `aab_percent` with a per cent sign | `aab_percent` |
+| AAB or higher incl. 2 facilitating subjects | `aab_percent` with a per cent sign | `aab_percent` |
 | Best 3 A levels | `best3_grade` with `best3_aps` in brackets | `best3_aps` |
 
 A cell whose underlying value is `None` renders as an empty string.
 
-Sorting is plain JavaScript, no library. The rows returned by `/search` are held in a variable. Each header cell carries the key it sorts on. Clicking a header sorts ascending; clicking the same header again reverses to descending; clicking a different header starts ascending again. The table is re-rendered from the sorted array. Numbers compare numerically, strings compare with `localeCompare`, and `null` always sorts last regardless of direction. The default order on a fresh search stays travel time ascending, as in iteration 1.
+Sorting is plain JavaScript, no library. The rows returned by `/search` are held in a variable. Every header holds a native `<button>` carrying the key it sorts on, so the control is reachable and operable by keyboard, not only by mouse. Activating a header sorts ascending; activating the same header again reverses to descending; activating a different header starts ascending again. The active header carries `aria-sort` set to `ascending` or `descending`, every other header carries `aria-sort="none"`, and the active header's button shows the direction as a visible arrow beside its label. The table is re-rendered from the sorted array. Numbers compare numerically, strings compare with `localeCompare`, and `null` always sorts last regardless of direction. The default order on a fresh search stays travel time ascending, as in iteration 1, and a fresh search resets the sort key and direction.
+
+The comparator lives in a new file, `sort.js`, which exports one function taking a key and a direction and returning a comparison function. `index.html` loads it with a plain `<script src="sort.js">` tag, and `app.py` serves it as `application/javascript` from the same directory it already serves `index.html`. Keeping it in its own file is what lets the check below run it under `node` with no browser and no test framework.
 
 Schools with no results data still appear in the table, with empty results cells, and sink to the bottom whenever a results column is the sort key.
 
@@ -78,9 +82,19 @@ All cell text is still written with `textContent`.
 
 ## Testing
 
-`test_build.py` gains cases for the two new functions and the merge. No browser tests; the sorting is short enough to check by hand.
+`test_build.py` gains cases for the two new functions and the merge:
 
 - `measure` returns `None` for `""`, `z`, `c`, and `x`, a float for `"50.44"`, and the string for `"A+"` and `"Above average"`.
 - `load_results` keeps a row matching all three filter values and drops rows that differ on `time_period`, on `exam_cohort`, or on `disadvantage_status`.
 - A school whose URN appears in the performance data gets the nine values; a school whose URN does not gets nine `None` values.
 - A school whose row carries a suppression code in one column gets `None` for that column and real values for the rest.
+
+`test_app.py` needs updating in the same change, or it breaks. Its `school()` helper builds a record with the iteration 1 keys only, so widening `RESULT_KEYS` makes `results()` raise `KeyError` on every one of its stubbed schools. Its response-key assertion also names the exact iteration 1 key set, so it fails once the response is wider.
+
+- `school()` takes the nine new keys, defaulting to populated values, so existing cases keep working unchanged.
+- The response-key assertion names the full widened set.
+- One case sends a school with populated measures and one with all nine set to `None` through `/search`, and checks both survive the join with their values intact.
+
+Sorting gets one runnable check rather than a manual pass: `check_sort.mjs`, run with `node check_sort.mjs`, importing the comparator from `sort.js` and asserting with `node:assert`. No framework, no browser, no dependency. It covers numeric ordering, negative `progress` values sorting below positive ones, text ordering on `name`, the grade columns ordering by their point scores rather than their grade letters, `null` sorting last in both ascending and descending order, the direction toggle on a repeated key, and the reset to travel time ascending after a fresh search.
+
+No browser tests beyond that; the rendering is short enough to check by hand.
