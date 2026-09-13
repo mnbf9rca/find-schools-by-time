@@ -93,7 +93,7 @@ TIME_FILTER_URL = "https://api.traveltimeapp.com/v4/time-filter"
 RESULT_KEYS = ("urn", "name", "type", "postcode", "website", "sixth_form",
                "gender", "religious_character",
                "students", "progress", "progress_banding", "grade", "aps",
-               "retained_percent", "aab_percent", "best3_grade", "best3_aps")
+               "retained_percent", "aab_percent", "best3_grade", "best3_aps", "lat", "lng")
 
 
 def time_filter(payload):

@@ -156,10 +156,11 @@ class TestResults(unittest.TestCase):
         rows = results(schools, response)
         self.assertEqual([r["urn"] for r in rows], ["1", "2"])
         self.assertEqual([r["minutes"] for r in rows], [2, 59])
+        self.assertEqual([(r.get("lat"), r.get("lng")) for r in rows], [(51.51, -0.12), (51.52, -0.13)])
         self.assertEqual(set(rows[0]), {
             "urn", "name", "type", "postcode", "website", "sixth_form", "gender", "religious_character", "minutes",
             "students", "progress", "progress_banding", "grade", "aps",
-            "retained_percent", "aab_percent", "best3_grade", "best3_aps"})
+            "retained_percent", "aab_percent", "best3_grade", "best3_aps", "lat", "lng"})
 
 
     def test_carries_results_and_missing_results_through_the_join(self):

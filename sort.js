@@ -20,6 +20,8 @@ export const COLUMNS = [
   { label: 'Best 3 A levels grade', key: 'best3_aps', value: (r) => r.best3_grade, cell: (r) => text(r.best3_grade) },
   { label: 'Best 3 A levels points', key: 'best3_aps', value: (r) => r.best3_aps, cell: (r) => text(r.best3_aps) },
   { label: 'Website', key: 'website', value: (r) => r.website, cell: () => '', link: true },
+  { label: 'Latitude', key: 'lat', value: (r) => r.lat, cell: (r) => r.lat?.toFixed(5) ?? '' },
+  { label: 'Longitude', key: 'lng', value: (r) => r.lng, cell: (r) => r.lng?.toFixed(5) ?? '' },
 ];
 
 export function csvField(value) {

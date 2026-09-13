@@ -83,6 +83,21 @@ assert.deepEqual(
   [2, 10, 20, 100]);
 
 const cell = (label, row) => COLUMNS.find((c) => c.label === label).cell(row);
+assert.deepEqual(COLUMNS.slice(-2).map(c => c.label), ['Latitude', 'Longitude']);
+for (const [label, key, value, expected] of [
+  ['Latitude', 'lat', 51.503991, '51.50399'],
+  ['Longitude', 'lng', -0.128354, '-0.12835'],
+]) {
+  assert.equal(keyOf(label), key);
+  assert.equal(cell(label, { [key]: value }), expected);
+  assert.equal(cell(label, { [key]: 0 }), '0.00000');
+  assert.equal(cell(label, { [key]: null }), '');
+  const coordinates = [-0.12, null, -1.2, 0].map(value => ({ [key]: value }));
+  for (const direction of ['asc', 'desc']) {
+    assert.deepEqual([...coordinates].sort(comparator(keyOf(label), direction)).map(r => r[key]),
+      direction === 'asc' ? [-1.2, -0.12, 0, null] : [0, -0.12, -1.2, null]);
+  }
+}
 assert.equal(indexOf('Gender'), indexOf('Sixth form') + 1);
 assert.equal(keyOf('Gender'), 'gender');
 assert.equal(cell('Gender', { gender: 'Girls' }), 'Girls');
@@ -120,7 +135,7 @@ const exportRow = {
   sixth_form: 'Has a sixth form', gender: 'Girls', religious_character: 'Church of England', minutes: 42, students: null,
   progress: 0, progress_banding: 'Average', grade: 'A', aps: 50.44,
   retained_percent: 90.1, aab_percent: 65.7, best3_grade: 'B', best3_aps: 40.58,
-  website: 'https://school.example',
+  website: 'https://school.example', lat: 51.503991, lng: -0.128354,
 };
 const headers = ['URN', ...COLUMNS.flatMap(c => c.key === 'progress'
   ? [c.label, 'Progress description'] : [c.label])];
@@ -137,7 +152,7 @@ assert.deepEqual(Object.fromEntries(headers.map((h, i) => [h, fields[i]])), {
   'Average result grade': 'A', 'Average result points': '50.44',
   'Completed programme': '90.1', 'AAB or higher incl. 2 facilitating subjects': '65.7',
   'Best 3 A levels grade': 'B', 'Best 3 A levels points': '40.58',
-  Website: 'https://school.example',
+  Website: 'https://school.example', Latitude: '51.503991', Longitude: '-0.128354',
 });
 assert.equal(exported[2].split(',')[0], '654321');
 assert.deepEqual(csvRows([]), [exported[0]]);
