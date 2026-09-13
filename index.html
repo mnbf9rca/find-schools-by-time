@@ -6,6 +6,7 @@
   label { margin-right: 1rem; }
   table { border-collapse: collapse; margin-top: 1rem; }
   th, td { border-bottom: 1px solid #ddd; padding: 0.3rem 0.6rem; text-align: left; }
+  th button { font: inherit; font-weight: bold; background: none; border: 0; padding: 0; cursor: pointer; }
   #error { color: #b00; }
 </style>
 <h1>Schools by travel time</h1>
@@ -24,13 +25,16 @@
 </form>
 <p id="error"></p>
 <p id="count"></p>
+<h2>A level results, 2024/25</h2>
 <table id="results"></table>
 <p><small>Travel times by TravelTime</small></p>
-<script>
+<script type="module">
+import { COLUMNS, comparator, sort, toggle, reset } from './sort.js';
 const form = document.getElementById('search');
 const errorLine = document.getElementById('error');
 const countLine = document.getElementById('count');
 const table = document.getElementById('results');
+let rows = [];
 
 function cell(row, text, tag = 'td') {
   const el = document.createElement(tag);
@@ -39,24 +43,33 @@ function cell(row, text, tag = 'td') {
   return el;
 }
 
-function render(rows) {
+function render(focusIndex) {
+  table.textContent = '';
   const header = table.insertRow();
-  for (const name of ['Name', 'Type', 'Postcode', 'Sixth form', 'Minutes', 'Website']) {
-    cell(header, name, 'th');
+  for (const [index, column] of COLUMNS.entries()) {
+    const th = cell(header, '', 'th');
+    th.scope = 'col';
+    const active = sort.key === column.key;
+    th.setAttribute('aria-sort', active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none');
+    const button = document.createElement('button');
+    button.textContent = column.label + (active ? (sort.direction === 'asc' ? ' ▲' : ' ▼') : '');
+    button.addEventListener('click', () => {
+      toggle(column.key);
+      render(index);
+    });
+    th.appendChild(button);
+    if (index === focusIndex) button.focus();
   }
-  for (const r of rows) {
+  for (const r of [...rows].sort(comparator(sort.key, sort.direction))) {
     const tr = table.insertRow();
-    cell(tr, r.name);
-    cell(tr, r.type);
-    cell(tr, r.postcode);
-    cell(tr, r.sixth_form);
-    cell(tr, r.minutes);
-    const last = cell(tr, '');
-    if (r.website) {
-      const a = document.createElement('a');
-      a.href = r.website;
-      a.textContent = 'Website';
-      last.appendChild(a);
+    for (const column of COLUMNS) {
+      const td = cell(tr, column.cell(r));
+      if (column.link && r.website) {
+        const a = document.createElement('a');
+        a.href = r.website;
+        a.textContent = 'Website';
+        td.appendChild(a);
+      }
     }
   }
 }
@@ -88,13 +101,15 @@ form.addEventListener('submit', async (event) => {
         mode: data.get('mode'),
       }),
     });
-    const rows = await search.json();
+    const found = await search.json();
     if (!search.ok) {
-      errorLine.textContent = rows.error || 'Search failed';
+      errorLine.textContent = found.error || 'Search failed';
       return;
     }
-    countLine.textContent = rows.length + ' schools within ' + data.get('minutes') + ' minutes';
-    if (rows.length) render(rows);
+    countLine.textContent = found.length + ' schools within ' + data.get('minutes') + ' minutes';
+    rows = found;
+    reset();
+    if (rows.length) render();
   } catch (e) {
     errorLine.textContent = String(e);
   } finally {
