@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { decode } from './record.js';
+import { SCHOOL_COUNT, SCHOOL_INDEX_SHA256 } from './school-index.js';
 import { COLUMNS, comparator, csvField, csvRows, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
 
 const rows = [
@@ -169,6 +170,8 @@ for (const column of COLUMNS) {
 // The committed record combines the Whitby example with synthetic boundary slots.
 const schools = JSON.parse(readFileSync(new URL('./schools.json', import.meta.url), 'utf8'));
 const schoolCount = schools.length;
+assert.equal(SCHOOL_COUNT, schoolCount);
+assert.equal(SCHOOL_INDEX_SHA256, '43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9');
 const record = readFileSync(new URL('./fixtures/example-origin.bin', import.meta.url));
 assert.equal(record.byteLength, 4 * 2 * schoolCount);
 assert.equal(schools[907].urn, '121667');

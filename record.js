@@ -1,6 +1,4 @@
-import schools from './schools.json' with { type: 'json' };
-
-const schoolCount = schools.length;
+import { SCHOOL_COUNT as schoolCount } from './school-index.js';
 
 // Planes: public_transport, walking, cycling, driving. Verify the manifest hash first.
 // 65535 means over cap, outside the pruning radius, or not computed.
