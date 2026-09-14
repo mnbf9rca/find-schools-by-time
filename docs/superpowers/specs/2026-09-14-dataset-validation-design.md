@@ -26,7 +26,7 @@ A band is `seconds // 600`, so band 6 covers 3,600 up to but not including 4,200
 
     Asserting the radius cannot fail, so report instead the greatest distance per mode at which a value was stored, and fail if it reaches the pre-margin measurement in `docs/decisions/2026-09-14-per-mode-pruning-radii.md`: 81.2 km public transport, 22.1 km cycling, 122.8 km driving. A value out at the measured edge is what radius truncation looks like.
 
-6. **Walk coverage.** Every origin whose centre is within 2 km straight line of a school has a walking value. Milestone 1 left four nearby schools with empty street durations; this check would have caught it. Two exclusions prevent failures on correct data.
+6. **Walk coverage.** Read `walk_missing_pairs` from the manifest first: the runner counts the same gap, so a non-zero figure says where to look before any record is opened. Every origin whose centre is within 2 km straight line of a school has a walking value. Milestone 1 left four nearby schools with empty street durations; this check would have caught it. Two exclusions prevent failures on correct data.
 
     A school in `fixtures/unmatched-schools.csv`, a committed allow-list of URN and reason, is skipped: its coordinate is off the routable network, a defect for issue #9 rather than a validator failure. Lord Wandsworth College (116521), with 10 origin centres within 2 km, and The Grammar School At Leeds (108113), with 13, are in it already from issues #4 and #9. The builder adds further rows by hand from the first run, with reasons, in the same commit.
 
