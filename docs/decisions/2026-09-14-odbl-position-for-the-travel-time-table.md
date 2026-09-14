@@ -4,7 +4,7 @@ Date: September 14, 2026
 
 ## Decision
 
-Position: awaiting the user's decision.
+The precomputed travel-time table is a produced work under the Open Database Licence, not a derivative database. The user decided this on September 14, 2026. The website and the per-search CSV carry the OpenStreetMap credit required for a produced work, and the whole table is not published as a downloadable database. Publishing it later would be a fresh decision taken with the rail agreement in view.
 
 ## The facts
 
@@ -22,8 +22,8 @@ Two parts of the Open Database Licence decide this. Clause 4.5 b says that using
 
 **Publish the whole table under the Open Database Licence, and record how that meets the Rail Delivery Group agreement.** The agreement's Schedule 1 permits the raw data for research and analysis only, and clause 3.3.2 requires an accuracy notice on onward distribution. A public dataset of derived times would need that notice, and the user's settled position that this project's table counts as analysis would have to extend to redistributing it.
 
-## Recommendation
+## Why
 
-Take the second option for now. The table holds no OpenStreetMap geometry or identifiers, so it is a weak candidate for a substantial extract, and the produced work reading matches how the numbers are actually used: a visitor asks about one postcode and gets an answer. It is also the only option that adds no lasting obligation, and it is reversible, because publishing the table later stays available while the reverse does not. The rail agreement points the same way, since not distributing the table avoids the accuracy notice question entirely.
+This is the second option. It was chosen because the table holds no OpenStreetMap geometry or identifiers, so it is a weak candidate for a substantial extract, and the produced work reading matches how the numbers are actually used: a visitor asks about one postcode and gets an answer. It is also the only option that adds no lasting obligation, and it is reversible, because publishing the table later stays available while the reverse does not. The rail agreement points the same way, since not distributing the table avoids the accuracy notice question entirely.
 
 See `LICENSES/README.md` for the OpenStreetMap and rail rows, and `LICENSES/ODbL-1.0.txt` for the licence text.
