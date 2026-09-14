@@ -33,7 +33,7 @@ else:
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_URL = 'http://127.0.0.1:8080'
 ARRIVE = '2026-09-16T08:30:00+01:00'
-RADII = (90, 90, 25, 136)
+RADII = (None, None, 30, None)
 BATCH_SIZE = 20000
 CAP = 5400
 MOTIS_VERSION = '2.11.3'
@@ -62,6 +62,8 @@ def batches(values):
 
 
 def candidate_indices(origins, easting, northing, radius_km):
+    if radius_km is None:
+        return list(range(len(origins)))
     limit = (radius_km * 1000) ** 2
     return [i for i, origin in enumerate(origins)
             for e, n in [origin.get('centre') or tuple(int(k) * 1000 + 500 for k in origin['id'].split('_'))]
