@@ -26,6 +26,8 @@ Unsigned 16-bit seconds, unrounded, little-endian. This keeps the existing decis
 
 ## Layout
 
+The per-origin key scheme below is superseded by `docs/decisions/2026-09-14-publish-sharded-objects.md`, which publishes shards of 8,000 records instead; the record bytes are unchanged.
+
 Four planes, one per mode. The plane index matches the mode strings `app.py` already uses: `public_transport` is 0, `walking` is 1, `cycling` is 2, `driving` is 3. The manifest's `modes` list is that array in that order.
 
 Each plane holds one two-byte value per school, so a plane is twice the school count in bytes, 8,746 with today's 4,373 schools. A value sits at
