@@ -1,0 +1,10 @@
+journey,lat,lng,urn,mode,planner_leave_by_minutes,source
+1,51.65795,-0.519602,137353,public_transport,60,"TfL latest feasible departure 07:30"
+2,54.929585,-1.619209,136352,public_transport,64,"proxy: Google itinerary departure 07:26, not a latest departure"
+3,53.399498,-2.82113,144782,public_transport,74,"proxy: Google itinerary departure 07:16, not a latest departure"
+4,54.065777,-1.367398,121694,public_transport,72,"proxy: Google itinerary departure 07:18, not a latest departure"
+5,54.481966,-0.620123,121667,public_transport,11,"Google direct walk of 11 minutes; no transit journey worth offering"
+7,51.720028,-2.529775,137382,public_transport,71,"proxy: Google itinerary departure 07:19, not a latest departure"
+8,53.42916,-2.174542,105591,walking,56,"Google walking duration"
+9,54.01885,-1.06286,136617,cycling,35,"Google cycling duration; MOTIS cycles slower, issue #40"
+10,50.776755,-1.724801,148737,driving,45,"Google driving duration in usual traffic"
