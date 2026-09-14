@@ -27,4 +27,6 @@ A personal, local web app: enter a UK postcode and a time limit, get the post-16
 - Never detach a process with `nohup`, `disown`, `setsid` or a bare `&` you walk away from. Every long-running job (imports, servers, downloads) runs under a harness-controlled task that can be stopped, so nothing is left running when the session ends.
 - Codex's sandbox kills backgrounded children: run short jobs in the foreground with escalation, and servers only in a Codex-managed background terminal you can stop. Stop servers yourself and confirm with escalated `pgrep` that none remain before replying.
 - Never merge to main, open terminal panes, or start the server on the user's behalf. Tell them the branch and the command.
+- Never wait synchronously for another agent, a server or a long job. A blocking wait stops the user from steering. Start the wait in the background and act on its notification.
+- `docs/local-setup.md` records what is installed on the user's Mac, where the feeds and graphs live, and the server command. Read it before rerunning a conversion, an import or the precompute.
 - Address the user as "human meatbag".
