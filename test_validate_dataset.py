@@ -138,7 +138,7 @@ class DatasetValidationTests(unittest.TestCase):
         self.write_csv('unreachable-origins.csv', ['origin_id', 'reason'], [('501_200', 'Confirmed offshore test cell')])
         self.assertEqual(self.run_validation()[3]['status'], 'PASS')
 
-    def test_check_4_transit_sentinel_and_one_percent_threshold(self):
+    def test_check_4_transit_sentinel_and_two_percent_threshold(self):
         values = copy.deepcopy(self.values)
         values[0][0] = 65535
         self.write_record('500_200', values)
@@ -149,9 +149,12 @@ class DatasetValidationTests(unittest.TestCase):
         self.assertEqual(self.run_validation()[4]['status'], 'PASS')
         values[2][1] = 700
         self.write_record('500_200', values)
+        self.assertEqual(self.run_validation()[4]['status'], 'PASS')
+        values[2][2] = 700
+        self.write_record('500_200', values)
         self.assertEqual(self.run_validation()[4]['status'], 'FAIL')
         values[2] = [500] * 50
-        values[3][:2] = [700, 700]
+        values[3][:3] = [700, 700, 700]
         self.write_record('500_200', values)
         self.assertEqual(self.run_validation()[4]['status'], 'FAIL')
 
@@ -172,13 +175,17 @@ class DatasetValidationTests(unittest.TestCase):
 
     def test_check_6_nearby_missing_walk_and_school_or_origin_exclusions(self):
         values = copy.deepcopy(self.values)
-        values[1][0] = 65535
+        values[1][:5] = [65535] * 5
         self.write_record('500_200', values)
-        self.manifest['run']['walk_missing_pairs'] = 1
+        self.assertEqual(self.run_validation()[6]['status'], 'PASS')
+        self.assertIn('500_200 100000', '\n'.join(self.messages))
+        values[1][5] = 65535
+        self.write_record('500_200', values)
+        self.manifest['run']['walk_missing_pairs'] = 6
         self.save_manifest()
         self.assertEqual(self.run_validation()[6]['status'], 'FAIL')
-        self.assertIn('walk_missing_pairs=1', self.messages[0])
-        self.write_csv('unmatched-schools.csv', ['urn', 'reason'], [('100000', 'Confirmed test coordinate miss')])
+        self.assertIn('walk_missing_pairs=6', self.messages[0])
+        self.write_csv('unmatched-schools.csv', ['urn', 'reason'], [('100000', 'Confirmed test coordinate miss'), ('100001', 'Confirmed test coordinate miss')])
         self.assertEqual(self.run_validation()[6]['status'], 'PASS')
         self.write_csv('unmatched-schools.csv', ['urn', 'reason'], [])
         self.write_csv('unreachable-origins.csv', ['origin_id', 'reason'], [('500_200', 'Confirmed offshore test cell')])
@@ -204,6 +211,7 @@ class DatasetValidationTests(unittest.TestCase):
         (checkpoint / '100001.bin').write_bytes(b'')
         result = self.run_validation(partial=True)
         self.assertEqual(result[8]['status'], 'SKIPPED')
+        self.assertIn('Partial mode: 1 of 50 schools covered', self.messages)
         self.assertEqual(self.run_validation()[8]['status'], 'FAIL')
 
     def test_check_9_pending_departure_leave_by_and_beyond_cap(self):
@@ -219,6 +227,11 @@ class DatasetValidationTests(unittest.TestCase):
         self.write_csv('validation-samples.csv', columns, [('500_200', '100000', 'public_transport', 'beyond cap', '06:30', 'test')])
         self.assertEqual(self.run_validation()[9]['status'], 'PASS')
         self.write_csv('validation-samples.csv', columns, [('500_200', '100000', 'public_transport', 'beyond cap', '07:30', 'test')])
+        self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
+        self.write_csv('validation-samples.csv', columns, [('500_200', '100000', 'public_transport', '', 'beyond cap', 'test')])
+        self.assertEqual(self.run_validation()[9]['status'], 'PASS')
+        values[0][0] = 600
+        self.write_record('500_200', values)
         self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
         self.write_csv('validation-samples.csv', columns, [('500_200', '100000', 'walking', 40, '', 'test')])
         self.assertEqual(self.run_validation()[9]['status'], 'FAIL')

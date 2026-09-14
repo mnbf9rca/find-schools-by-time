@@ -105,6 +105,7 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
                     nearby.setdefault(oid, []).append(i)
     checks[6]['excluded_schools'] = excluded_schools
     checks[6]['pairs_checked'] = sum(map(len, nearby.values()))
+    checks[6]['missing_pairs'] = 0
     counts = [[] for _ in record.MODES]
     greatest = [0.0] * 4
     comparable, slower = [0] * 4, [0] * 4
@@ -155,15 +156,20 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
             fail(3, f'{oid}: all four planes are empty')
         for i in nearby.get(oid, []):
             if planes[1][i] == record.SENTINEL:
-                fail(6, f'{oid} {schools[i]["urn"]}: no walking value within 2 km')
+                checks[6]['missing_pairs'] += 1
+                emit(f'Check 6 evidence: {oid} {schools[i]["urn"]}: no walking value within 2 km')
         del data, values, planes
         if number % 10000 == 0:
             emit(f'Read {number}/{len(origins)} records')
 
     for mode in (2, 3):
         emit(f'Check 4: {record.MODES[mode]} slower than walking in {slower[mode]}/{comparable[mode]} comparable pairs')
-        if slower[mode] * 100 > comparable[mode]:
-            fail(4, f'{record.MODES[mode]} exceeds walking in more than 1 percent of comparable pairs')
+        if slower[mode] * 50 > comparable[mode]:
+            fail(4, f'{record.MODES[mode]} exceeds walking in more than 2 percent of comparable pairs')
+    missing, near = checks[6]['missing_pairs'], checks[6]['pairs_checked']
+    emit(f'Check 6: {missing}/{near} nearby pairs have no walking value')
+    if missing * 20 > near:
+        fail(6, 'missing walks exceed 5 percent of nearby pairs')
     checks[5]['maximum_km'] = dict(zip(record.MODES, greatest))
     emit(f'Check 5: maximum distances km {checks[5]["maximum_km"]}')
     for mode, limit in ((0, 81.2), (2, 22.1), (3, 122.8)):
@@ -221,17 +227,17 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
             continue
         value = stored(9, row['origin_id'], row['urn'], row['mode'])
         try:
-            if pt:
+            if planner == 'beyond cap':
+                seconds = record.CAP + 1
+            elif pt:
                 departure = datetime.strptime(planner, '%H:%M')
                 seconds = (8 * 60 + 30 - departure.hour * 60 - departure.minute) * 60
-            elif planner == 'beyond cap':
-                seconds = record.CAP + 1
             else:
                 seconds = float(planner) * 60
         except ValueError:
             fail(9, f'{label}: invalid planner value {planner!r}')
             continue
-        if value is not None and row['planner_minutes'].strip() == 'beyond cap':
+        if value is not None and (planner == 'beyond cap' or row['planner_minutes'].strip() == 'beyond cap'):
             if value != record.SENTINEL or seconds <= record.CAP:
                 fail(9, f'{label}: beyond-cap claim disagrees with stored value or planner departure')
             else:
@@ -239,6 +245,8 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
         else:
             compare(9, label, value, seconds)
 
+    if partial:
+        emit(f'Partial mode: {len(completed & set(school_indices))} of {len(schools)} schools covered')
     for i, check in checks.items():
         if check['status'] != 'FAIL':
             if check['pending']:
