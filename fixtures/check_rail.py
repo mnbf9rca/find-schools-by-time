@@ -15,6 +15,16 @@ def check():
         z.writestr("stops.txt", '\ufeffstop_id,stop_name\nA,"Station, east"\n')
     with zipfile.ZipFile(archive) as z:
         assert list(rows(z, "stops")) == [{"stop_id": "A", "stop_name": "Station, east"}]
+    outside = io.BytesIO()
+    with zipfile.ZipFile(outside, "w") as z:
+        z.writestr("agency.txt", "agency_id,agency_name\na,Rail\n")
+        z.writestr("stops.txt", "stop_id,stop_lat,stop_lon\nHOEKVHL,51.9978,4.12617\nBROKEN,51,5\n")
+    try:
+        main(outside, outside, "")
+    except AssertionError as error:
+        assert {row[0] for row in error.args[0]} == {"HOEKVHL", "BROKEN"}
+    else:
+        raise AssertionError("An unexpected stop outside the bounds was accepted")
     print("Rail validation checks passed")
 
 
@@ -39,11 +49,13 @@ def main(bods_path, rail_path, cif_directory):
         missing_coordinates = 0
         for key, row in stops.items():
             lat, lon = row["stop_lat"], row["stop_lon"]
-            missing_coordinates += not lat or not lon
-            if not lat or not lon or not (49.8 <= float(lat) <= 61 and -8.7 <= float(lon) <= 1.9):
+            missing = not lat or not lon
+            missing_coordinates += missing
+            if missing or not (49.8 <= float(lat) <= 61 and -8.7 <= float(lon) <= 1.9):
                 bad.append((key, lat, lon))
         print(f"Stops missing coordinates: {missing_coordinates}")
         print(f"Stops outside bounds or missing coordinates: {bad}")
+        assert {key for key, _, _ in bad} == {"HOEKVHL"}, bad
         positions = {
             "KNGX": (51.53088842, -0.122921342), "CAMBDGE": (52.1945746, 0.137554552),
             "MNCRPIC": (53.47671998, -2.228977818), "LEEDS": (53.79489697, -1.547435079),

@@ -13,8 +13,9 @@ check <- function() {
   calendar$wednesday <- 0
   stopifnot(active_trips(list(calendar = calendar, trips = trips)) == 0)
   broken <- list(
+    trips = data.frame(trip_id = "t"),
     stops = data.frame(stop_id = c("A", "B"), stop_lat = c(51, NA), stop_lon = 0),
-    stop_times = data.frame(stop_id = c("A", "A", "B", "missing"),
+    stop_times = data.frame(trip_id = "t", stop_id = c("A", "A", "B", "missing"),
                             arrival_time = c("10:01:30", "25:00:00", "10:00:00", "10:00:00"),
                             departure_time = c("10:01:00", "25:01:00", "10:00:00", "10:00:00")),
     transfers = data.frame(from_stop_id = c("A", "A", "missing"), to_stop_id = c("A", "B", "A")))
@@ -22,6 +23,12 @@ check <- function() {
   stopifnot(nrow(repaired$stops) == 1, nrow(repaired$stop_times) == 2,
             nrow(repaired$transfers) == 1,
             identical(repaired$stop_times$departure_time, c("10:01:30", "25:01:00")))
+  for (remaining in 0:1) {
+    short <- broken
+    short$stop_times$stop_id[seq_len(2 - remaining)] <- "B"
+    failure <- tryCatch({ repair(short); NULL }, error = identity)
+    stopifnot(inherits(failure, "error"), grepl("at least two stop times", conditionMessage(failure)))
+  }
   cat("Rail conversion checks passed\n")
 }
 
@@ -46,6 +53,7 @@ repair <- function(gtfs) {
   cat("Stop times dropped without a located stop:", sum(!keep), "\n")
   cat("Missing stop identifiers:", unique(gtfs$stop_times$stop_id[!keep]), "\n")
   gtfs$stop_times <- gtfs$stop_times[keep, ]
+  if (any(table(factor(gtfs$stop_times$trip_id, levels = gtfs$trips$trip_id)) < 2L)) stop("Every trip must retain at least two stop times")
   keep <- gtfs$transfers$from_stop_id %in% gtfs$stops$stop_id &
           gtfs$transfers$to_stop_id %in% gtfs$stops$stop_id
   cat("Transfers dropped without both stops:", sum(!keep), "\n")
