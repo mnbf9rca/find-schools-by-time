@@ -48,6 +48,8 @@
         "peak_server_rss_bytes": {"type": "integer"},
         "output_bytes": {"type": "integer"},
         "requests_retried": {"type": "integer"},
+        "walk_gapfill_requests": {"type": "integer"},
+        "walk_gapfill_recovered": {"type": "integer"},
         "transpose_seconds": {"type": "number"},
         "schools_completed": {"type": "integer"},
         "school_bytes": {"type": "integer"},

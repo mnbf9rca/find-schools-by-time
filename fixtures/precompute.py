@@ -69,12 +69,14 @@ def candidate_indices(origins, easting, northing, radius_km):
 
 
 def payload(school, mode, origins):
-    separator = ';' if mode == 3 else ','
+    separator = ';' if mode in (1, 3) else ','
     body = {'one': f'{school["lat"]}{separator}{school["lng"]}',
             'many': [f'{o["lat"]}{separator}{o["lng"]}' for o in origins],
             'arriveBy': True, 'maxMatchingDistance': 250}
-    if mode == 3:
-        body.update(mode='CAR', max=CAP)
+    if mode in (1, 3):
+        body.update(mode='WALK' if mode == 1 else 'CAR', max=CAP)
+        if mode == 1:
+            body.update(arriveBy=False, maxMatchingDistance=500)
         return '/api/v1/one-to-many', body
     body.update(time=ARRIVE, maxTravelTime=90, maxDirectTime=CAP,
                 transitModes=['TRANSIT'] if mode == 0 else [],
@@ -102,7 +104,7 @@ def seconds(entry):
 
 
 def response_values(mode, data, count):
-    street = data if mode == 3 else data['street_durations']
+    street = data if mode in (1, 3) else data['street_durations']
     if len(street) != count:
         raise ValueError('Street response length differs from request')
     direct = [seconds(entry) for entry in street]
@@ -250,7 +252,8 @@ def run(args):
                   'cycling_speed_mps': 5.0, 'workers': args.workers, 'motis_version': MOTIS_VERSION,
                   'origins_sha256': sha256(args.origins), 'school_index_sha256': record.school_index_hash(SCHOOL_INDEX),
                   'schools_sha256': sha256(args.schools), 'graph_directory': str(graph),
-                  'base_url': args.base_url, 'arrival': ARRIVE, 'feeds': feeds}
+                  'base_url': args.base_url, 'arrival': ARRIVE, 'feeds': feeds,
+                  'walk_gapfill': {'radius_km': 10, 'max_matching_distance': 500, 'arrive_by': False}}
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     state_path = out / 'run.json'
@@ -262,7 +265,8 @@ def run(args):
         now = datetime.now(timezone.utc)
         state = {'version': now.strftime('%Y%m%dT%H%M%SZ'), 'started': now.strftime('%Y-%m-%dT%H:%M:%SZ'),
                  'parameters': parameters, 'wall_seconds': 0, 'requests': 0, 'requests_retried': 0,
-                 'peak_server_rss_bytes': 0, 'transpose_seconds': 0}
+                 'peak_server_rss_bytes': 0, 'transpose_seconds': 0,
+                 'walk_gapfill_requests': 0, 'walk_gapfill_recovered': 0}
         atomic_json(state_path, state)
     prior_wall = state['wall_seconds']
     lock, stop, sampler_stop = threading.RLock(), threading.Event(), threading.Event()
@@ -306,8 +310,12 @@ def run(args):
         if stop.is_set():
             raise InterruptedError('Run stopped')
         t0, requests, planes = time.monotonic(), 0, [[], [], [], []]
-        for mode in (0, 2, 3):
-            indices = candidate_indices(origins, school['e'], school['n'], RADII[mode])
+        recovered = 0
+        for mode in (0, 2, 3, 1):
+            indices = candidate_indices(origins, school['e'], school['n'], 10 if mode == 1 else RADII[mode])
+            if mode == 1:
+                walking = dict(planes[1])
+                indices = [i for i in indices if i not in walking]
             for batch in batches(indices):
                 attempts = 0
                 def request(subset):
@@ -317,6 +325,7 @@ def run(args):
                     endpoint, body = payload(school, mode, [origins[i] for i in subset])
                     with lock:
                         state['requests'] += 1
+                        state['walk_gapfill_requests'] += int(mode == 1)
                         state['requests_retried'] += int(attempts > 0)
                         save()
                     attempts += 1
@@ -329,10 +338,20 @@ def run(args):
                         return json.load(response)
                 for subset, response in halving(batch, request, stop):
                     for plane, values in response_values(mode, response, len(subset)).items():
-                        planes[plane].extend((i, value) for i, value in zip(subset, values) if value != record.SENTINEL)
+                        pairs = [(i, value) for i, value in zip(subset, values) if value != record.SENTINEL]
+                        planes[plane].extend(pairs)
+                        if mode == 1:
+                            recovered += len(pairs)
         if stop.is_set():
             raise InterruptedError('Run stopped')
-        write_school(out / 'schools' / f'{school["urn"]}.bin', planes)
+        transit = dict(planes[0])
+        for i, value in planes[1]:
+            transit[i] = min(transit.get(i, record.SENTINEL), value)
+        planes[0] = list(transit.items())
+        with lock:
+            write_school(out / 'schools' / f'{school["urn"]}.bin', planes)
+            state['walk_gapfill_recovered'] += recovered
+            save()
         return school['urn'], time.monotonic() - t0, requests, sum(map(len, planes))
 
     pool = ThreadPoolExecutor(max_workers=args.workers)
@@ -367,7 +386,8 @@ def run(args):
         school_bytes = sum((out / 'schools' / f'{s["urn"]}.bin').stat().st_size for s in schools)
         save()
         run_stats = {key: state[key] for key in ('started', 'wall_seconds', 'requests', 'requests_retried',
-                                               'peak_server_rss_bytes', 'transpose_seconds')}
+                                               'peak_server_rss_bytes', 'transpose_seconds',
+                                               'walk_gapfill_requests', 'walk_gapfill_recovered')}
         run_stats.update(workers=args.workers, output_bytes=school_bytes + record_bytes,
                          school_bytes=school_bytes, record_bytes=record_bytes, schools_completed=complete,
                          walk_missing_pairs=missing, walk_nearby_pairs=nearby)

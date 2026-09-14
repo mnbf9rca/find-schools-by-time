@@ -99,14 +99,19 @@ class TestPrecompute(unittest.TestCase):
                 pc.read_school(schools_dir / '121667.bin', 2)
 
     def test_subprocess_resume_uses_nondefault_url_and_full_school_index(self):
+        calls = []
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self):
                 body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                calls.append(body)
                 time.sleep(.1)
                 entries = [{'duration': 957.5} for _ in body['many']]
-                result = entries if body.get('mode') == 'CAR' else {
+                result = entries if body.get('mode') in ('CAR', 'WALK') else {
                     'street_durations': entries,
                     'transit_durations': [[{'duration': 4200}] for _ in entries]}
+                if body.get('directMode') == 'WALK' and body['one'].startswith('54.481915,'):
+                    result['street_durations'] = [({'duration': 0} if x == '54.482,-0.61' else {}) for x in body['many']]
+                    result['transit_durations'] = [[{'duration': 100 if x == '54.483,-0.60' else 4200}] for x in body['many']]
                 raw = json.dumps(result).encode()
                 self.send_response(200)
                 self.send_header('Content-Length', str(len(raw)))
@@ -121,7 +126,7 @@ class TestPrecompute(unittest.TestCase):
             with tempfile.TemporaryDirectory() as directory:
                 base = Path(directory)
                 origins = base / 'origins.csv'
-                origins.write_text('id,lat,lng\n489_510,54.481966,-0.620123\n530_180,51.508,-0.128\n87_15,49.957693,-6.358553\n')
+                origins.write_text('id,lat,lng\n489_510,54.481966,-0.620123\n490_510,54.482,-0.61\n491_510,54.483,-0.60\n501_510,54.49,-0.45\n530_180,51.508,-0.128\n87_15,49.957693,-6.358553\n')
                 schools = base / 'schools.csv'
                 schools.write_text('urn,lat,lng\n100001,51.508,-0.128\n121667,54.481915,-0.624338\n137353,51.52221,-0.15217\n')
                 graph = base / 'data.rail'
@@ -163,10 +168,22 @@ class TestPrecompute(unittest.TestCase):
                                    for out, version in zip((resumed, baseline), versions)]
                     a, b = {p.name: p.read_bytes() for p in left.glob('*.bin')}, {p.name: p.read_bytes() for p in right.glob('*.bin')}
                     self.assertEqual(a, b)
-                    self.assertEqual(len(a), 3)
+                    self.assertEqual(len(a), 3 if folder else 6)
                 manifest = json.loads((resumed / versions[0] / 'manifest.json').read_text())
                 self.assertEqual(manifest['school_count'], record.SCHOOL_COUNT)
                 self.assertEqual(manifest['run']['peak_server_rss_bytes'], 0)
+                walking = dict(pc.read_school(resumed / 'schools/121667.bin', 6)[1])
+                transit = dict(pc.read_school(resumed / 'schools/121667.bin', 6)[0])
+                self.assertEqual(walking, {0: 958, 1: 0, 2: 958})
+                self.assertEqual(transit, {0: 958, 1: 0, 2: 100, 3: 4200})
+                gapfill = [body for body in calls if body.get('mode') == 'WALK']
+                self.assertEqual(len(gapfill), 2)  # Once in each completed run; no requests for complete walks.
+                for body in gapfill:
+                    self.assertEqual(body, {'one': '54.481915;-0.624338',
+                        'many': ['54.481966;-0.620123', '54.483;-0.60'],
+                        'mode': 'WALK', 'max': 5400, 'maxMatchingDistance': 500, 'arriveBy': False})
+                self.assertEqual(manifest['run']['walk_gapfill_requests'], 1)
+                self.assertEqual(manifest['run']['walk_gapfill_recovered'], 2)
                 changed = common + [str(resumed), '--workers', '2']
                 result = subprocess.run(changed, capture_output=True, text=True, timeout=15)
                 self.assertNotEqual(result.returncode, 0)
