@@ -31,6 +31,11 @@ class TestPrecompute(unittest.TestCase):
                 self.assertEqual(body['many'], ['54.48;-0.62'])
             else:
                 self.assertEqual(endpoint, '/api/experimental/one-to-many-intermodal')
+                self.assertEqual(body['preTransitModes'], ['WALK'])
+                self.assertEqual(body['postTransitModes'], ['WALK'])
+                self.assertEqual(body['maxPreTransitTime'], 900)
+                self.assertEqual(body['maxPostTransitTime'], 900)
+                self.assertTrue(body['useRoutedTransfers'])
                 self.assertEqual(body['maxTravelTime'], 90)
                 self.assertEqual(body['maxDirectTime'], 5400)
                 self.assertEqual(body['time'], '2026-09-16T08:30:00+01:00')
@@ -122,6 +127,9 @@ class TestPrecompute(unittest.TestCase):
         server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
         thread = threading.Thread(target=server.serve_forever)
         thread.start()
+        second_server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        second_thread = threading.Thread(target=second_server.serve_forever)
+        second_thread.start()
         try:
             with tempfile.TemporaryDirectory() as directory:
                 base = Path(directory)
@@ -154,12 +162,19 @@ class TestPrecompute(unittest.TestCase):
                 first = json.loads((resumed / 'run.json').read_text())
                 self.assertGreater(first['requests'], 0)
                 saved_mtime = (resumed / 'schools/100001.bin').stat().st_mtime_ns
+                # Older checkpoints stored the URL; it is not part of dataset identity.
+                first['parameters']['base_url'] = f'http://127.0.0.1:{server.server_port}'
+                (resumed / 'run.json').write_text(json.dumps(first))
+                common[common.index('--base-url') + 1] = f'http://127.0.0.1:{second_server.server_port}'
                 for out in (resumed, baseline):
                     result = subprocess.run(common + [str(out)], capture_output=True, text=True, timeout=30)
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertEqual((resumed / 'schools/100001.bin').stat().st_mtime_ns, saved_mtime)
                 second = json.loads((resumed / 'run.json').read_text())
                 self.assertEqual(second['version'], first['version'])
+                self.assertNotIn('base_url', second['parameters'])
+                for key in ('schools_sha256', 'arrival', 'feeds'):
+                    self.assertEqual(second['parameters'][key], first['parameters'][key])
                 self.assertGreater(second['requests'], first['requests'])
                 self.assertGreater(second['wall_seconds'], first['wall_seconds'])
                 versions = [json.loads((out / 'current.json').read_text())['version'] for out in (resumed, baseline)]
@@ -171,6 +186,10 @@ class TestPrecompute(unittest.TestCase):
                     self.assertEqual(len(a), 3 if folder else 6)
                 manifest = json.loads((resumed / versions[0] / 'manifest.json').read_text())
                 self.assertEqual(manifest['school_count'], record.SCHOOL_COUNT)
+                self.assertEqual(manifest['shards'], {'records_per_shard': 8000, 'count': 1, 'record_bytes': 34984})
+                version = versions[0]
+                self.assertEqual(manifest['keys'], {'shard': version + '/shard-{nn}.bin',
+                    'origins': version + '/origins.txt', 'manifest': version + '/manifest.json', 'current': 'current.json'})
                 self.assertEqual(manifest['run']['peak_server_rss_bytes'], 0)
                 walking = dict(pc.read_school(resumed / 'schools/121667.bin', 6)[1])
                 transit = dict(pc.read_school(resumed / 'schools/121667.bin', 6)[0])
@@ -215,6 +234,9 @@ raise SystemExit(precompute.main())
             server.shutdown()
             thread.join()
             server.server_close()
+            second_server.shutdown()
+            second_thread.join()
+            second_server.server_close()
 
 
 if __name__ == '__main__':

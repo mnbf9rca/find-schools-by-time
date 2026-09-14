@@ -18,6 +18,10 @@ MANIFEST = {
     'cycling_speed_mps': 5.0, 'pruning_radii_km': [90, 90, 25, 136],
     'origin_count': 93217, 'origins_sha256': 'a' * 64, 'school_count': 4373,
     'school_index_sha256': 'b' * 64,
+    'shards': {'records_per_shard': 8000, 'count': 12, 'record_bytes': 34984},
+    'keys': {'shard': '20260914T093000Z/shard-{nn}.bin',
+             'origins': '20260914T093000Z/origins.txt',
+             'manifest': '20260914T093000Z/manifest.json', 'current': 'current.json'},
     'feeds': [{'path': 'motis-spike/feeds/bods.zip', 'sha256': 'c' * 64}],
     'run': {'started': '2026-09-14T09:30:00Z', 'wall_seconds': 4412, 'workers': 8,
             'requests': 26238, 'peak_server_rss_bytes': 9448928051,
@@ -39,6 +43,10 @@ class DatasetManifestTests(unittest.TestCase):
     def test_rejects_invalid_fields_at_every_level(self):
         cases = [
             ((), 'version', None, '$.version'),
+            ((), 'shards', None, '$.shards'),
+            ((), 'keys', None, '$.keys'),
+            (('shards',), 'count', '12', '$.shards.count'),
+            (('keys',), 'shard', 1, '$.keys.shard'),
             ((), 'school_count', '4373', '$.school_count'),
             ((), 'school_count', True, '$.school_count'),
             ((), 'cycling_speed_mps', True, '$.cycling_speed_mps'),

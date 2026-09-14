@@ -252,13 +252,14 @@ def run(args):
                   'cycling_speed_mps': 5.0, 'workers': args.workers, 'motis_version': MOTIS_VERSION,
                   'origins_sha256': sha256(args.origins), 'school_index_sha256': record.school_index_hash(SCHOOL_INDEX),
                   'schools_sha256': sha256(args.schools), 'graph_directory': str(graph),
-                  'base_url': args.base_url, 'arrival': ARRIVE, 'feeds': feeds,
+                  'arrival': ARRIVE, 'feeds': feeds,
                   'walk_gapfill': {'radius_km': 10, 'max_matching_distance': 500, 'arrive_by': False}}
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     state_path = out / 'run.json'
     if state_path.exists():
         state = json.loads(state_path.read_text())
+        state['parameters'].pop('base_url', None)
         if state['parameters'] != parameters:
             raise ValueError('Resume parameters differ from run.json')
     else:
@@ -397,7 +398,12 @@ def run(args):
                     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
                     'cycling_speed_mps': 5.0, 'pruning_radii_km': list(RADII), 'origin_count': len(origins),
                     'origins_sha256': parameters['origins_sha256'], 'school_count': record.SCHOOL_COUNT,
-                    'school_index_sha256': parameters['school_index_sha256'], 'feeds': feeds, 'run': run_stats}
+                    'school_index_sha256': parameters['school_index_sha256'], 'feeds': feeds, 'run': run_stats,
+                    'shards': {'records_per_shard': 8000, 'count': (len(origins) + 7999) // 8000,
+                               'record_bytes': 8 * record.SCHOOL_COUNT},
+                    'keys': {'shard': state['version'] + '/shard-{nn}.bin',
+                             'origins': state['version'] + '/origins.txt',
+                             'manifest': state['version'] + '/manifest.json', 'current': 'current.json'}}
         errors = validate(manifest)
         if errors:
             raise ValueError('; '.join(errors))
