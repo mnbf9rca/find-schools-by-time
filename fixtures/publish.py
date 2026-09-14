@@ -98,7 +98,7 @@ def objects(directory, manifest):
             for i in range(manifest['shards']['count'])] + [
         (keys['origins'], directory / 'origins.txt', 'text/plain'),
         (keys['manifest'], directory / 'manifest.json', 'application/json'),
-        (keys['current'], directory / 'current.json', 'application/json')]
+        (keys['current'], directory.parent / 'current.json', 'application/json')]
 
 
 def publish(directory, origins_csv=ROOT / 'fixtures/origins.csv', *, dry_run=False,
@@ -117,7 +117,7 @@ def publish(directory, origins_csv=ROOT / 'fixtures/origins.csv', *, dry_run=Fal
     shard_number, within = divmod(index, dimensions['records_per_shard'])
     offset, size = within * dimensions['record_bytes'], dimensions['record_bytes']
     emit(f'Whitby: origin index {index}, shard {shard_number}, offset {offset}, record bytes {size}')
-    (directory / 'current.json').write_text(json.dumps({'version': manifest['version']}) + '\n')
+    (directory.parent / 'current.json').write_text(json.dumps({'version': manifest['version']}) + '\n')
     uploads = objects(directory, manifest)
     list_command = WRANGLER + ['r2', 'bucket', 'list']
     create_command = WRANGLER + ['r2', 'bucket', 'create', BUCKET, '--location', 'weur']

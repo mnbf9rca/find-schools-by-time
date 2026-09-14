@@ -17,3 +17,5 @@ Commands for the issue #17 run of `fixtures/precompute.py`. Its contract is `doc
 Record two numbers against the prediction, in `motis-spike/NOTES.md` and in a comment on issue #17. Wall time: expect about 1.5 hours at eight workers, because batching at 20,000 origins makes the driving search three requests per school rather than the two the 1.2 hour projection assumed. Time the transpose separately; it was never measured. Peak server resident set size: predicted 8.8 GB. Expect about 3.8 GB of disk, the school files plus the records.
 
 To re-measure the pruning radii rather than trust them, use `fixtures/measure_reach.py`. The issue #18 validator checks the published data.
+
+Keep each version's local directory until `--delete-version` has run for it, because deletion reads that version's manifest for its keys.

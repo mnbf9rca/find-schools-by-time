@@ -93,8 +93,12 @@ class PublishTests(unittest.TestCase):
                 remote.pop(cmd[3], None)
             return subprocess.CompletedProcess(argv, 0)
         messages = []
+        current = self.directory.parent / 'current.json'
+        current.write_text(json.dumps({'version': '20260913T093000Z'}))
         publish.publish(self.directory, self.origins, dry_run=True, command=command, emit=messages.append)
         self.assertEqual(calls, [])
+        self.assertEqual(json.loads(current.read_text()), {'version': self.manifest['version']})
+        self.assertFalse((self.directory / 'current.json').exists())
         self.assertFalse((self.directory / '.uploaded').exists())
         self.assertTrue((self.directory / 'shards').exists())
         self.assertIn('Whitby: origin index 1, shard 1, offset 0, record bytes 34984', messages)
@@ -112,6 +116,7 @@ class PublishTests(unittest.TestCase):
         self.assertEqual([c[c.index('--content-type') + 1] for c in puts],
             ['application/octet-stream', 'text/plain', 'application/json', 'application/json'])
         self.assertEqual(json.loads(remote[f'{publish.BUCKET}/current.json']), {'version': version})
+        self.assertEqual(Path(puts[-1][puts[-1].index('--file') + 1]), current)
         self.assertFalse((self.directory / 'shards').exists())
         calls.clear()
         publish.publish(self.directory, self.origins, command=command, emit=messages.append)
