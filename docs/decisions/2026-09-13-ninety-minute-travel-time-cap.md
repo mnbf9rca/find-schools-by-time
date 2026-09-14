@@ -16,6 +16,14 @@ Storing up to 90 while defaulting the display to 60 keeps the two choices separa
 
 See `docs/superpowers/research/2026-09-13-spike-measurements.md` for the timings and `docs/superpowers/research/2026-09-13-post-16-commute-statistics.md` for the guidance figure and the absence of a measured distribution.
 
+## Cycling speed
+
+Cycling runs at 5.0 metres per second, 18 kilometres per hour nominal, set through `cyclingSpeed` on `POST /api/experimental/one-to-many-intermodal` with `directMode: BIKE` and an empty `transitModes` list.
+
+The figure comes from the 10.4 kilometre route from Haxby, 54.01885 and -1.06286, to Archbishop Holgate's School, URN 136617, arriving by 08:30 on Wednesday September 16, 2026. MOTIS 2.11.3 returns 2,778 seconds at its built-in 4.2 metres per second, 2,573 at 4.5, 2,467 at 4.7 and 2,293 at 5.0. Google Maps gives 35 minutes. At 5.0 the answer is 38 minutes, an effective 16.3 kilometres per hour once junction costs are counted.
+
+The plain street endpoints cannot be used for cycling. `GET` and `POST /api/v1/one-to-many` accept `cyclingSpeed` and silently ignore it, returning 2,778 seconds whatever it is set to. Only the intermodal endpoint honours it, so the bike sweep runs there with the transit modes switched off.
+
 ## Open points
 
 At 90 minutes the 30 km origin radius, not the cap, is what bounds the driving results and probably the cycling results too, because both cover more than 30 km in 90 minutes. The radius therefore needs revisiting alongside the cap; issue #15 holds that work.
