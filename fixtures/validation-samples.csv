@@ -2,7 +2,7 @@ origin_id,urn,mode,planner_minutes,planner_departure,character
 405_301,103584,public_transport,,,Birmingham urban
 459_90,150099,public_transport,,,Isle of Wight island
 415_635,137598,public_transport,,,"Bamburgh, 22 km from Berwick"
-621_333,121241,public_transport,,,Norfolk rural
+621_333,121241,walking,,,Norfolk rural
 433_389,107140,walking,,,Sheffield urban
 352_315,123608,walking,,,Shrewsbury town
 351_253,117036,cycling,,,"Hereford, Welsh border"
