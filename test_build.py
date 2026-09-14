@@ -1,4 +1,5 @@
 import io
+import hashlib
 import json
 from contextlib import redirect_stdout
 import tempfile
@@ -159,6 +160,20 @@ def build(test, urns, *perf_rows):
 
 
 class TestMerge(unittest.TestCase):
+    def test_build_emits_the_whole_school_index(self):
+        source = gias_csv(self, '999999', '100003', '121667')
+        index = source.with_name('school-index.js')
+        with redirect_stdout(io.StringIO()):
+            main(source, perf_csv(self), index_path=index)
+        expected = hashlib.sha256(b'100003\n121667\n999999').hexdigest()
+        self.assertEqual(index.read_text(),
+                         f'export const SCHOOL_COUNT = 3;\n'
+                         f'export const SCHOOL_INDEX_SHA256 = "{expected}";\n')
+
+    def test_build_sorts_schools_by_urn(self):
+        self.assertEqual(list(build(self, ['999999', '100003', '121667'])),
+                         ['100003', '121667', '999999'])
+
     def test_religious_character_mapping(self):
         for value, expected in (("Church of England", "Church of England"),
                                 ("Roman Catholic", "Roman Catholic"),
