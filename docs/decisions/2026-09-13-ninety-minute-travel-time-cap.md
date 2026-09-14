@@ -26,6 +26,6 @@ The plain street endpoints cannot be used for cycling. `GET` and `POST /api/v1/o
 
 ## Open points
 
-At 90 minutes the 30 km origin radius, not the cap, is what bounds the driving results and probably the cycling results too, because both cover more than 30 km in 90 minutes. The radius therefore needs revisiting alongside the cap; issue #15 holds that work.
+The radius is settled. The 30 km radius the spike used did bound the driving and cycling results rather than the cap, as expected. Measurement replaced it with one radius per mode, 90 km for public transport, 25 km for cycling and 136 km for driving; see `docs/decisions/2026-09-14-per-mode-pruning-radii.md`.
 
 The metric is settled. The cap is expressed in leave-by seconds, the time before 08:30 at which you must leave home, and not in journey duration; see `docs/decisions/2026-09-14-store-leave-by-minutes.md`. The transit values the sweep already stored were leave-by figures, so the only change is taking the smaller of the transit figure and the direct walk. That can only lower a value, and it lowers it for short journeys that were already well inside the cap, so the cost measurements above stand.
