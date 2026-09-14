@@ -1,0 +1,2 @@
+export const SCHOOL_COUNT = 4373;
+export const SCHOOL_INDEX_SHA256 = "43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9";

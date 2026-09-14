@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { decode } from './record.js';
+import { SCHOOL_COUNT, SCHOOL_INDEX_SHA256 } from './school-index.js';
 import { COLUMNS, comparator, csvField, csvRows, DEFAULT_SORT, reset, sort, toggle } from './sort.js';
 
 const rows = [
@@ -164,4 +167,35 @@ for (const column of COLUMNS) {
     : column.label === 'Best 3 A levels grade' ? 'best3_grade' : column.key;
   assert.equal(column.value(exportRow), exportRow[field]);
 }
-console.log('sort.js: sorting, split columns and CSV checks passed');
+// The committed record combines the Whitby example with synthetic boundary slots.
+const schools = JSON.parse(readFileSync(new URL('./schools.json', import.meta.url), 'utf8'));
+const schoolCount = schools.length;
+assert.equal(SCHOOL_COUNT, schoolCount);
+assert.equal(SCHOOL_INDEX_SHA256, '43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9');
+const record = readFileSync(new URL('./fixtures/example-origin.bin', import.meta.url));
+assert.equal(record.byteLength, 4 * 2 * schoolCount);
+assert.equal(schools[907].urn, '121667');
+for (let mode = 0; mode < 4; mode++) assert.equal(decode(record, mode, 0), 65535);
+assert.equal(decode(record, 0, 907), 957);
+assert.equal(decode(record, 1, 907), 957);
+assert.equal(decode(record, 2, schoolCount - 1), 0);
+assert.equal(decode(record, 3, schoolCount - 1), 5400);
+const arrayBuffer = record.buffer.slice(record.byteOffset, record.byteOffset + record.byteLength);
+assert.equal(decode(arrayBuffer, 0, 907), 957);
+// A byte view can start at an odd offset; reads still use little-endian order.
+const padded = new Uint8Array(record.length + 1);
+padded.set(record, 1);
+assert.equal(decode(padded.subarray(1), 1, 907), 957);
+for (const wrong of [new ArrayBuffer(0), record.subarray(1), record.subarray(8),
+                     new Uint8Array(record.length + 2)]) {
+  assert.throws(() => decode(wrong, 0, 0), RangeError);
+}
+for (const [mode, school] of [[-1, 0], [4, 0], [0, -1], [0, schoolCount], [0.5, 0], [0, 0.5]]) {
+  assert.throws(() => decode(record, mode, school), RangeError);
+}
+for (const value of [5401, 65534]) {
+  const corrupt = Buffer.from(record);
+  corrupt.writeUInt16LE(value, 0);
+  assert.throws(() => decode(corrupt, 0, 0), RangeError);
+}
+console.log('Sorting, split columns, CSV and record checks passed');

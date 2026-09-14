@@ -8,6 +8,8 @@ Usage: uv run build_schools.py data/extract/edubasealldata20260913.csv data/a-le
 """
 
 import csv
+import hashlib
+from pathlib import Path
 import json
 import math
 import sys
@@ -90,7 +92,14 @@ def load_results(path):
         }
 
 
-def main(path, results_path):
+def write_school_index(schools, path):
+    urns = sorted(school["urn"] for school in schools)
+    digest = hashlib.sha256('\n'.join(urns).encode('utf-8')).hexdigest()
+    Path(path).write_text(f'export const SCHOOL_COUNT = {len(urns)};\n'
+                          f'export const SCHOOL_INDEX_SHA256 = "{digest}";\n')
+
+
+def main(path, results_path, index_path=None):
     results = load_results(results_path)
     empty = dict.fromkeys(RESULT_COLUMNS, None)
     schools = []
@@ -111,8 +120,11 @@ def main(path, results_path):
                 "lat": lat,
                 "lng": lng,
             } | results.get(row["URN"], empty))
+    schools.sort(key=lambda school: school["urn"])
     json.dump(schools, sys.stdout)
+    if index_path is not None:
+        write_school_index(schools, index_path)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], index_path="school-index.js")
