@@ -4,37 +4,43 @@ Date: September 14, 2026
 
 ## Goal
 
-One plain script, `fixtures/precompute.py`, turns the school list and the origin grid into the published dataset. Run it as `uv run --with pyproj fixtures/precompute.py <out-dir>`, with `--workers N` defaulting to 8. Standard library plus pyproj.
+`fixtures/precompute.py` turns the school list and the origin grid into the published dataset: `uv run --with pyproj fixtures/precompute.py <out-dir>`, with `--workers N` default 8, `--base-url` default `http://127.0.0.1:8080`, and `--schools PATH` default `schools.json`, also taking a CSV of `urn`, `lat` and `lng` so the runbook can use `fixtures/spike-sample.csv`. Standard library plus pyproj, used only to project the school coordinates to EPSG:27700 at startup, because an origin identifier already carries its easting and northing.
 
-The inputs are `schools.json` for the 4,373 schools and `fixtures/origins.csv` for the origins. pyproj projects the school coordinates to EPSG:27700 once at startup and is used nowhere else, because an origin's identifier already carries its easting and northing in kilometres.
+The script is self-contained. It imports neither `sweep_spike.py`, unreachable by a bare `import` under the `from fixtures import ...` convention, nor `measure_reach.py`, which returns index sets rather than seconds. It carries its own grid, payload and request code.
 
 ## Requests
 
-Three request groups per school against a MOTIS server already listening on 127.0.0.1:8080. Each is restricted to the origins within its mode's radius from `docs/decisions/2026-09-14-per-mode-pruning-radii.md` and split into batches of at most 20,000, in origin order. Build the bodies with `payload()` from `fixtures/measure_reach.py`, which sends them. Public transport uses `POST /api/experimental/one-to-many-intermodal` with `transitModes: ["TRANSIT"]`, `directMode: "WALK"` and `lat,lng` coordinates; cycling the same endpoint with `transitModes: []`, `directMode: "BIKE"` and `cyclingSpeed: 5.0`; driving `POST /api/v1/one-to-many` with `mode: "CAR"` and `lat;lng` coordinates. All set `arriveBy: true`, a 5,400 second cap and `time: "2026-09-16T08:30:00+01:00"`.
+Three request groups per school, each holding the origins within its mode's radius from `docs/decisions/2026-09-14-per-mode-pruning-radii.md`, split into batches of at most 20,000 in origin order.
 
-Three requests fill four planes: the public transport response carries a `street_durations` entry per origin, the direct walk, so the walking plane needs no fourth request. It inherits the 90 kilometre transit radius.
+Measure distance from the cell centre: easting is 1,000 times the identifier's kilometre easting plus 500, northing likewise. The rounded radii leave margins of 669, 644 and 915 metres, two of them under the 707 metre corner-to-centre displacement, so measuring from anywhere else drops reachable origins.
 
-Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone. Discard anything above 5,400 seconds.
+- Public transport: `POST /api/experimental/one-to-many-intermodal`, `transitModes: ["TRANSIT"]`, `directMode: "WALK"`, `lat,lng`.
+- Cycling: same endpoint, `transitModes: []`, `directMode: "BIKE"`, `cyclingSpeed: 5.0`, `lat,lng`.
+- Driving: `POST /api/v1/one-to-many`, `mode: "CAR"`, `lat;lng`, and no `time`, because driving does not depend on time of day.
 
-On a non-200 response or a dropped connection, halve the batch and retry each half, down to a single origin, which is a hard error. `fixtures/measure_reach.py` already does that.
+The caps carry three units: `maxTravelTime: 90` minutes on the transit leg, `maxDirectTime: 5400` seconds on the direct leg, `max: 5400` seconds for driving. All three set `arriveBy: true` and `maxMatchingDistance: 250` metres; the intermodal pair also set `time: "2026-09-16T08:30:00+01:00"`.
+
+Three requests fill four planes: the public transport response's `street_durations` entry per origin is the direct walk, so the walking plane needs no fourth request and inherits the 90 kilometre transit radius. That leg is the intermodal endpoint's, not the street endpoint the spike used, and `motis-spike/NOTES.md` records empty `street_durations` for four nearby schools with no follow-up. Hence the explicit `maxMatchingDistance`, the runbook's sample run checking walk coverage against straight-line distance, and the same check in the issue #18 validator: an origin within 2 km of a school with no walk value is a defect to chase.
+
+Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone; discard anything over 5,400 seconds. On a non-200 or a dropped connection, halve the batch and retry each half down to a single origin, which is a hard error.
 
 ## Per-school output
 
-A worker takes one school, issues its three request groups, and writes `<out-dir>/schools/<urn>.bin` through a `.tmp` file and a rename, so a file exists only when complete.
+A worker takes one school, issues its three request groups, and writes `<out-dir>/schools/<urn>.bin` through a `.tmp` file and a rename. It holds four unsigned 32-bit counts, one per mode in plane order, then four sections of `(uint32 origin_index, uint16 seconds)` pairs ascending by index. The index is the zero-based row number in `fixtures/origins.csv`, 32 bits because there are over 65,535 origins. The sections exist because tagging each pair with its mode would cost seven bytes instead of six. Expect 120 KB per school, 500 MB in total. Keep `<out-dir>/schools/` until the version is published; then it can be deleted.
 
-That file holds four unsigned 32-bit counts, one per mode in plane order, then four sections of `(uint32 origin_index, uint16 seconds)` pairs ascending by index. The origin index is the zero-based row number in `fixtures/origins.csv`, 32 bits because there are more than 65,535 origins. Separate sections let the transpose read only the mode it needs.
+## Resume
 
-Resume is that file's existence: the script skips every school that has one. No separate checkpoint is needed, because rename is atomic and a complete file is the only state worth keeping. The four measured schools reach 1,500 to 26,000 origins each, so expect about 120 KB per school and 500 MB in total.
+`<out-dir>/run.json` is written on the first start and read on every later one. It holds the version, every run parameter (the three radii, batch size, cap, cycling speed, worker count and MOTIS version), the SHA-256 of `fixtures/origins.csv`, the school index hash and the graph directory. A resume refuses to continue if any differs, because the version is the run's start time and must not be minted twice. The file also accumulates wall seconds, requests and peak server resident set size across invocations, so the issue #17 figures cover the whole run.
+
+Resume validates each school file rather than trusting it exists: its length must equal 16 bytes plus six times the sum of its four counts. The rename is atomic on APFS, the temporary file sitting in the same directory and so the same filesystem, but nothing calls `fsync` first, so a power loss can leave a short file under a complete name. Delete and redo any that fails.
 
 ## Transpose
 
-A final pass turns the school files into one record per origin in the format of `docs/superpowers/specs/2026-09-14-per-origin-record-format.md`, at `<out-dir>/<version>/<origin-id>.bin`.
-
-Holding every record at once would need 34,984 bytes per origin, 3.5 GB at 120,000 origins. Instead it works in slices of 30,000 origins: allocate the slice's four planes, about 1.05 GB, read every school file discarding pairs outside the slice, write the slice's records, move on. Three or four passes over 500 MB cost little and write no intermediate file.
+One pass over the school files builds the whole matrix in memory, then writes one record per origin in the format of `docs/superpowers/specs/2026-09-14-per-origin-record-format.md` to `<out-dir>/<version>/<origin-id>.bin`. The matrix is 93,217 origins times 34,984 bytes, 3.26 GB, against 48 GB on the Mac and 8.8 GB for the server. Allocate the buffer once, with a `ponytail:` comment naming the ceiling: about 3.5 GB of process memory, slice by origin range on a smaller machine. Do not memory-map the 93,217 output files; macOS's open-file limit makes that worse than writing them in turn. Two phases is what issue #14 means by transposing as it goes: memory stays bounded by one matrix rather than every response, and the per-school files are what make resume possible.
 
 ## Manifest and publishing
 
-`<out-dir>/<version>/manifest.json`, with `<out-dir>/current.json` holding `{"version": "..."}` alone, so publishing is one write. The version is the run's start time in UTC.
+`<out-dir>/<version>/manifest.json`, with `<out-dir>/current.json` holding `{"version": "..."}` alone. Publish records first, the manifest second, `current.json` last, so no version is named before it is complete. Locally `current.json` also goes through a temporary file and a rename.
 
 ```json
 {
@@ -47,25 +53,28 @@ Holding every record at once would need 34,984 bytes per origin, 3.5 GB at 120,0
   "cap_seconds": 5400,
   "display_band_minutes": 10,
   "unreachable": 65535,
+  "compression": "none",
+  "rounding": "half up to whole seconds, then compared with 5400",
   "cycling_speed_mps": 5.0,
   "pruning_radii_km": [90, 90, 25, 136],
-  "origin_count": 104312,
+  "origin_count": 93217,
   "origins_sha256": "2f1c...",
   "school_count": 4373,
   "school_index_sha256": "43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9",
-  "feeds": [{"path": "motis-spike/feeds/bods.zip", "sha256": "d69d71ec..."}],
+  "feeds": [{"path": "motis-spike/feeds/bods.zip", "sha256": "d69d71ec..."},
+            {"path": "motis-spike/feeds/rail.zip", "sha256": "..."}],
   "run": {"started": "2026-09-14T09:30:00Z", "wall_seconds": 4412, "workers": 8,
-          "requests": 26238, "peak_server_rss_bytes": 9448928051, "output_bytes": 3649253408}
+          "requests": 26238, "peak_server_rss_bytes": 9448928051, "output_bytes": 3761103528}
 }
 ```
 
-`pruning_radii_km` is in plane order. The `feeds` list copies `path` and `sha256` from `fixtures/feed-manifest.json` unchanged.
+The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
 
-`fixtures/manifest.schema.json` is the contract, a JSON Schema document. The script validates the manifest it wrote before exiting, using the standard library alone. Validating means reading the schema's `required`, `properties` and `enum` entries, then asserting that every required key is present, every value has the declared type, every enumerated value is listed, and no unexpected top-level key appears. That is not JSON Schema but the subset this file uses; the schema must stay inside it.
+`fixtures/manifest.schema.json` is the contract; `fixtures/check_dataset_manifest.py` validates against it before the run exits, in about thirty lines of standard library with a `--check` self-test like `fixtures/check_manifest.py`. It walks the schema recursively, honouring `required`, `properties`, `type`, `enum`, `items` and `minItems` at every level, so a `feeds` entry missing its checksum fails, the `run` object is checked and `pruning_radii_km` must hold four numbers. `enum` applies to each array element, not the array.
 
 ## The server
 
-The operator starts and stops the server, not the script, so a stopped run resumes without reloading the graph and the script never detaches a process it cannot supervise. It asserts that `pgrep -x motis` returns exactly one process, reads that identifier to sample memory, and exits with a plain message otherwise.
+The operator starts and stops the server, not the script, so a stopped run resumes without reloading the graph. At the default base URL the script asserts that `pgrep -x motis` returns exactly one process and reads that identifier to sample memory. Against any other it skips both, which lets the stub-server tests run inside the unit suite.
 
 ## Progress and summary
 
@@ -73,19 +82,17 @@ One flushed line per completed school:
 
     1841/4373 137353 12.4s requests=6 pairs=25746 rss=8.2GiB
 
-The summary gives schools completed, requests issued and retried, wall seconds, peak server resident set size sampled every second with `ps -o rss=`, and output bytes for the school files and the origin records. Issue #17 records these against the prediction.
+The summary gives schools completed, requests issued and retried, wall seconds, peak server resident set size sampled every second with `ps -o rss=`, and output bytes for school files and records separately, which issue #17 records against the prediction.
 
 ## Tests
 
-Written first.
+Written first, all under `uv run --with pyproj python -m unittest`, none needing a live server.
 
-1. Request shape. Public transport carries `directMode: "WALK"` and `maxDirectTime: 5400`, cycling carries `transitModes: []` with `directMode: "BIKE"` and `cyclingSpeed: 5.0`, driving posts to `/api/v1/one-to-many` with semicolon coordinates, and batches cap at 20,000, covering every origin once.
-2. Leave-by rule. On a synthetic response, public transport takes the smaller of the transit minimum and the street duration, walking takes the street duration alone, and anything above 5,400 seconds is dropped.
-3. Transpose. School files holding known pairs transpose into a record matching the round-trip fixture from the record format spec byte for byte, at 34,984 bytes.
-4. Manifest. A correct manifest validates; a missing key, a wrong type and an unexpected key each fail.
-5. Resume. Run the script against a stub HTTP server returning canned responses over a few schools, stop it halfway, rerun it, and assert the output directory is byte identical to an uninterrupted run.
-6. Pruning. `--verify-pruning URN...` sends both the unpruned England grid and the pruned list for each named school, and asserts that the pruned result holds every origin the unpruned request reached. Reuse the assertion in `fixtures/measure_reach.py`. It needs a live server and stays out of the default suite.
-
-Tests 1 to 5 run under `uv run --with pyproj python -m unittest`.
+1. Request shape: the three bodies, their caps and units, the absent `time` on driving, `maxMatchingDistance: 250` on all three, and batching at 20,000 covering every origin once.
+2. Leave-by rule, on a synthetic response, including the discard above 5,400 seconds.
+3. Candidate origins: each mode's set is exactly the origins whose cell centre lies within its radius.
+4. Transpose: known pairs give a record matching the record format spec's fixture byte for byte, and every origin gets exactly one object, all-sentinel ones included.
+5. Manifest: a correct one validates; a missing key, a wrong type, an unexpected key, a `feeds` entry without its checksum and `pruning_radii_km` holding three numbers each fail.
+6. Resume: against a stub HTTP server on another port through `--base-url`, stop halfway, rerun, and `<out-dir>/schools/` plus the record bytes match an uninterrupted run. The manifest is outside that claim, carrying the run's own timings.
 
 The run itself is in `docs/precompute-runbook.md`.
