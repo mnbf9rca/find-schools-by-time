@@ -78,7 +78,7 @@ class TestOriginGrid(unittest.TestCase):
                 e, n = map(int, cell.split('_'))
                 self.assertTrue(any(f'{e + de}_{n + dn}' in cells for de, dn in neighbours), postcode)
                 fallback.append(postcode['postcode'])
-        print(f'School postcode neighbour fallback: {len(fallback)} ({", ".join(fallback)})')
+        self.assertEqual(fallback, ['GL16 7EJ', 'OX18 2PY'])
 
     @unittest.skipUnless((ROOT / 'data/codepo_gb.zip').is_file(), 'Code-Point Open zip absent; skipping generator self-check')
     def test_generator_reproduces_committed_csv(self):

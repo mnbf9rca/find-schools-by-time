@@ -6,7 +6,7 @@
 
 **Tools:** Python standard library, pyproj, and the existing unittest suite.
 
-**Contract:** `origin/issue-12-origin-grid-spec:docs/superpowers/specs/2026-09-14-origin-grid-design.md`, amended by the accepted findings in `/Users/rob/.claude/jobs/362f546b/tmp/brief-design-4.md`.
+**Contract:** The amended [origin grid spec](https://github.com/mnbf9rca/find-schools-by-time/blob/2e46ee2/docs/superpowers/specs/2026-09-14-origin-grid-design.md) on `origin/issue-12-origin-grid-spec`, pinned to commit `2e46ee2`.
 
 ## One build task
 
