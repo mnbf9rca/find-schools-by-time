@@ -47,11 +47,11 @@ The public transport value is the smaller of the MOTIS transit figure and the va
 
 ## School index
 
-The index is the position of the school's URN in the URNs from `schools.json` sorted ascending, 0 to 4,372. All URNs are six-digit strings, so text and numeric order agree.
+The index is the position of the school's URN in the URNs from `schools.json` sorted ascending, 0 to 4,372. All URNs are six-digit strings, so text and numeric order agree. The index is always the whole of `schools.json`, whatever the runner's `--schools` flag selects, so a sample run still writes full-size records with only the sampled schools populated.
 
 `schools.json` is currently in that order by accident: `build_schools.py` does not sort. This build makes it sort by URN and makes `test_build.py` assert that, two lines in total.
 
-The manifest records `school_index_sha256`, the SHA-256 of those sorted URNs joined by single newlines with no trailing newline, encoded as UTF-8 in lowercase hex. Today it is `43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9`. The writer computes it into the manifest. The Worker compares it with a constant built into the Worker and refuses to serve on a mismatch, because a record decoded against the wrong school list returns another school's times without failing.
+The manifest records `school_index_sha256`, the SHA-256 of those sorted URNs joined by single newlines with no trailing newline, encoded as UTF-8 in lowercase hex. Today it is `43760fe2449c63cdb1ff7a4a03fc310da08c85990199b51868d7b87edbf120d9`. The writer computes it into the manifest. `build_schools.py` also emits `school-index.js`, a small module holding the school count and that hash, which is what `record.js` and the Worker read; importing `schools.json` would pull two megabytes into a Worker bundle to learn one integer. The Worker compares the manifest's hash with the one in that module and refuses to serve on a mismatch, because a record decoded against the wrong school list returns another school's times without failing.
 
 ## Worked example
 
@@ -67,7 +67,7 @@ Origin `489_510`, the cell holding 54.481966 and -0.620123 near Whitby. Whitby S
 
 To encode, round each MOTIS duration half up to a whole second, then compare it with the cap. Zero is a valid value. A negative value is a writer error and raises. Fill `4 * plane_bytes` with `ff`, then for every pair of 5,400 seconds or fewer write `struct.pack("<H", seconds)` at its offset, leaving everything else at the sentinel.
 
-To decode, take the school count from the school list rather than hardcoding it, and reject any object whose length is not `4 * 2 * school_count`. Read the buffer as a `Uint16Array` and take element `mode_index * school_count + school_index`. Every platform that runs a browser is little-endian, so no `DataView` is needed. Treat 65,535 as no value and anything from 5,401 to 65,534 as corrupt. The school index hash is what guarantees the school count is the right one.
+To decode, take the school count from the school list rather than hardcoding it, and reject any object whose length is not `4 * 2 * school_count`. Read the buffer through a `DataView` with `littleEndian` true and take element `mode_index * school_count + school_index`, because a byte view can start at an odd offset, where a `Uint16Array` throws. Treat 65,535 as no value and anything from 5,401 to 65,534 as corrupt. The school index hash is what guarantees the school count is the right one.
 
 The reader lives in `record.js`, exporting `decode(buffer, modeIndex, schoolIndex)`. The Worker imports it in milestone 4; `check_sort.mjs` imports it now.
 
