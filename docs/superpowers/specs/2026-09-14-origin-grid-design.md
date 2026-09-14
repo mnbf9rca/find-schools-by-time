@@ -4,11 +4,11 @@ Date: September 14, 2026
 
 ## Goal
 
-Fix the set of origins the precompute runs against, give each one an identifier the browser computes from a postcode without a round trip, and commit the list.
+Fix the origins the precompute runs against, give each one an identifier the browser computes from a postcode without a round trip, and commit the list.
 
 ## The geography
 
-Origins are the centres of EPSG:27700 1 kilometre grid cells, masked to those holding at least one England postcode in Ordnance Survey Code-Point Open, whose country code column marks England as E92000001. The mask is exact: the only thing a user can enter is a postcode, so a cell holding none can never be asked about.
+Origins are the centres of EPSG:27700 1 kilometre grid cells, masked to those holding at least one England postcode in Ordnance Survey Code-Point Open, whose country code column marks England as E92000001. The mask is exact: the only thing a user can enter is a postcode, so a cell holding none is never asked about.
 
 Drop the 849 England rows whose positional quality indicator is 90: their easting and northing are zero, which would put an origin at cell `0_0` in the Atlantic. Keep quality 50 and 60, 3,853 and 241 rows. Those positions are estimated rather than surveyed, but the postcodes are real and an estimated position is worth more than no origin.
 
@@ -44,7 +44,7 @@ The pin is for reproducibility, not accuracy: this Helmert transform differs fro
 
 ## The download
 
-`https://api.os.uk/downloads/v1/products/CodePointOpen/downloads?area=GB&format=CSV&redirect` returns a 14,461,176 byte zip and needs no account. The API publishes its MD5, which goes in the `fixtures/feed-manifest.json` entry alongside a null validity window. Download it by hand into `data/`, which is gitignored.
+`https://api.os.uk/downloads/v1/products/CodePointOpen/downloads?area=GB&format=CSV&redirect` returns a 14,461,176 byte zip and needs no account. The API publishes its MD5, which goes in the `fixtures/feed-manifest.json` entry alongside a null validity window. Download it by hand into the gitignored `data/`.
 
 Inside, `Data/CSV/` holds 129 headerless CSV files, one per postcode area, with column names in `Doc/Code-Point_Open_Column_Headers.csv`.
 
@@ -58,4 +58,4 @@ The unit test runs always. For every postcode in that fixture it computes the ce
 
 Absence from Code-Point Open is not a failure. 36 school postcodes are missing: 34 terminated, since Code-Point Open holds current units only, and two live ones, M7 4LJ and TA19 9DT.
 
-`make_origins.py` also has a self-check that regenerates a sample from the zip. That needs `data/`, which is gitignored, so it runs only when the zip is present and otherwise skips with a message.
+One more test regenerates the whole of `fixtures/origins.csv` from the zip and compares it byte for byte. It needs `data/`, which is gitignored, so it runs only when the zip is present and skips with a message otherwise.
