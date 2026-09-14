@@ -243,5 +243,21 @@ class DatasetValidationTests(unittest.TestCase):
         self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
 
 
+    def test_check_9_numeric_street_minutes_above_cap_match_only_sentinel(self):
+        columns = ['origin_id', 'urn', 'mode', 'planner_minutes', 'planner_departure', 'character']
+        for mode, minutes, stored_value, expected in [
+                ('walking', 96, 65535, 'PASS'), ('driving', 110, 65535, 'PASS'),
+                ('cycling', 91, 65535, 'PASS'), ('walking', 96, 5400, 'FAIL'),
+                ('walking', 90, 65535, 'FAIL'), ('walking', 90, 5400, 'PASS'),
+                ('driving', 'inf', 65535, 'FAIL'), ('walking', -1, 65535, 'FAIL')]:
+            with self.subTest(mode=mode, minutes=minutes, stored_value=stored_value):
+                self.write_csv('validation-samples.csv', columns,
+                               [('500_200', '100000', mode, minutes, '', 'test')])
+                values = copy.deepcopy(self.values)
+                values[record.MODES.index(mode)][0] = stored_value
+                self.write_record('500_200', values)
+                self.assertEqual(self.run_validation()[9]['status'], expected)
+
+
 if __name__ == '__main__':
     unittest.main()

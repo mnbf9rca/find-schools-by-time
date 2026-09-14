@@ -236,7 +236,9 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
         except ValueError:
             fail(9, f'{label}: invalid planner value {planner!r}')
             continue
-        if value is not None and (planner == 'beyond cap' or row['planner_minutes'].strip() == 'beyond cap'):
+        beyond_cap = (planner == 'beyond cap' or row['planner_minutes'].strip() == 'beyond cap'
+                      or (not pt and math.isfinite(seconds) and seconds > record.CAP))
+        if value is not None and beyond_cap:
             if value != record.SENTINEL or seconds <= record.CAP:
                 fail(9, f'{label}: beyond-cap claim disagrees with stored value or planner departure')
             else:
