@@ -10,9 +10,9 @@ The script is self-contained. It imports neither `sweep_spike.py`, unreachable b
 
 ## Requests
 
-Three request groups per school, each holding the origins within its mode's radius from `docs/decisions/2026-09-14-per-mode-pruning-radii.md`, split into batches of at most 20,000 in origin order.
+Three request groups per school, split into batches of at most 20,000 in origin order.
 
-Measure distance from the cell centre: easting is 1,000 times the identifier's kilometre easting plus 500, northing likewise. The rounded radii leave margins of 669, 644 and 915 metres, two of them under the 707 metre corner-to-centre displacement, so measuring from anywhere else drops reachable origins.
+Public transport, the walking plane that shares its request, and driving send every origin. `docs/decisions/2026-09-14-per-mode-pruning-radii.md` withdraws their radii, because the 100-school sample stored values at 88.229 km and 133.333 km against radii of 90 km and 136 km. Cycling keeps the only radius, 30 km, measured from the cell centre: easting is 1,000 times the identifier's kilometre easting plus 500, northing likewise. That 30 km sits 3 km above the 27 km an 18 km/h bike covers in 90 minutes, so the 707 metre corner-to-centre displacement no longer threatens a reachable origin.
 
 - Public transport: `POST /api/experimental/one-to-many-intermodal`, `transitModes: ["TRANSIT"]`, `directMode: "WALK"`, `lat,lng`.
 - Cycling: same endpoint, `transitModes: []`, `directMode: "BIKE"`, `cyclingSpeed: 5.0`, `lat,lng`.
@@ -62,7 +62,7 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
   "compression": "none",
   "rounding": "half up to whole seconds, then compared with 5400",
   "cycling_speed_mps": 5.0,
-  "pruning_radii_km": [90, 90, 25, 136],
+  "pruning_radii_km": [null, null, 30, null],
   "shards": {"records_per_shard": 8000, "count": 12, "record_bytes": 34984},
   "keys": {"shard": "<version>/shard-{nn}.bin", "origins": "<version>/origins.txt",
            "manifest": "<version>/manifest.json", "current": "current.json"},
@@ -80,7 +80,7 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
 }
 ```
 
-The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files, which `record_bytes` and `school_bytes` also give separately; `requests_retried`, `transpose_seconds`, `schools_completed` and the two walk counts are the run's own figures for issue #17. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
+The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order and holds null for a mode that sends every origin, so its schema entry carries no per-item type. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files, which `record_bytes` and `school_bytes` also give separately; `requests_retried`, `transpose_seconds`, `schools_completed` and the two walk counts are the run's own figures for issue #17. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
 
 `fixtures/manifest.schema.json` is the contract; `fixtures/check_dataset_manifest.py` validates against it before the run exits, in about thirty lines of standard library with a `--check` self-test like `fixtures/check_manifest.py`. It walks the schema recursively, honouring `required`, `properties`, `type`, `enum`, `items` and `minItems` at every level, so a `feeds` entry missing its checksum fails, the `run` object is checked and `pruning_radii_km` must hold four numbers. `enum` applies to each array element, not the array.
 
