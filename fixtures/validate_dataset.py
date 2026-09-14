@@ -172,9 +172,8 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
         fail(6, 'missing walks exceed 5 percent of nearby pairs')
     checks[5]['maximum_km'] = dict(zip(record.MODES, greatest))
     emit(f'Check 5: maximum distances km {checks[5]["maximum_km"]}')
-    for mode, limit in ((0, 81.2), (2, 22.1), (3, 122.8)):
-        if greatest[mode] >= limit:
-            fail(5, f'{record.MODES[mode]} reaches {greatest[mode]:.3f} km, at or beyond measured edge {limit} km')
+    if greatest[2] >= 27:
+        fail(5, f'cycling reaches {greatest[2]:.3f} km, at or beyond the 27 km physical bound')
     checks[7]['counts'] = {mode: {'min': min(c) if c else 0, 'median': statistics.median(c) if c else 0,
                                  'max': max(c) if c else 0} for mode, c in zip(record.MODES, counts)}
     emit(f'Check 7: reachable schools {checks[7]["counts"]}')

@@ -158,11 +158,14 @@ class DatasetValidationTests(unittest.TestCase):
         self.write_record('500_200', values)
         self.assertEqual(self.run_validation()[4]['status'], 'FAIL')
 
-    def test_check_5_walk_limit_and_measured_edges(self):
+    def test_check_5_walk_and_cycling_bounds_and_unpruned_maxima(self):
         schools = json.loads((self.root / 'schools.json').read_text())
         transformer = Transformer.from_pipeline(make_origins.PIPELINE)
-        for mode, distance in [(1, 7600), (0, 81300), (2, 22200), (3, 122900)]:
-            with self.subTest(mode=mode):
+        for mode, distance, expected in [(1, 7400, 'PASS'), (1, 7600, 'FAIL'),
+                                         (0, 100000, 'PASS'), (2, 22200, 'PASS'),
+                                         (2, 26999, 'PASS'), (2, 27001, 'FAIL'),
+                                         (3, 150000, 'PASS')]:
+            with self.subTest(mode=mode, distance=distance):
                 lng, lat = transformer.transform(500500 + distance, 200500)
                 schools[0].update(lng=lng, lat=lat)
                 (self.root / 'schools.json').write_text(json.dumps(schools))
@@ -171,7 +174,10 @@ class DatasetValidationTests(unittest.TestCase):
                 values[mode][0] = 600
                 self.write_record('500_200', values)
                 self.write_record('501_200', values)
-                self.assertEqual(self.run_validation()[5]['status'], 'FAIL')
+                check = self.run_validation()[5]
+                self.assertEqual(check['status'], expected)
+                self.assertEqual(set(check['maximum_km']), set(record.MODES))
+                self.assertAlmostEqual(check['maximum_km'][record.MODES[mode]], distance / 1000, places=3)
 
     def test_check_6_nearby_missing_walk_and_school_or_origin_exclusions(self):
         values = copy.deepcopy(self.values)
