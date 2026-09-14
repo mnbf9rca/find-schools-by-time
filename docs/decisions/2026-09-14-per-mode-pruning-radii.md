@@ -17,3 +17,13 @@ The batch size is not a preference. MOTIS resets the connection on request bodie
 ## Open points
 
 Four schools do not prove that the radii hold everywhere. The validator in issue #18 checks the published dataset for any origin reachable from beyond its mode's radius, which is what would catch a school this sample did not represent.
+
+## Superseded in part
+
+Date: September 14, 2026
+
+The public transport and driving radii are withdrawn. On the 100-school sample the issue #18 validator found stored values reaching 88.229 km for public transport and 133.333 km for driving, against radii of 90 and 136 km. Those radii truncate real journeys, not the 5,400 second cap: fast rail into London and motorways cover more within a 90 minute leave-by.
+
+The 10 percent margin was the wrong instrument: a margin measured on four schools cannot see rail speed, which belongs to the network, not the sample.
+
+Public transport, the walking plane sharing its request, and driving now send the whole grid. `fixtures/measure_reach.csv` puts a full-grid request at about 3 seconds per school per mode, costing roughly an hour at eight workers. Cycling keeps the only radius, now 30 km, above the 27 km an 18 km/h bike covers in 90 minutes.
