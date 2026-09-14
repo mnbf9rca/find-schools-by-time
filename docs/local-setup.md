@@ -14,7 +14,7 @@ The raw inputs (MOTIS 2.11.3 binary, the BODS zip, the OpenStreetMap England ext
 
 Graphs under `motis-spike/`: `data/` (BODS only, milestone 1), `data.run1/` (the first milestone 1 import) and `data.rail/` (BODS plus rail, built with `./motis import -c config.rail.yml -d data.rail`). Nothing was renamed. No supplement feed was needed, so the feed set for the precompute is `bods.zip` plus `rail.zip`.
 
-Serve the combined graph from `motis-spike/` with `./motis server -d data.rail`. The server reads `data.rail/config.yml`, not the `config.rail.yml` used for the import. The three limits the precompute raises in that file are `onetomany_max_many`, `routing_max_timeout_seconds` and `max_max_matching_distance`.
+Serve the combined graph from `motis-spike/` with `./motis server -d data.rail`. The server reads `data.rail/config.yml`, not the `config.rail.yml` used for the import. The two limits the precompute raises in that file are `onetomany_max_many` and `routing_max_timeout_seconds`.
 
 ## Cloudflare
 
