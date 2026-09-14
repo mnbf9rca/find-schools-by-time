@@ -1,0 +1,445 @@
+phase,workers,urn,mode,origin_set,part,radius_km,n_origins,elapsed_s,http_status,outcome,n_reachable,max_distance_km,n_walk_reachable,max_walk_distance_km,peak_rss_kib,group_wall_s,missing_from_full,error
+scaling,1,137353,TRANSIT,30km,all,30,2830,5.218459,200,ok,1810,29.98808759467354,87,5.420341275151254,3100672,,,
+scaling,1,137353,BIKE,30km,all,30,2830,0.693101,200,ok,1277,22.141761773749526,,,3135504,,,
+scaling,1,137353,CAR,30km,all,30,2830,1.064474,200,ok,2632,29.997457297847312,,,3403744,,,
+scaling,1,137353,TRANSIT,60km,all,60,11316,2.394793,200,ok,2461,59.97591498343722,87,5.420341275151254,3715936,,,
+scaling,1,137353,BIKE,60km,all,60,11316,1.232193,200,ok,1277,22.141761773749526,,,3736704,,,
+scaling,1,137353,CAR,60km,all,60,11316,1.169725,200,ok,10313,59.992760591988144,,,3899248,,,
+scaling,1,137353,TRANSIT,100km,all,100,31423,3.225985,200,ok,2521,81.20990683106794,87,5.420341275151254,4135632,,,
+scaling,1,137353,BIKE,100km,all,100,31423,2.246668,200,ok,1277,22.141761773749526,,,4156384,,,
+scaling,1,137353,CAR,100km,all,100,31423,1.448419,200,ok,21375,99.9969410417447,,,4170496,,,
+scaling,1,137353,TRANSIT,england,all,,382800,0.000653,,failed,,,,,4170512,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,alla,,191400,0.000497,,failed,,,,,4170512,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allaa,,95700,0.000518,,failed,,,,,4170512,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allaaa,,47850,0.000428,,failed,,,,,4170512,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allaaaa,,23925,0.167881,200,ok,0,0,0,0,4171264,,,
+scaling,1,137353,TRANSIT,england,allaaab,,23925,0.236892,200,ok,0,0,0,0,4174112,,,
+scaling,1,137353,TRANSIT,england,allaab,,47850,0.000521,,failed,,,,,4174128,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allaaba,,23925,0.339109,200,ok,0,0,0,0,4183552,,,
+scaling,1,137353,TRANSIT,england,allaabb,,23925,0.332935,200,ok,0,0,0,0,4190048,,,
+scaling,1,137353,TRANSIT,england,allab,,95700,0.000533,,failed,,,,,4190048,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allaba,,47850,0.000454,,failed,,,,,4190048,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allabaa,,23925,0.449048,200,ok,0,0,0,0,4202688,,,
+scaling,1,137353,TRANSIT,england,allabab,,23925,0.500306,200,ok,0,0,0,0,4212048,,,
+scaling,1,137353,TRANSIT,england,allabb,,47850,0.000504,,failed,,,,,4212048,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allabba,,23925,1.050456,200,ok,0,0,0,0,4252640,,,
+scaling,1,137353,TRANSIT,england,allabbb,,23925,1.544788,200,ok,0,0,0,0,4380960,,,
+scaling,1,137353,TRANSIT,england,allb,,191400,0.000556,,failed,,,,,4380960,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allba,,95700,0.000462,,failed,,,,,4380960,,,[Errno 54] Connection reset by peer
+scaling,1,137353,TRANSIT,england,allbaa,,47850,0.000474,,failed,,,,,4380960,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allbaaa,,23925,1.864601,200,ok,0,0,0,0,4548688,,,
+scaling,1,137353,TRANSIT,england,allbaab,,23925,1.932498,200,ok,0,0,0,0,4708304,,,
+scaling,1,137353,TRANSIT,england,allbab,,47850,0.000478,,failed,,,,,4708304,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allbaba,,23925,1.469414,200,ok,83,81.20990683106794,0,0,4803728,,,
+scaling,1,137353,TRANSIT,england,allbabb,,23925,1.065135,200,ok,688,74.1193561839302,0,0,4841440,,,
+scaling,1,137353,TRANSIT,england,allbb,,95700,0.003069,,failed,,,,,4841440,,,[Errno 32] Broken pipe
+scaling,1,137353,TRANSIT,england,allbba,,47850,0.000427,,failed,,,,,4841440,,,[Errno 54] Connection reset by peer
+scaling,1,137353,TRANSIT,england,allbbaa,,23925,1.314374,200,ok,1526,64.1793339368813,87,5.420341275151254,4860832,,,
+scaling,1,137353,TRANSIT,england,allbbab,,23925,0.733413,200,ok,224,58.31009713513769,0,0,4871792,,,
+scaling,1,137353,TRANSIT,england,allbbb,,47850,1.17003,200,ok,0,0,0,0,4917024,,,
+scaling,1,137353,BIKE,england,all,,382800,0.000455,,failed,,,,,4917024,,,[Errno 32] Broken pipe
+scaling,1,137353,BIKE,england,alla,,191400,0.000501,,failed,,,,,4917024,,,[Errno 32] Broken pipe
+scaling,1,137353,BIKE,england,allaa,,95700,0.000501,,failed,,,,,4917024,,,[Errno 32] Broken pipe
+scaling,1,137353,BIKE,england,allaaa,,47850,0.000457,,failed,,,,,4917024,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allaaaa,,23925,0.214655,200,ok,0,0,,,4917024,,,
+scaling,1,137353,BIKE,england,allaaab,,23925,0.282266,200,ok,0,0,,,4932240,,,
+scaling,1,137353,BIKE,england,allaab,,47850,0.000463,,failed,,,,,4932240,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allaaba,,23925,0.369581,200,ok,0,0,,,4959248,,,
+scaling,1,137353,BIKE,england,allaabb,,23925,0.371054,200,ok,0,0,,,4986272,,,
+scaling,1,137353,BIKE,england,allab,,95700,0.000479,,failed,,,,,4986272,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allaba,,47850,0.000507,,failed,,,,,4986272,,,[Errno 32] Broken pipe
+scaling,1,137353,BIKE,england,allabaa,,23925,0.459258,200,ok,0,0,,,5013280,,,
+scaling,1,137353,BIKE,england,allabab,,23925,0.507554,200,ok,0,0,,,5013280,,,
+scaling,1,137353,BIKE,england,allabb,,47850,0.000452,,failed,,,,,5013280,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allabba,,23925,0.873584,200,ok,0,0,,,5013280,,,
+scaling,1,137353,BIKE,england,allabbb,,23925,1.04816,200,ok,0,0,,,5047072,,,
+scaling,1,137353,BIKE,england,allb,,191400,0.000431,,failed,,,,,5047072,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allba,,95700,0.000513,,failed,,,,,5047072,,,[Errno 32] Broken pipe
+scaling,1,137353,BIKE,england,allbaa,,47850,0.000442,,failed,,,,,5047072,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allbaaa,,23925,1.316351,200,ok,0,0,,,5067968,,,
+scaling,1,137353,BIKE,england,allbaab,,23925,1.453812,200,ok,0,0,,,5074944,,,
+scaling,1,137353,BIKE,england,allbab,,47850,0.00046,,failed,,,,,5074944,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allbaba,,23925,1.240229,200,ok,0,0,,,5102368,,,
+scaling,1,137353,BIKE,england,allbabb,,23925,1.02396,200,ok,164,22.141761773749526,,,5103136,,,
+scaling,1,137353,BIKE,england,allbb,,95700,0.0005,,failed,,,,,5103136,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allbba,,47850,0.000463,,failed,,,,,5103136,,,[Errno 54] Connection reset by peer
+scaling,1,137353,BIKE,england,allbbaa,,23925,1.305673,200,ok,1113,21.577450343730554,,,5130256,,,
+scaling,1,137353,BIKE,england,allbbab,,23925,0.746423,200,ok,0,0,,,5150016,,,
+scaling,1,137353,BIKE,england,allbbb,,47850,0.995485,200,ok,0,0,,,5191728,,,
+scaling,1,137353,CAR,england,all,,382800,0.000412,,failed,,,,,5191728,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,alla,,191400,0.000381,,failed,,,,,5191728,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allaa,,95700,0.000391,,failed,,,,,5191728,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allaaa,,47850,0.000536,,failed,,,,,5191728,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,allaaaa,,23925,0.979361,200,ok,0,0,,,5343808,,,
+scaling,1,137353,CAR,england,allaaab,,23925,0.996315,200,ok,0,0,,,5518112,,,
+scaling,1,137353,CAR,england,allaab,,47850,0.000468,,failed,,,,,5518112,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,allaaba,,23925,1.155022,200,ok,0,0,,,5696304,,,
+scaling,1,137353,CAR,england,allaabb,,23925,1.079351,200,ok,0,0,,,5874256,,,
+scaling,1,137353,CAR,england,allab,,95700,0.000458,,failed,,,,,5874256,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allaba,,47850,0.000525,,failed,,,,,5874256,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,allabaa,,23925,1.058695,200,ok,0,0,,,6053408,,,
+scaling,1,137353,CAR,england,allabab,,23925,1.057562,200,ok,0,0,,,6230176,,,
+scaling,1,137353,CAR,england,allabb,,47850,0.000452,,failed,,,,,6230176,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allabba,,23925,1.17075,200,ok,0,0,,,6232848,,,
+scaling,1,137353,CAR,england,allabbb,,23925,1.178705,200,ok,0,0,,,6232880,,,
+scaling,1,137353,CAR,england,allb,,191400,0.000503,,failed,,,,,6232880,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,allba,,95700,0.000464,,failed,,,,,6232880,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allbaa,,47850,0.000414,,failed,,,,,6232880,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allbaaa,,23925,1.226375,200,ok,0,0,,,6232912,,,
+scaling,1,137353,CAR,england,allbaab,,23925,1.275723,200,ok,793,108.80653146923622,,,6410080,,,
+scaling,1,137353,CAR,england,allbab,,47850,0.000388,,failed,,,,,6410080,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allbaba,,23925,1.178908,200,ok,4540,120.70274798099554,,,6412640,,,
+scaling,1,137353,CAR,england,allbabb,,23925,1.114754,200,ok,5164,112.36609138056755,,,6412720,,,
+scaling,1,137353,CAR,england,allbb,,95700,0.000419,,failed,,,,,6412720,,,[Errno 54] Connection reset by peer
+scaling,1,137353,CAR,england,allbba,,47850,0.000483,,failed,,,,,6412720,,,[Errno 32] Broken pipe
+scaling,1,137353,CAR,england,allbbaa,,23925,1.221641,200,ok,5271,111.1437425545745,,,6589024,,,
+scaling,1,137353,CAR,england,allbbab,,23925,1.070294,200,ok,4475,102.96895935637377,,,6590032,,,
+scaling,1,137353,CAR,england,allbbb,,47850,1.293695,200,ok,1618,99.32592865698788,,,6768416,,,
+scaling,1,131065,TRANSIT,30km,all,30,2827,0.278104,200,ok,455,29.7616264293851,55,4.922395565383699,6800928,,,
+scaling,1,131065,BIKE,30km,all,30,2827,0.259131,200,ok,993,21.6370168928906,,,6800976,,,
+scaling,1,131065,CAR,30km,all,30,2827,0.487241,200,ok,1865,29.999056717927033,,,6800976,,,
+scaling,1,131065,TRANSIT,60km,all,60,11312,0.770523,200,ok,474,50.40978272024591,55,4.922395565383699,6802000,,,
+scaling,1,131065,BIKE,60km,all,60,11312,0.769162,200,ok,993,21.6370168928906,,,6802000,,,
+scaling,1,131065,CAR,60km,all,60,11312,0.609071,200,ok,6104,59.989206047002696,,,6802000,,,
+scaling,1,131065,TRANSIT,100km,all,100,31415,1.491569,200,ok,474,50.40978272024591,55,4.922395565383699,6808768,,,
+scaling,1,131065,BIKE,100km,all,100,31415,1.451813,200,ok,993,21.6370168928906,,,6808768,,,
+scaling,1,131065,CAR,100km,all,100,31415,0.791151,200,ok,12164,99.99610211559579,,,6808768,,,
+scaling,1,131065,TRANSIT,england,all,,382800,0.000514,,failed,,,,,6808768,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,alla,,191400,0.00045,,failed,,,,,6808768,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allaa,,95700,0.000455,,failed,,,,,6808768,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allaaa,,47850,0.000498,,failed,,,,,6808768,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allaaaa,,23925,0.113172,200,ok,0,0,0,0,6808768,,,
+scaling,1,131065,TRANSIT,england,allaaab,,23925,0.177463,200,ok,0,0,0,0,6808800,,,
+scaling,1,131065,TRANSIT,england,allaab,,47850,0.000491,,failed,,,,,6808800,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allaaba,,23925,0.255238,200,ok,0,0,0,0,6808976,,,
+scaling,1,131065,TRANSIT,england,allaabb,,23925,0.270916,200,ok,0,0,0,0,6808976,,,
+scaling,1,131065,TRANSIT,england,allab,,95700,0.000479,,failed,,,,,6808976,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allaba,,47850,0.000446,,failed,,,,,6808976,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allabaa,,23925,0.339478,200,ok,0,0,0,0,6809360,,,
+scaling,1,131065,TRANSIT,england,allabab,,23925,0.426758,200,ok,0,0,0,0,6810080,,,
+scaling,1,131065,TRANSIT,england,allabb,,47850,0.000521,,failed,,,,,6810080,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allabba,,23925,0.870651,200,ok,130,22.372420851795102,7,3.8593836193469047,6810912,,,
+scaling,1,131065,TRANSIT,england,allabbb,,23925,0.943764,200,ok,326,33.749265833916745,48,4.922395565383699,6811152,,,
+scaling,1,131065,TRANSIT,england,allb,,191400,0.000444,,failed,,,,,6811152,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allba,,95700,0.000475,,failed,,,,,6811152,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allbaa,,47850,0.000489,,failed,,,,,6811152,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allbaaa,,23925,1.228876,200,ok,18,50.40978272024591,0,0,6811584,,,
+scaling,1,131065,TRANSIT,england,allbaab,,23925,1.472095,200,ok,0,0,0,0,6814624,,,
+scaling,1,131065,TRANSIT,england,allbab,,47850,0.000473,,failed,,,,,6814624,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allbaba,,23925,1.113084,200,ok,0,0,0,0,6814848,,,
+scaling,1,131065,TRANSIT,england,allbabb,,23925,0.950711,200,ok,0,0,0,0,6814912,,,
+scaling,1,131065,TRANSIT,england,allbb,,95700,0.000539,,failed,,,,,6814912,,,[Errno 32] Broken pipe
+scaling,1,131065,TRANSIT,england,allbba,,47850,0.000488,,failed,,,,,6814912,,,[Errno 54] Connection reset by peer
+scaling,1,131065,TRANSIT,england,allbbaa,,23925,1.224953,200,ok,0,0,0,0,6814928,,,
+scaling,1,131065,TRANSIT,england,allbbab,,23925,0.601895,200,ok,0,0,0,0,6814928,,,
+scaling,1,131065,TRANSIT,england,allbbb,,47850,1.032024,200,ok,0,0,0,0,6824304,,,
+scaling,1,131065,BIKE,england,all,,382800,0.000487,,failed,,,,,6824304,,,[Errno 54] Connection reset by peer
+scaling,1,131065,BIKE,england,alla,,191400,0.00053,,failed,,,,,6824304,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allaa,,95700,0.000535,,failed,,,,,6824304,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allaaa,,47850,0.000473,,failed,,,,,6824304,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allaaaa,,23925,0.128893,200,ok,0,0,,,6827456,,,
+scaling,1,131065,BIKE,england,allaaab,,23925,0.183084,200,ok,0,0,,,6828192,,,
+scaling,1,131065,BIKE,england,allaab,,47850,0.00038,,failed,,,,,6828192,,,[Errno 54] Connection reset by peer
+scaling,1,131065,BIKE,england,allaaba,,23925,0.272753,200,ok,0,0,,,6828192,,,
+scaling,1,131065,BIKE,england,allaabb,,23925,0.277348,200,ok,0,0,,,6828192,,,
+scaling,1,131065,BIKE,england,allab,,95700,0.000473,,failed,,,,,6828192,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allaba,,47850,0.000468,,failed,,,,,6828192,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allabaa,,23925,0.368963,200,ok,0,0,,,6828192,,,
+scaling,1,131065,BIKE,england,allabab,,23925,0.432472,200,ok,0,0,,,6832240,,,
+scaling,1,131065,BIKE,england,allabb,,47850,0.000504,,failed,,,,,6832240,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allabba,,23925,0.810537,200,ok,380,21.25384777314582,,,6832256,,,
+scaling,1,131065,BIKE,england,allabbb,,23925,0.92666,200,ok,613,21.6370168928906,,,6835776,,,
+scaling,1,131065,BIKE,england,allb,,191400,0.000511,,failed,,,,,6835776,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allba,,95700,0.000485,,failed,,,,,6835776,,,[Errno 54] Connection reset by peer
+scaling,1,131065,BIKE,england,allbaa,,47850,0.00043,,failed,,,,,6835776,,,[Errno 54] Connection reset by peer
+scaling,1,131065,BIKE,england,allbaaa,,23925,1.059552,200,ok,0,0,,,6838864,,,
+scaling,1,131065,BIKE,england,allbaab,,23925,1.367653,200,ok,0,0,,,6840096,,,
+scaling,1,131065,BIKE,england,allbab,,47850,0.000515,,failed,,,,,6840096,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allbaba,,23925,1.142342,200,ok,0,0,,,6840112,,,
+scaling,1,131065,BIKE,england,allbabb,,23925,0.924429,200,ok,0,0,,,6844032,,,
+scaling,1,131065,BIKE,england,allbb,,95700,0.000397,,failed,,,,,6844032,,,[Errno 54] Connection reset by peer
+scaling,1,131065,BIKE,england,allbba,,47850,0.000489,,failed,,,,,6844032,,,[Errno 32] Broken pipe
+scaling,1,131065,BIKE,england,allbbaa,,23925,1.11077,200,ok,0,0,,,6847120,,,
+scaling,1,131065,BIKE,england,allbbab,,23925,0.652077,200,ok,0,0,,,6847120,,,
+scaling,1,131065,BIKE,england,allbbb,,47850,0.925507,200,ok,0,0,,,6855600,,,
+scaling,1,131065,CAR,england,all,,382800,0.000528,,failed,,,,,6855600,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,alla,,191400,0.000537,,failed,,,,,6855600,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allaa,,95700,0.000499,,failed,,,,,6855600,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allaaa,,47850,0.000502,,failed,,,,,6855600,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allaaaa,,23925,0.477747,200,ok,0,0,,,6855600,,,
+scaling,1,131065,CAR,england,allaaab,,23925,0.502082,200,ok,0,0,,,6855600,,,
+scaling,1,131065,CAR,england,allaab,,47850,0.000496,,failed,,,,,6855600,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allaaba,,23925,0.528452,200,ok,0,0,,,6855616,,,
+scaling,1,131065,CAR,england,allaabb,,23925,0.534852,200,ok,0,0,,,6855648,,,
+scaling,1,131065,CAR,england,allab,,95700,0.000472,,failed,,,,,6855648,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allaba,,47850,0.000447,,failed,,,,,6855648,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allabaa,,23925,0.584411,200,ok,0,0,,,6896512,,,
+scaling,1,131065,CAR,england,allabab,,23925,0.555408,200,ok,0,0,,,6896560,,,
+scaling,1,131065,CAR,england,allabb,,47850,0.000539,,failed,,,,,6896560,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allabba,,23925,0.712027,200,ok,650,60.17702658955084,,,6896592,,,
+scaling,1,131065,CAR,england,allabbb,,23925,0.788111,200,ok,5571,109.45386664386768,,,7013840,,,
+scaling,1,131065,CAR,england,allb,,191400,0.000541,,failed,,,,,7013840,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allba,,95700,0.000461,,failed,,,,,7013840,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allbaa,,47850,0.000433,,failed,,,,,7013840,,,[Errno 54] Connection reset by peer
+scaling,1,131065,CAR,england,allbaaa,,23925,0.760472,200,ok,4721,107.39275682998476,,,7014784,,,
+scaling,1,131065,CAR,england,allbaab,,23925,0.761927,200,ok,1612,113.83413163978926,,,7014784,,,
+scaling,1,131065,CAR,england,allbab,,47850,0.000422,,failed,,,,,7014784,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allbaba,,23925,0.732566,200,ok,25,117.42097257714053,,,7014864,,,
+scaling,1,131065,CAR,england,allbabb,,23925,0.672897,200,ok,0,0,,,7014864,,,
+scaling,1,131065,CAR,england,allbb,,95700,0.00052,,failed,,,,,7014864,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allbba,,47850,0.000499,,failed,,,,,7014864,,,[Errno 32] Broken pipe
+scaling,1,131065,CAR,england,allbbaa,,23925,0.699122,200,ok,0,0,,,7014880,,,
+scaling,1,131065,CAR,england,allbbab,,23925,0.678594,200,ok,0,0,,,7128288,,,
+scaling,1,131065,CAR,england,allbbb,,47850,0.772543,200,ok,0,0,,,7135568,,,
+scaling,1,110533,TRANSIT,30km,all,30,2828,0.171029,200,ok,208,27.315845314728453,56,4.723320368935354,7165104,,,
+scaling,1,110533,BIKE,30km,all,30,2828,0.170616,200,ok,743,21.345391262790336,,,7165776,,,
+scaling,1,110533,CAR,30km,all,30,2828,1.266358,200,ok,2646,29.99749649978009,,,7324896,,,
+scaling,1,110533,TRANSIT,60km,all,60,11317,1.064689,200,ok,210,40.52964328732653,56,4.723320368935354,7327600,,,
+scaling,1,110533,BIKE,60km,all,60,11317,0.963604,200,ok,743,21.345391262790336,,,7328352,,,
+scaling,1,110533,CAR,60km,all,60,11317,1.433244,200,ok,10509,59.99707876115369,,,7375488,,,
+scaling,1,110533,TRANSIT,100km,all,100,31420,2.298731,200,ok,210,40.52964328732653,56,4.723320368935354,7383600,,,
+scaling,1,110533,BIKE,100km,all,100,31420,2.204144,200,ok,743,21.345391262790336,,,7383616,,,
+scaling,1,110533,CAR,100km,all,100,31420,1.833631,200,ok,23876,99.99789706990533,,,7383616,,,
+scaling,1,110533,TRANSIT,england,all,,382800,0.000576,,failed,,,,,6842192,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,alla,,191400,0.000773,,failed,,,,,6838496,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allaa,,95700,0.000466,,failed,,,,,6838496,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allaaa,,47850,0.000397,,failed,,,,,6838496,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allaaaa,,23925,0.108022,200,ok,0,0,0,0,6838592,,,
+scaling,1,110533,TRANSIT,england,allaaab,,23925,0.179544,200,ok,0,0,0,0,6838592,,,
+scaling,1,110533,TRANSIT,england,allaab,,47850,0.000523,,failed,,,,,6838592,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allaaba,,23925,0.281064,200,ok,0,0,0,0,6838592,,,
+scaling,1,110533,TRANSIT,england,allaabb,,23925,0.266055,200,ok,0,0,0,0,6838144,,,
+scaling,1,110533,TRANSIT,england,allab,,95700,0.000414,,failed,,,,,6768608,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allaba,,47850,0.000472,,failed,,,,,6756672,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allabaa,,23925,0.388023,200,ok,0,0,0,0,6756672,,,
+scaling,1,110533,TRANSIT,england,allabab,,23925,0.459841,200,ok,0,0,0,0,6672976,,,
+scaling,1,110533,TRANSIT,england,allabb,,47850,0.00063,,failed,,,,,6672576,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allabba,,23925,0.982236,200,ok,0,0,0,0,6672576,,,
+scaling,1,110533,TRANSIT,england,allabbb,,23925,1.099131,200,ok,0,0,0,0,6523648,,,
+scaling,1,110533,TRANSIT,england,allb,,191400,0.000485,,failed,,,,,6523648,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allba,,95700,0.000465,,failed,,,,,6523648,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allbaa,,47850,0.000822,,failed,,,,,6426528,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allbaaa,,23925,1.117765,200,ok,0,0,0,0,6349712,,,
+scaling,1,110533,TRANSIT,england,allbaab,,23925,1.46591,200,ok,0,0,0,0,6303520,,,
+scaling,1,110533,TRANSIT,england,allbab,,47850,0.000495,,failed,,,,,6303520,,,[Errno 32] Broken pipe
+scaling,1,110533,TRANSIT,england,allbaba,,23925,1.170773,200,ok,4,40.52964328732653,0,0,6303520,,,
+scaling,1,110533,TRANSIT,england,allbabb,,23925,0.945448,200,ok,206,27.315845314728453,56,4.723320368935354,6303520,,,
+scaling,1,110533,TRANSIT,england,allbb,,95700,0.000434,,failed,,,,,6303520,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allbba,,47850,0.00047,,failed,,,,,6303520,,,[Errno 54] Connection reset by peer
+scaling,1,110533,TRANSIT,england,allbbaa,,23925,1.225107,200,ok,0,0,0,0,6303520,,,
+scaling,1,110533,TRANSIT,england,allbbab,,23925,0.6571,200,ok,0,0,0,0,6303520,,,
+scaling,1,110533,TRANSIT,england,allbbb,,47850,0.942601,200,ok,0,0,0,0,6305888,,,
+scaling,1,110533,BIKE,england,all,,382800,0.000501,,failed,,,,,6305888,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,alla,,191400,0.000432,,failed,,,,,6305888,,,[Errno 54] Connection reset by peer
+scaling,1,110533,BIKE,england,allaa,,95700,0.000494,,failed,,,,,6305888,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allaaa,,47850,0.00054,,failed,,,,,6305904,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allaaaa,,23925,0.142336,200,ok,0,0,,,6324128,,,
+scaling,1,110533,BIKE,england,allaaab,,23925,0.219259,200,ok,0,0,,,6325472,,,
+scaling,1,110533,BIKE,england,allaab,,47850,0.000493,,failed,,,,,6325472,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allaaba,,23925,0.296098,200,ok,0,0,,,6327664,,,
+scaling,1,110533,BIKE,england,allaabb,,23925,0.308382,200,ok,0,0,,,6327664,,,
+scaling,1,110533,BIKE,england,allab,,95700,0.000522,,failed,,,,,6327664,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allaba,,47850,0.00047,,failed,,,,,6327664,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allabaa,,23925,0.368739,200,ok,0,0,,,6327664,,,
+scaling,1,110533,BIKE,england,allabab,,23925,0.423815,200,ok,0,0,,,6327664,,,
+scaling,1,110533,BIKE,england,allabb,,47850,0.000523,,failed,,,,,6327664,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allabba,,23925,0.887603,200,ok,0,0,,,6328416,,,
+scaling,1,110533,BIKE,england,allabbb,,23925,1.042353,200,ok,0,0,,,6328416,,,
+scaling,1,110533,BIKE,england,allb,,191400,0.000535,,failed,,,,,6328416,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allba,,95700,0.000469,,failed,,,,,6328416,,,[Errno 54] Connection reset by peer
+scaling,1,110533,BIKE,england,allbaa,,47850,0.00049,,failed,,,,,6328416,,,[Errno 54] Connection reset by peer
+scaling,1,110533,BIKE,england,allbaaa,,23925,1.079769,200,ok,0,0,,,6329168,,,
+scaling,1,110533,BIKE,england,allbaab,,23925,1.235196,200,ok,0,0,,,6329168,,,
+scaling,1,110533,BIKE,england,allbab,,47850,0.000497,,failed,,,,,6329168,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allbaba,,23925,1.141387,200,ok,166,19.82915023482115,,,6329168,,,
+scaling,1,110533,BIKE,england,allbabb,,23925,0.83004,200,ok,577,21.345391262790336,,,6329168,,,
+scaling,1,110533,BIKE,england,allbb,,95700,0.000508,,failed,,,,,6329168,,,[Errno 54] Connection reset by peer
+scaling,1,110533,BIKE,england,allbba,,47850,0.000479,,failed,,,,,6329168,,,[Errno 32] Broken pipe
+scaling,1,110533,BIKE,england,allbbaa,,23925,1.2113,200,ok,0,0,,,6329168,,,
+scaling,1,110533,BIKE,england,allbbab,,23925,0.650135,200,ok,0,0,,,6329168,,,
+scaling,1,110533,BIKE,england,allbbb,,47850,0.998295,200,ok,0,0,,,6329168,,,
+scaling,1,110533,CAR,england,all,,382800,0.000511,,failed,,,,,6329168,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,alla,,191400,0.000445,,failed,,,,,6329168,,,[Errno 54] Connection reset by peer
+scaling,1,110533,CAR,england,allaa,,95700,0.000476,,failed,,,,,6329168,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allaaa,,47850,0.000442,,failed,,,,,6329168,,,[Errno 54] Connection reset by peer
+scaling,1,110533,CAR,england,allaaaa,,23925,1.059741,200,ok,0,0,,,6329248,,,
+scaling,1,110533,CAR,england,allaaab,,23925,1.096321,200,ok,0,0,,,6329248,,,
+scaling,1,110533,CAR,england,allaab,,47850,0.000515,,failed,,,,,6244496,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allaaba,,23925,1.111343,200,ok,0,0,,,6244624,,,
+scaling,1,110533,CAR,england,allaabb,,23925,1.114407,200,ok,0,0,,,6310832,,,
+scaling,1,110533,CAR,england,allab,,95700,0.000434,,failed,,,,,6310832,,,[Errno 54] Connection reset by peer
+scaling,1,110533,CAR,england,allaba,,47850,0.000543,,failed,,,,,6310832,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allabaa,,23925,1.147998,200,ok,0,0,,,6563024,,,
+scaling,1,110533,CAR,england,allabab,,23925,1.137963,200,ok,0,0,,,6612096,,,
+scaling,1,110533,CAR,england,allabb,,47850,0.000511,,failed,,,,,6612096,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allabba,,23925,1.294108,200,ok,0,0,,,6619200,,,
+scaling,1,110533,CAR,england,allabbb,,23925,1.387984,200,ok,0,0,,,6832800,,,
+scaling,1,110533,CAR,england,allb,,191400,0.000467,,failed,,,,,6832800,,,[Errno 54] Connection reset by peer
+scaling,1,110533,CAR,england,allba,,95700,0.000486,,failed,,,,,6832800,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allbaa,,47850,0.000352,,failed,,,,,6832800,,,[Errno 54] Connection reset by peer
+scaling,1,110533,CAR,england,allbaaa,,23925,1.365381,200,ok,130,115.53776912667819,,,6984544,,,
+scaling,1,110533,CAR,england,allbaab,,23925,1.338742,200,ok,4479,122.65353405720889,,,6994288,,,
+scaling,1,110533,CAR,england,allbab,,47850,0.000492,,failed,,,,,6994288,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allbaba,,23925,1.395398,200,ok,6181,122.80481443543175,,,7167120,,,
+scaling,1,110533,CAR,england,allbabb,,23925,1.24838,200,ok,5958,107.28145746708421,,,7167360,,,
+scaling,1,110533,CAR,england,allbb,,95700,0.000519,,failed,,,,,7167360,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allbba,,47850,0.000465,,failed,,,,,7167360,,,[Errno 32] Broken pipe
+scaling,1,110533,CAR,england,allbbaa,,23925,1.281298,200,ok,5221,105.66805641774876,,,7168704,,,
+scaling,1,110533,CAR,england,allbbab,,23925,1.200278,200,ok,3048,110.60037955703837,,,7168704,,,
+scaling,1,110533,CAR,england,allbbb,,47850,1.417386,200,ok,9,110.40074892966608,,,7342208,,,
+scaling,1,150099,TRANSIT,30km,all,30,2824,0.280509,200,ok,216,20.850718322101333,55,5.181336722283711,7374112,,,
+scaling,1,150099,BIKE,30km,all,30,2824,0.264236,200,ok,526,22.072167382226045,,,7374112,,,
+scaling,1,150099,CAR,30km,all,30,2824,0.177715,200,ok,696,24.27158236330778,,,7374128,,,
+scaling,1,150099,TRANSIT,60km,all,60,11304,0.594541,200,ok,216,20.850718322101333,55,5.181336722283711,7374128,,,
+scaling,1,150099,BIKE,60km,all,60,11304,0.599037,200,ok,526,22.072167382226045,,,7374128,,,
+scaling,1,150099,CAR,60km,all,60,11304,0.412482,200,ok,696,24.27158236330778,,,7374144,,,
+scaling,1,150099,TRANSIT,100km,all,100,31416,1.355094,200,ok,216,20.850718322101333,55,5.181336722283711,7382304,,,
+scaling,1,150099,BIKE,100km,all,100,31416,1.322437,200,ok,526,22.072167382226045,,,7384752,,,
+scaling,1,150099,CAR,100km,all,100,31416,0.971998,200,ok,696,24.27158236330778,,,7384752,,,
+scaling,1,150099,TRANSIT,england,all,,382800,0.000469,,failed,,,,,7384752,,,[Errno 54] Connection reset by peer
+scaling,1,150099,TRANSIT,england,alla,,191400,0.000531,,failed,,,,,7384752,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allaa,,95700,0.000422,,failed,,,,,7384752,,,[Errno 54] Connection reset by peer
+scaling,1,150099,TRANSIT,england,allaaa,,47850,0.000489,,failed,,,,,7384752,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allaaaa,,23925,0.111342,200,ok,0,0,0,0,7384752,,,
+scaling,1,150099,TRANSIT,england,allaaab,,23925,0.177329,200,ok,0,0,0,0,7384752,,,
+scaling,1,150099,TRANSIT,england,allaab,,47850,0.000458,,failed,,,,,7384752,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allaaba,,23925,0.255713,200,ok,0,0,0,0,7384784,,,
+scaling,1,150099,TRANSIT,england,allaabb,,23925,0.270855,200,ok,0,0,0,0,7384784,,,
+scaling,1,150099,TRANSIT,england,allab,,95700,0.000501,,failed,,,,,7384784,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allaba,,47850,0.000516,,failed,,,,,7384784,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allabaa,,23925,0.361496,200,ok,0,0,0,0,7384784,,,
+scaling,1,150099,TRANSIT,england,allabab,,23925,0.422251,200,ok,0,0,0,0,7384784,,,
+scaling,1,150099,TRANSIT,england,allabb,,47850,0.000483,,failed,,,,,7384784,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allabba,,23925,0.879407,200,ok,0,0,0,0,7384800,,,
+scaling,1,150099,TRANSIT,england,allabbb,,23925,0.949311,200,ok,0,0,0,0,7384800,,,
+scaling,1,150099,TRANSIT,england,allb,,191400,0.000514,,failed,,,,,7384800,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allba,,95700,0.000436,,failed,,,,,7384800,,,[Errno 54] Connection reset by peer
+scaling,1,150099,TRANSIT,england,allbaa,,47850,0.000403,,failed,,,,,7384800,,,[Errno 54] Connection reset by peer
+scaling,1,150099,TRANSIT,england,allbaaa,,23925,1.235158,200,ok,0,0,0,0,7384800,,,
+scaling,1,150099,TRANSIT,england,allbaab,,23925,1.260485,200,ok,35,20.850718322101333,0,0,7384944,,,
+scaling,1,150099,TRANSIT,england,allbab,,47850,0.00048,,failed,,,,,7384944,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allbaba,,23925,1.175468,200,ok,181,18.157745190055852,55,5.181336722283711,7384944,,,
+scaling,1,150099,TRANSIT,england,allbabb,,23925,0.844033,200,ok,0,0,0,0,7384944,,,
+scaling,1,150099,TRANSIT,england,allbb,,95700,0.00047,,failed,,,,,7384944,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allbba,,47850,0.000499,,failed,,,,,7384944,,,[Errno 32] Broken pipe
+scaling,1,150099,TRANSIT,england,allbbaa,,23925,1.242053,200,ok,0,0,0,0,7384992,,,
+scaling,1,150099,TRANSIT,england,allbbab,,23925,0.600863,200,ok,0,0,0,0,7384992,,,
+scaling,1,150099,TRANSIT,england,allbbb,,47850,0.961315,200,ok,0,0,0,0,7388784,,,
+scaling,1,150099,BIKE,england,all,,382800,0.000455,,failed,,,,,7388784,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,alla,,191400,0.000541,,failed,,,,,7388784,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allaa,,95700,0.000457,,failed,,,,,7388784,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allaaa,,47850,0.000409,,failed,,,,,7388784,,,[Errno 54] Connection reset by peer
+scaling,1,150099,BIKE,england,allaaaa,,23925,0.106977,200,ok,0,0,,,7388784,,,
+scaling,1,150099,BIKE,england,allaaab,,23925,0.168259,200,ok,0,0,,,7388784,,,
+scaling,1,150099,BIKE,england,allaab,,47850,0.000509,,failed,,,,,7388784,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allaaba,,23925,0.247792,200,ok,0,0,,,7402816,,,
+scaling,1,150099,BIKE,england,allaabb,,23925,0.268193,200,ok,0,0,,,7402816,,,
+scaling,1,150099,BIKE,england,allab,,95700,0.000438,,failed,,,,,7388816,,,[Errno 54] Connection reset by peer
+scaling,1,150099,BIKE,england,allaba,,47850,0.00047,,failed,,,,,7388816,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allabaa,,23925,0.356195,200,ok,0,0,,,7388816,,,
+scaling,1,150099,BIKE,england,allabab,,23925,0.414435,200,ok,0,0,,,7388816,,,
+scaling,1,150099,BIKE,england,allabb,,47850,0.000536,,failed,,,,,7388816,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allabba,,23925,0.813151,200,ok,0,0,,,7388816,,,
+scaling,1,150099,BIKE,england,allabbb,,23925,1.032116,200,ok,0,0,,,7388816,,,
+scaling,1,150099,BIKE,england,allb,,191400,0.000452,,failed,,,,,7388816,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allba,,95700,0.000445,,failed,,,,,7388816,,,[Errno 54] Connection reset by peer
+scaling,1,150099,BIKE,england,allbaa,,47850,0.000396,,failed,,,,,7388816,,,[Errno 54] Connection reset by peer
+scaling,1,150099,BIKE,england,allbaaa,,23925,1.208073,200,ok,0,0,,,7388832,,,
+scaling,1,150099,BIKE,england,allbaab,,23925,1.35822,200,ok,107,22.072167382226045,,,7389152,,,
+scaling,1,150099,BIKE,england,allbab,,47850,0.000523,,failed,,,,,7389152,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allbaba,,23925,1.136665,200,ok,419,18.34791117285005,,,7389152,,,
+scaling,1,150099,BIKE,england,allbabb,,23925,0.911331,200,ok,0,0,,,7403072,,,
+scaling,1,150099,BIKE,england,allbb,,95700,0.000487,,failed,,,,,7403072,,,[Errno 32] Broken pipe
+scaling,1,150099,BIKE,england,allbba,,47850,0.000453,,failed,,,,,7403072,,,[Errno 54] Connection reset by peer
+scaling,1,150099,BIKE,england,allbbaa,,23925,1.193269,200,ok,0,0,,,7403072,,,
+scaling,1,150099,BIKE,england,allbbab,,23925,0.645721,200,ok,0,0,,,7403072,,,
+scaling,1,150099,BIKE,england,allbbb,,47850,0.995655,200,ok,0,0,,,7405184,,,
+scaling,1,150099,CAR,england,all,,382800,0.000504,,failed,,,,,7405184,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,alla,,191400,0.000537,,failed,,,,,7405184,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allaa,,95700,0.000474,,failed,,,,,7405184,,,[Errno 54] Connection reset by peer
+scaling,1,150099,CAR,england,allaaa,,47850,0.000457,,failed,,,,,7405184,,,[Errno 54] Connection reset by peer
+scaling,1,150099,CAR,england,allaaaa,,23925,0.116134,200,ok,0,0,,,7405184,,,
+scaling,1,150099,CAR,england,allaaab,,23925,0.14785,200,ok,0,0,,,7405184,,,
+scaling,1,150099,CAR,england,allaab,,47850,0.000503,,failed,,,,,7405184,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allaaba,,23925,0.211801,200,ok,0,0,,,7405184,,,
+scaling,1,150099,CAR,england,allaabb,,23925,0.200668,200,ok,0,0,,,7405296,,,
+scaling,1,150099,CAR,england,allab,,95700,0.000489,,failed,,,,,7405296,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allaba,,47850,0.000495,,failed,,,,,7405296,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allabaa,,23925,0.219108,200,ok,0,0,,,7405392,,,
+scaling,1,150099,CAR,england,allabab,,23925,0.258203,200,ok,0,0,,,7405408,,,
+scaling,1,150099,CAR,england,allabb,,47850,0.000483,,failed,,,,,7405408,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allabba,,23925,0.575576,200,ok,0,0,,,7406000,,,
+scaling,1,150099,CAR,england,allabbb,,23925,0.724877,200,ok,0,0,,,7406000,,,
+scaling,1,150099,CAR,england,allb,,191400,0.000542,,failed,,,,,7406000,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allba,,95700,0.00046,,failed,,,,,7406000,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allbaa,,47850,0.000477,,failed,,,,,7406000,,,[Errno 32] Broken pipe
+scaling,1,150099,CAR,england,allbaaa,,23925,0.753031,200,ok,0,0,,,7414768,,,
+scaling,1,150099,CAR,england,allbaab,,23925,0.835577,200,ok,173,24.27158236330778,,,7414768,,,
+scaling,1,150099,CAR,england,allbab,,47850,0.000458,,failed,,,,,7414768,,,[Errno 54] Connection reset by peer
+scaling,1,150099,CAR,england,allbaba,,23925,0.736736,200,ok,523,19.161848905918042,,,7437776,,,
+scaling,1,150099,CAR,england,allbabb,,23925,0.63926,200,ok,0,0,,,7437776,,,
+scaling,1,150099,CAR,england,allbb,,95700,0.000446,,failed,,,,,7437776,,,[Errno 54] Connection reset by peer
+scaling,1,150099,CAR,england,allbba,,47850,0.000476,,failed,,,,,7437776,,,[Errno 54] Connection reset by peer
+scaling,1,150099,CAR,england,allbbaa,,23925,0.724525,200,ok,0,0,,,7437776,,,
+scaling,1,150099,CAR,england,allbbab,,23925,0.455788,200,ok,0,0,,,7437776,,,
+scaling,1,150099,CAR,england,allbbb,,47850,0.78892,200,ok,0,0,,,7437776,,,
+margin,1,137353,TRANSIT,margin,all,89.33089751417474,25063,2.132147,200,ok,2521,81.20990683106794,87,5.420341275151254,7439056,6.609104,0,
+margin,1,131065,TRANSIT,margin,all,89.33089751417474,25075,1.18871,200,ok,474,50.40978272024591,55,4.922395565383699,7439056,6.609104,0,
+margin,1,110533,TRANSIT,margin,all,89.33089751417474,25063,1.976862,200,ok,210,40.52964328732653,56,4.723320368935354,7436752,6.609104,0,
+margin,1,150099,TRANSIT,margin,all,89.33089751417474,25082,1.151217,200,ok,216,20.850718322101333,55,5.181336722283711,7436720,6.609104,0,
+margin,1,137353,BIKE,margin,all,24.35593795112448,1865,0.608333,200,ok,1277,22.141761773749526,,,7440096,1.198952,0,
+margin,1,131065,BIKE,margin,all,24.35593795112448,1867,0.222851,200,ok,993,21.6370168928906,,,7440096,1.198952,0,
+margin,1,110533,BIKE,margin,all,24.35593795112448,1863,0.12185,200,ok,743,21.345391262790336,,,7440096,1.198952,0,
+margin,1,150099,BIKE,margin,all,24.35593795112448,1868,0.193863,200,ok,526,22.072167382226045,,,7440096,1.198952,0,
+margin,1,137353,CAR,margin,all,135.08529587897493,57198,0.000429,,failed,,,,,7440096,9.1082,0,[Errno 54] Connection reset by peer
+margin,1,137353,CAR,margin,alla,135.08529587897493,28599,1.312405,200,ok,12552,120.70274798099554,,,7446832,9.1082,0,
+margin,1,137353,CAR,margin,allb,135.08529587897493,28599,1.286525,200,ok,9309,102.96895935637377,,,7447312,9.1082,0,
+margin,1,131065,CAR,margin,all,135.08529587897493,57325,0.000421,,failed,,,,,7447312,9.1082,0,[Errno 54] Connection reset by peer
+margin,1,131065,CAR,margin,alla,135.08529587897493,28662,0.632321,200,ok,841,70.86544595840074,,,7447328,9.1082,0,
+margin,1,131065,CAR,margin,allb,135.08529587897493,28663,0.897028,200,ok,11738,117.42097257714053,,,7509840,9.1082,0,
+margin,1,110533,CAR,margin,all,135.08529587897493,57330,0.0005,,failed,,,,,7509840,9.1082,0,[Errno 32] Broken pipe
+margin,1,110533,CAR,margin,alla,135.08529587897493,28665,1.434961,200,ok,12273,122.80481443543175,,,7582928,9.1082,0,
+margin,1,110533,CAR,margin,allb,135.08529587897493,28665,1.472312,200,ok,12753,110.60037955703837,,,7582976,9.1082,0,
+margin,1,150099,CAR,margin,all,135.08529587897493,51129,0.000503,,failed,,,,,7582976,9.1082,0,[Errno 32] Broken pipe
+margin,1,150099,CAR,margin,alla,135.08529587897493,25564,0.71074,200,ok,366,24.27158236330778,,,7582976,9.1082,0,
+margin,1,150099,CAR,margin,allb,135.08529587897493,25565,0.948384,200,ok,330,19.161848905918042,,,7582976,9.1082,0,
+margin,8,137353,TRANSIT,margin,all,89.33089751417474,25063,2.594187,200,ok,2521,81.20990683106794,87,5.420341275151254,8270032,2.701567,0,
+margin,8,131065,TRANSIT,margin,all,89.33089751417474,25075,1.615259,200,ok,474,50.40978272024591,55,4.922395565383699,8269536,2.701567,0,
+margin,8,110533,TRANSIT,margin,all,89.33089751417474,25063,2.31179,200,ok,210,40.52964328732653,56,4.723320368935354,8269648,2.701567,0,
+margin,8,150099,TRANSIT,margin,all,89.33089751417474,25082,1.498451,200,ok,216,20.850718322101333,55,5.181336722283711,8269280,2.701567,0,
+margin,8,137353,TRANSIT,margin,all,89.33089751417474,25063,2.564915,200,ok,2521,81.20990683106794,87,5.420341275151254,8270032,2.701567,0,
+margin,8,131065,TRANSIT,margin,all,89.33089751417474,25075,1.588073,200,ok,474,50.40978272024591,55,4.922395565383699,8269536,2.701567,0,
+margin,8,110533,TRANSIT,margin,all,89.33089751417474,25063,2.307249,200,ok,210,40.52964328732653,56,4.723320368935354,8269648,2.701567,0,
+margin,8,150099,TRANSIT,margin,all,89.33089751417474,25082,1.470729,200,ok,216,20.850718322101333,55,5.181336722283711,8269280,2.701567,0,
+margin,8,137353,BIKE,margin,all,24.35593795112448,1865,0.652987,200,ok,1277,22.141761773749526,,,8286528,0.696592,0,
+margin,8,131065,BIKE,margin,all,24.35593795112448,1867,0.267681,200,ok,993,21.6370168928906,,,8286512,0.696592,0,
+margin,8,110533,BIKE,margin,all,24.35593795112448,1863,0.166732,200,ok,743,21.345391262790336,,,8282736,0.696592,0,
+margin,8,150099,BIKE,margin,all,24.35593795112448,1868,0.248737,200,ok,526,22.072167382226045,,,8286480,0.696592,0,
+margin,8,137353,BIKE,margin,all,24.35593795112448,1865,0.652829,200,ok,1277,22.141761773749526,,,8286528,0.696592,0,
+margin,8,131065,BIKE,margin,all,24.35593795112448,1867,0.261967,200,ok,993,21.6370168928906,,,8286512,0.696592,0,
+margin,8,110533,BIKE,margin,all,24.35593795112448,1863,0.153305,200,ok,743,21.345391262790336,,,8282256,0.696592,0,
+margin,8,150099,BIKE,margin,all,24.35593795112448,1868,0.234969,200,ok,526,22.072167382226045,,,8286480,0.696592,0,
+margin,8,137353,CAR,margin,all,135.08529587897493,57198,0.001423,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,137353,CAR,margin,alla,135.08529587897493,28599,2.095783,200,ok,12552,120.70274798099554,,,8452384,4.424632,0,
+margin,8,137353,CAR,margin,allb,135.08529587897493,28599,1.763519,200,ok,9309,102.96895935637377,,,8546704,4.424632,0,
+margin,8,131065,CAR,margin,all,135.08529587897493,57325,0.000959,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,131065,CAR,margin,alla,135.08529587897493,28662,0.98535,200,ok,841,70.86544595840074,,,8300288,4.424632,0,
+margin,8,131065,CAR,margin,allb,135.08529587897493,28663,1.312028,200,ok,11738,117.42097257714053,,,8489136,4.424632,0,
+margin,8,110533,CAR,margin,all,135.08529587897493,57330,0.005325,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,110533,CAR,margin,alla,135.08529587897493,28665,2.058273,200,ok,12273,122.80481443543175,,,8455072,4.424632,0,
+margin,8,110533,CAR,margin,allb,135.08529587897493,28665,1.904333,200,ok,12753,110.60037955703837,,,8560672,4.424632,0,
+margin,8,150099,CAR,margin,all,135.08529587897493,51129,0.005736,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,150099,CAR,margin,alla,135.08529587897493,25564,1.075391,200,ok,366,24.27158236330778,,,8307088,4.424632,0,
+margin,8,150099,CAR,margin,allb,135.08529587897493,25565,1.39663,200,ok,330,19.161848905918042,,,8489184,4.424632,0,
+margin,8,137353,CAR,margin,all,135.08529587897493,57198,0.001512,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,137353,CAR,margin,alla,135.08529587897493,28599,1.985981,200,ok,12552,120.70274798099554,,,8438400,4.424632,0,
+margin,8,137353,CAR,margin,allb,135.08529587897493,28599,1.75791,200,ok,9309,102.96895935637377,,,8542080,4.424632,0,
+margin,8,131065,CAR,margin,all,135.08529587897493,57325,0.002518,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,131065,CAR,margin,alla,135.08529587897493,28662,0.947616,200,ok,841,70.86544595840074,,,8300288,4.424632,0,
+margin,8,131065,CAR,margin,allb,135.08529587897493,28663,1.346379,200,ok,11738,117.42097257714053,,,8489136,4.424632,0,
+margin,8,110533,CAR,margin,all,135.08529587897493,57330,0.013271,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,110533,CAR,margin,alla,135.08529587897493,28665,2.099822,200,ok,12273,122.80481443543175,,,8455584,4.424632,0,
+margin,8,110533,CAR,margin,allb,135.08529587897493,28665,1.89119,200,ok,12753,110.60037955703837,,,8560672,4.424632,0,
+margin,8,150099,CAR,margin,all,135.08529587897493,51129,0.014222,,failed,,,,,8286528,4.424632,0,[Errno 32] Broken pipe
+margin,8,150099,CAR,margin,alla,135.08529587897493,25564,1.050246,200,ok,366,24.27158236330778,,,8307088,4.424632,0,
+margin,8,150099,CAR,margin,allb,135.08529587897493,25565,1.399259,200,ok,330,19.161848905918042,,,8489184,4.424632,0,
