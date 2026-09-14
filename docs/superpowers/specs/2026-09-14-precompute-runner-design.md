@@ -24,6 +24,8 @@ Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: 
 
 Three requests fill four planes: the public transport response's `street_durations` entry per origin is the direct walk, so the walking plane needs no fourth request and inherits the 90 kilometre transit radius. That leg is the intermodal endpoint's, not the street endpoint the spike used, and `motis-spike/NOTES.md` records empty `street_durations` for four nearby schools with no follow-up. Hence the explicit `maxMatchingDistance`, the runbook's sample run checking walk coverage against straight-line distance, and the same check in the issue #18 validator: an origin within 2 km of a school with no walk value is a defect to chase.
 
+A fourth request fills gaps: origins within 10 km straight line of the school that still have no walking value go to `POST /api/v1/one-to-many` with `mode: "WALK"`, `max: 5400`, `arriveBy: false` and `maxMatchingDistance: 500`, batched like the rest. It fills the walking plane; public transport stays the smaller of the transit figure and the final walking value. MOTIS's one-to-many street search has direction-dependent false negatives, and a union of both directions recovers some. Remaining misses are school coordinates off the routable network, for the validator's `fixtures/unmatched-schools.csv`. The server needs `max_max_matching_distance: 500`.
+
 Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone; discard anything over 5,400 seconds. On a non-200 or a dropped connection, halve the batch and retry each half down to a single origin, which is a hard error.
 
 ## Per-school output
@@ -74,6 +76,7 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
           "requests": 26238, "requests_retried": 12, "peak_server_rss_bytes": 9448928051,
           "transpose_seconds": 214.5, "schools_completed": 4373, "school_bytes": 500000000,
           "record_bytes": 3261103528, "output_bytes": 3761103528,
+          "walk_gapfill_requests": 118, "walk_gapfill_recovered": 9,
           "walk_missing_pairs": 43, "walk_nearby_pairs": 8261}
 }
 ```
