@@ -8,4 +8,7 @@ build:
 run:
 	op run --env-file=.env.tpl -- python3 app.py
 
-.PHONY: build run
+origins:
+	uv run --with pyproj fixtures/make_origins.py
+
+.PHONY: build run origins
