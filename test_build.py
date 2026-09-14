@@ -159,6 +159,10 @@ def build(test, urns, *perf_rows):
 
 
 class TestMerge(unittest.TestCase):
+    def test_build_sorts_schools_by_urn(self):
+        self.assertEqual(list(build(self, ['999999', '100003', '121667'])),
+                         ['100003', '121667', '999999'])
+
     def test_religious_character_mapping(self):
         for value, expected in (("Church of England", "Church of England"),
                                 ("Roman Catholic", "Roman Catholic"),

@@ -111,6 +111,7 @@ def main(path, results_path):
                 "lat": lat,
                 "lng": lng,
             } | results.get(row["URN"], empty))
+    schools.sort(key=lambda school: school["urn"])
     json.dump(schools, sys.stdout)
 
 
