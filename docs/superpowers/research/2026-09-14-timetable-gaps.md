@@ -1,10 +1,10 @@
-# Timetable gaps: first audit for issue #9
+# Timetable gaps: issue #9
 
 Audited on 14 September 2026 using fixtures/audit_feeds.py against /Users/rob/git/find-schools-by-time/motis-spike/feeds/bods.zip, downloaded on 13 September 2026. The feed version is 20260913_022858. Its recorded SHA256 checksum is d69d71ecf6d1cc85ff8a62d6f72b83fdb4f23cd2c6978e7306a2f12c5353f5ec. The complete output is saved locally in motis-spike/bods-gap-audit.txt, including counts for all 635 agencies and all 246 routes whose type is neither bus nor coach.
 
-BODS contains all 11 Underground lines, the Docklands Light Railway, London Trams, the cable car and all seven ferry services named in the spec. The Thames Clippers entries are RB1, RB4 and RB6. Elizabeth line and all six named Overground lines are absent from BODS and await the rail feed from issue #8. No supplement is justified by this first audit alone.
+BODS contains all 11 Underground lines, the Docklands Light Railway, London Trams, the cable car and all seven ferry services named in the spec. The Thames Clippers entries are RB1, RB4 and RB6. The rail feed supplies the Elizabeth line and all six named Overground lines, which are absent from BODS. No expected service is missing from both feeds.
 
-Presence means that a matching route has trip records in the snapshot. It does not establish a sailing before 08:30, service on 16 September 2026, every branch or pier, or a successful journey to a school. Those checks remain for the second half of issue #9. A resolution of "no action, already present" means no additional feed for that observed service; it does not close the routing checks. The rail column stays "pending #8" throughout because no rail zip was available, including for services already settled by BODS.
+Presence means that a matching route has trip records in the snapshot. It does not establish a sailing before 08:30, service on 16 September 2026, every branch or pier, or a successful journey to a school. Those checks remain for the second half of issue #9. A resolution of "no action, already present" means no additional feed for that observed service; it does not close the routing checks. The rail column records the second audit, using the repaired feed from issue #8. A named corridor establishes presence, not coverage of every branch or date.
 
 ## Method and counts
 
@@ -28,39 +28,39 @@ The type 2 records are both Docklands Light Railway, not National Rail. London U
 
 ## Expected services
 
-The Overground rows use the six names listed by [Transport for London](https://tfl.gov.uk/modes/london-overground/the-new-look-london-overground?intcmp=75267). Operators for present services use the agency names in the snapshot. Transport for London identifies the absent networks without guessing the rail feed's eventual agency labels. Searches covered agency names and all route names, including bus and coach entries; Elizabeth Yule Transport is a bus operator, not evidence of the Elizabeth line.
+The Overground rows use the six names listed by [Transport for London](https://tfl.gov.uk/modes/london-overground/the-new-look-london-overground?intcmp=75267). Operators for present services use the agency names in the snapshot. The rail feed labels the Elizabeth line agency as TfL Rail and groups all six Overground lines under London Overground; the named lines are identified from their route endpoints. Searches covered agency names and all route names, including bus and coach entries; Elizabeth Yule Transport is a bus operator, not evidence of the Elizabeth line.
 
 | Service | Operator | Present in BODS | Present in the rail feed | Resolution |
 |---|---|---|---|---|
-| London Underground Bakerloo line | London Underground (TfL) | Yes. 1,691 trips on route 10245790. | pending #8 | no action, already present |
-| London Underground Central line | London Underground (TfL) | Yes. 7,934 trips on routes 12364313, 12838358. | pending #8 | no action, already present |
-| London Underground Circle line | London Underground (TfL) | Yes. 2,449 trips on routes 10245795, 13031477, 13276222. | pending #8 | no action, already present |
-| London Underground District line | London Underground (TfL) | Yes. 8,902 trips on routes 12364306, 13031489, 13276236. | pending #8 | no action, already present |
-| London Underground Hammersmith & City line | London Underground (TfL) | Yes. 2,256 trips on routes 10245799, 13031462, 13276224. | pending #8 | no action, already present |
-| London Underground Jubilee line | London Underground (TfL) | Yes. 3,485 trips on route 10245834. | pending #8 | no action, already present |
-| London Underground Metropolitan line | London Underground (TfL) | Yes. 6,639 trips on routes 10245827, 13031473, 13276229. | pending #8 | no action, already present |
-| London Underground Northern line | London Underground (TfL) | Yes. 6,135 trips on route 10423673. | pending #8 | no action, already present |
-| London Underground Piccadilly line | London Underground (TfL) | Yes. 12,206 trips on routes 10245837, 13031500, 13276263, 13276268. | pending #8 | no action, already present |
-| London Underground Victoria line | London Underground (TfL) | Yes. 8,322 trips on routes 10245820, 12838352. | pending #8 | no action, already present |
-| London Underground Waterloo & City line | London Underground (TfL) | Yes. 531 trips on route 137823. | pending #8 | no action, already present |
-| Docklands Light Railway | London Docklands Light Railway - TfL | Yes. 5,539 trips on routes 10884596, 13031618. | pending #8 | no action, already present |
-| London Trams | London Tramlink | Yes. 2,670 trips on routes 13276884, 4069348. | pending #8 | no action, already present |
-| Elizabeth line | Transport for London Elizabeth line | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Liberty line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Lioness line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Mildmay line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Suffragette line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Weaver line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| London Overground Windrush line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | pending #8 | pending #8 |
-| Thames Clippers river bus | Thames Clippers | Yes. 517 trips on routes 11478119, 11478121, 11478117. | pending #8 | no action, already present |
-| London cable car | IFS Cloud Cable Car | Yes. 1,016 trips on route 723057. | pending #8 | no action, already present |
-| Portsmouth to Fishbourne | WightLink | Yes. 151 trips on route 222677. | pending #8 | no action, already present |
-| Portsmouth Harbour to Ryde Pier | WightLink | Yes. 100 trips on route 92706. | pending #8 | no action, already present |
-| Lymington to Yarmouth | WightLink | Yes. 80 trips on route 222679. | pending #8 | no action, already present |
-| Southsea to Ryde hovercraft | Hovertravel | Yes. 86 trips on route 141118. | pending #8 | no action, already present |
-| Southampton to East Cowes | Red Funnel | Yes. 114 trips on route 222675. | pending #8 | no action, already present |
-| Southampton to West Cowes Red Jet | Red Funnel | Yes. 146 trips on route 222676. | pending #8 | no action, already present |
-| Mersey ferry between Liverpool Pier Head and Seacombe | Mersey Ferries | Yes. 72 trips on routes 12459557, 12459558. | pending #8 | no action, already present |
+| London Underground Bakerloo line | London Underground (TfL) | Yes. 1,691 trips on route 10245790. | Partial. London Underground routes 2935 and 2939 have 2,346 trips between Elephant and Castle and Harrow and Wealdstone; other Bakerloo patterns are also present. | no action, already present |
+| London Underground Central line | London Underground (TfL) | Yes. 7,934 trips on routes 12364313, 12838358. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Circle line | London Underground (TfL) | Yes. 2,449 trips on routes 10245795, 13031477, 13276222. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground District line | London Underground (TfL) | Yes. 8,902 trips on routes 12364306, 13031489, 13276236. | Partial. London Underground routes 2950 and 2963 have 31 trips between Richmond and Upminster; other District patterns are also present. | no action, already present |
+| London Underground Hammersmith & City line | London Underground (TfL) | Yes. 2,256 trips on routes 10245799, 13031462, 13276224. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Jubilee line | London Underground (TfL) | Yes. 3,485 trips on route 10245834. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Metropolitan line | London Underground (TfL) | Yes. 6,639 trips on routes 10245827, 13031473, 13276229. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Northern line | London Underground (TfL) | Yes. 6,135 trips on route 10423673. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Piccadilly line | London Underground (TfL) | Yes. 12,206 trips on routes 10245837, 13031500, 13276263, 13276268. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Victoria line | London Underground (TfL) | Yes. 8,322 trips on routes 10245820, 12838352. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Underground Waterloo & City line | London Underground (TfL) | Yes. 531 trips on route 137823. | No separately identified service. Supplied by BODS. | no action, already present |
+| Docklands Light Railway | London Docklands Light Railway - TfL | Yes. 5,539 trips on routes 10884596, 13031618. | No separately identified service. Supplied by BODS. | no action, already present |
+| London Trams | London Tramlink | Yes. 2,670 trips on routes 13276884, 4069348. | No separately identified service. Supplied by BODS. | no action, already present |
+| Elizabeth line | Transport for London Elizabeth line | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. TfL Rail routes 7489 and 7530 have 1,696 trips between Abbey Wood and Reading; Heathrow and Shenfield branches are also present. | no action, already present |
+| London Overground Liberty line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Routes 2886 and 2898 have 348 trips between Romford and Upminster. | no action, already present |
+| London Overground Lioness line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Routes 2868 and 2902 have 1,981 trips between Euston and Watford Junction. | no action, already present |
+| London Overground Mildmay line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Routes 2884 and 2892 have 1,985 trips between Richmond and Stratford; Clapham Junction routes 2836 and 2890 are also present. | no action, already present |
+| London Overground Suffragette line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Routes 2818 and 2851 have 1,336 trips between Barking Riverside and Gospel Oak. | no action, already present |
+| London Overground Weaver line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Liverpool Street routes 2830, 2831, 2849, 2870, 2871 and 2872 have 6,905 trips serving Cheshunt, Chingford and Enfield Town. | no action, already present |
+| London Overground Windrush line | Transport for London London Overground | No matching agency or route. The only type 2 routes belong to the Docklands Light Railway. | Yes. Routes 2861 and 2905 have 1,827 trips between Highbury and Islington and West Croydon; Clapham Junction, Crystal Palace and New Cross branches are also present. | no action, already present |
+| Thames Clippers river bus | Thames Clippers | Yes. 517 trips on routes 11478119, 11478121, 11478117. | No separately identified service. Supplied by BODS. | no action, already present |
+| London cable car | IFS Cloud Cable Car | Yes. 1,016 trips on route 723057. | No separately identified service. Supplied by BODS. | no action, already present |
+| Portsmouth to Fishbourne | WightLink | Yes. 151 trips on route 222677. | No separately identified service. Supplied by BODS. | no action, already present |
+| Portsmouth Harbour to Ryde Pier | WightLink | Yes. 100 trips on route 92706. | Yes. South Western Railway ferry routes 5874 and 5875 connect Portsmouth Harbour and Ryde Pier Head. | no action, already present |
+| Lymington to Yarmouth | WightLink | Yes. 80 trips on route 222679. | Yes. South Western Railway ferry routes 5873 and 5876 connect Lymington Pier and Yarmouth. | no action, already present |
+| Southsea to Ryde hovercraft | Hovertravel | Yes. 86 trips on route 141118. | No separately identified service. Supplied by BODS. | no action, already present |
+| Southampton to East Cowes | Red Funnel | Yes. 114 trips on route 222675. | No separately identified service. Supplied by BODS. | no action, already present |
+| Southampton to West Cowes Red Jet | Red Funnel | Yes. 146 trips on route 222676. | No separately identified service. Supplied by BODS. | no action, already present |
+| Mersey ferry between Liverpool Pier Head and Seacombe | Mersey Ferries | Yes. 72 trips on routes 12459557, 12459558. | No separately identified service. Supplied by BODS. | no action, already present |
 
 ## Additional ferry services found
 
@@ -70,42 +70,55 @@ These are candidates based on their location and route descriptions, not claims 
 
 | Service | Operator | Present in BODS | Present in the rail feed | Resolution |
 |---|---|---|---|---|
-| Mount Batten to Plymouth Barbican | Mountbatten Water Taxis | Yes. 228 trips on route 10148609. | pending #8 | no action, already present |
-| Bosham Hoe to West Itchenor | Itchenor Ferry | Yes. 72 trips on route 12736258. | pending #8 | no action, already present |
-| Shepperton to Weybridge | Nauticalia Ferry | Yes. 207 trips on route 12736259. | pending #8 | no action, already present |
-| Bristol Cross Harbour Ferry | Number Seven Boat Trips | Yes. 246 trips on route 1316912. | pending #8 | no action, already present |
-| Woolwich Ferry | Woolwich Free Ferry | Yes. 128 trips on route 137948. | pending #8 | no action, already present |
-| Flushing to Falmouth | Flushing Ferry | Yes. 158 trips on routes 141084, 141088. | pending #8 | no action, already present |
-| St Mawes Ferry | St Mawes Ferry | Yes. 106 trips on routes 141090, 141094. | pending #8 | no action, already present |
-| Fowey to Polruan | Polruan Ferry Co Ltd | Yes. 261 trips on route 141093. | pending #8 | no action, already present |
-| Cremyll to Plymouth | Plymouth Boat Trips | Yes. 348 trips on routes 141095, 405325. | pending #8 | no action, already present |
-| Fowey to Bodinnick | Polruan Passenger Ferry, Bodinnick Vehicle Ferry | Yes. 480 trips on route 222656. | pending #8 | no action, already present |
-| Mudeford Ferry | Mudeford Ferry | Yes. 108 trips on route 222667. | pending #8 | no action, already present |
-| Tuckton Ferry | Bournemouth Boating Ser | Yes. 54 trips on route 222668. | pending #8 | no action, already present |
-| St Mawes to Place | St Mawes Ferry | Yes. 96 trips on route 3080. | pending #8 | no action, already present |
-| Torpoint to Plymouth | Tamar Bridge & Torpoint Ferry Joint Committee | Yes. 779 trips on route 3084. | pending #8 | no action, already present |
-| Plymouth Barbican to Cawsand | Plymouth Boat Trips | Yes. 36 trips on route 3091. | pending #8 | no action, already present |
-| Plymouth Barbican Ferry | Plymouth Boat Trips | Yes. 39 trips on route 3092. | pending #8 | no action, already present |
-| Dartmouth Higher Ferry to Kingswear | Dartmouth Higher Ferry | Yes. 378 trips on route 3094. | pending #8 | no action, already present |
-| Dartmouth Lower Ferry to Kingswear | River Link | Yes. 464 trips on route 3095. | pending #8 | no action, already present |
-| Salcombe to East Portlemouth | Salcombe Ferry | Yes. 138 trips on route 3111. | pending #8 | no action, already present |
-| Sandbanks Ferry | Sandbanks Ferry | Yes. 392 trips on route 3171. | pending #8 | no action, already present |
-| Cowes Floating Bridge | Cowes Ferry | Yes. 900 trips on route 3213. | pending #8 | no action, already present |
-| Gosport to Portsmouth | Gosport-Portsmouth Ferry | Yes. 592 trips on route 3214. | pending #8 | no action, already present |
-| Hayling Ferry | Hayling Ferry Limited | Yes. 116 trips on route 3215. | pending #8 | no action, already present |
-| Brightlingsea to East Mersea | Brightlingsea Ferry Services | Yes. 30 trips on route 3345290. | pending #8 | no action, already present |
-| Harwich Harbour ferry serving Harwich, Felixstowe and Shotley | Harwich Harbour Ferry | Yes. 58 trips on routes 3345291, 9475106. | pending #8 | no action, already present |
-| Plymouth to Saltash | Plymouth Boat Trips | Yes. 36 trips on route 3916898. | pending #8 | no action, already present |
-| Feock to Philleigh | Fal River Links | Yes. 254 trips on route 405317. | pending #8 | no action, already present |
-| Padstow to Rock | Padstow Harbour Commissioners | Yes. 198 trips on route 405331. | pending #8 | no action, already present |
-| Shields Ferry between North Shields and South Shields | Nexus Ferry | Yes. 210 trips on route 66999. | pending #8 | no action, already present |
-| Bristol Ferry Boats | Bristol Ferry Boat Company | Yes. 36 trips on route 8726042. | pending #8 | no action, already present |
-| Felixstowe Foot Ferry | Felixstowe Ferry Boat Yard | Yes. 140 trips on routes 9286766, 9286767. | pending #8 | no action, already present |
-| Burnham on Crouch to Wallasea Island | Burnham Ferry | Yes. 60 trips on route 9619885. | pending #8 | no action, already present |
-| Mevagissey to Fowey | Mevagissey Ferry | Yes. 24 trips on route 96401. | pending #8 | no action, already present |
+| Mount Batten to Plymouth Barbican | Mountbatten Water Taxis | Yes. 228 trips on route 10148609. | No separately identified service. Supplied by BODS. | no action, already present |
+| Bosham Hoe to West Itchenor | Itchenor Ferry | Yes. 72 trips on route 12736258. | No separately identified service. Supplied by BODS. | no action, already present |
+| Shepperton to Weybridge | Nauticalia Ferry | Yes. 207 trips on route 12736259. | No separately identified service. Supplied by BODS. | no action, already present |
+| Bristol Cross Harbour Ferry | Number Seven Boat Trips | Yes. 246 trips on route 1316912. | No separately identified service. Supplied by BODS. | no action, already present |
+| Woolwich Ferry | Woolwich Free Ferry | Yes. 128 trips on route 137948. | No separately identified service. Supplied by BODS. | no action, already present |
+| Flushing to Falmouth | Flushing Ferry | Yes. 158 trips on routes 141084, 141088. | No separately identified service. Supplied by BODS. | no action, already present |
+| St Mawes Ferry | St Mawes Ferry | Yes. 106 trips on routes 141090, 141094. | No separately identified service. Supplied by BODS. | no action, already present |
+| Fowey to Polruan | Polruan Ferry Co Ltd | Yes. 261 trips on route 141093. | No separately identified service. Supplied by BODS. | no action, already present |
+| Cremyll to Plymouth | Plymouth Boat Trips | Yes. 348 trips on routes 141095, 405325. | No separately identified service. Supplied by BODS. | no action, already present |
+| Fowey to Bodinnick | Polruan Passenger Ferry, Bodinnick Vehicle Ferry | Yes. 480 trips on route 222656. | No separately identified service. Supplied by BODS. | no action, already present |
+| Mudeford Ferry | Mudeford Ferry | Yes. 108 trips on route 222667. | No separately identified service. Supplied by BODS. | no action, already present |
+| Tuckton Ferry | Bournemouth Boating Ser | Yes. 54 trips on route 222668. | No separately identified service. Supplied by BODS. | no action, already present |
+| St Mawes to Place | St Mawes Ferry | Yes. 96 trips on route 3080. | No separately identified service. Supplied by BODS. | no action, already present |
+| Torpoint to Plymouth | Tamar Bridge & Torpoint Ferry Joint Committee | Yes. 779 trips on route 3084. | No separately identified service. Supplied by BODS. | no action, already present |
+| Plymouth Barbican to Cawsand | Plymouth Boat Trips | Yes. 36 trips on route 3091. | No separately identified service. Supplied by BODS. | no action, already present |
+| Plymouth Barbican Ferry | Plymouth Boat Trips | Yes. 39 trips on route 3092. | No separately identified service. Supplied by BODS. | no action, already present |
+| Dartmouth Higher Ferry to Kingswear | Dartmouth Higher Ferry | Yes. 378 trips on route 3094. | No separately identified service. Supplied by BODS. | no action, already present |
+| Dartmouth Lower Ferry to Kingswear | River Link | Yes. 464 trips on route 3095. | No separately identified service. Supplied by BODS. | no action, already present |
+| Salcombe to East Portlemouth | Salcombe Ferry | Yes. 138 trips on route 3111. | No separately identified service. Supplied by BODS. | no action, already present |
+| Sandbanks Ferry | Sandbanks Ferry | Yes. 392 trips on route 3171. | No separately identified service. Supplied by BODS. | no action, already present |
+| Cowes Floating Bridge | Cowes Ferry | Yes. 900 trips on route 3213. | No separately identified service. Supplied by BODS. | no action, already present |
+| Gosport to Portsmouth | Gosport-Portsmouth Ferry | Yes. 592 trips on route 3214. | No separately identified service. Supplied by BODS. | no action, already present |
+| Hayling Ferry | Hayling Ferry Limited | Yes. 116 trips on route 3215. | No separately identified service. Supplied by BODS. | no action, already present |
+| Brightlingsea to East Mersea | Brightlingsea Ferry Services | Yes. 30 trips on route 3345290. | No separately identified service. Supplied by BODS. | no action, already present |
+| Harwich Harbour ferry serving Harwich, Felixstowe and Shotley | Harwich Harbour Ferry | Yes. 58 trips on routes 3345291, 9475106. | No separately identified service. Supplied by BODS. | no action, already present |
+| Plymouth to Saltash | Plymouth Boat Trips | Yes. 36 trips on route 3916898. | No separately identified service. Supplied by BODS. | no action, already present |
+| Feock to Philleigh | Fal River Links | Yes. 254 trips on route 405317. | No separately identified service. Supplied by BODS. | no action, already present |
+| Padstow to Rock | Padstow Harbour Commissioners | Yes. 198 trips on route 405331. | No separately identified service. Supplied by BODS. | no action, already present |
+| Shields Ferry between North Shields and South Shields | Nexus Ferry | Yes. 210 trips on route 66999. | No separately identified service. Supplied by BODS. | no action, already present |
+| Bristol Ferry Boats | Bristol Ferry Boat Company | Yes. 36 trips on route 8726042. | No separately identified service. Supplied by BODS. | no action, already present |
+| Felixstowe Foot Ferry | Felixstowe Ferry Boat Yard | Yes. 140 trips on routes 9286766, 9286767. | No separately identified service. Supplied by BODS. | no action, already present |
+| Burnham on Crouch to Wallasea Island | Burnham Ferry | Yes. 60 trips on route 9619885. | No separately identified service. Supplied by BODS. | no action, already present |
+| Mevagissey to Fowey | Mevagissey Ferry | Yes. 24 trips on route 96401. | No separately identified service. Supplied by BODS. | no action, already present |
 
 ## Gaps and remaining checks
 
-The only missing expected services in BODS are the Elizabeth line and the Liberty, Lioness, Mildmay, Suffragette, Weaver and Windrush Overground lines. Each resolution remains "pending #8" until the rail feed is audited. There are no confirmed missing Underground lines or missing ferry services among the comparison rows.
+The seven expected services absent from BODS are supplied by rail: the Elizabeth line and the Liberty, Lioness, Mildmay, Suffragette, Weaver and Windrush Overground lines. Every comparison row is present in at least one feed and resolves to no action, already present. Dated morning departures and the two routing checks remain to be completed below.
 
 Milestone 1 already found London journeys close to the user's TfL comparison, while rail-dependent journeys were slower. Its seven schools with no transit reach are a separate routing question, not evidence of a missing ferry or Underground line. The Grammar School At Leeds and Lord Wandsworth College remain candidates for coordinate or stop-matching checks recorded on issue #9. No supplement, timetable conversion, graph import or server run was performed for this half.
+
+## Rail audit
+
+The second audit used uv run fixtures/audit_feeds.py /Users/rob/git/find-schools-by-time/motis-spike/feeds/rail.zip. The complete output is saved locally as motis-spike/rail-gap-audit.txt. The feed has SHA256 7652de90bda13dbf80947a48e831be48796ec92fce3fa20058993566d9d2e43e and was built as recorded in the Rail GTFS section of NOTES.md. Counts cover the full calendar. The row evidence gives representative routes rather than claiming that their trip totals describe an entire public line.
+
+| Route type | Meaning | Routes | Trips |
+|---|---|---|---|
+| 1 | Metro | 54 | 6,556 |
+| 2 | Rail | 5,218 | 440,577 |
+| 3 | Bus | 2,229 | 81,102 |
+| 4 | Ferry | 45 | 919 |
+
+All 45 rail-feed ferry routes were inspected. Of the comparison rows, the rail feed supplies Portsmouth Harbour to Ryde Pier Head and Lymington to Yarmouth. Its other ferry routes serve Scotland, Wales, Ireland, the Isle of Man, the Isles of Scilly or the Netherlands; they do not add another local crossing to an English sixth form to this comparison list. The rail feed's partial Underground records do not replace the named lines in BODS. Its London Trams and Docklands Light Railway services are not separately identified.
