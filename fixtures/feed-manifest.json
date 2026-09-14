@@ -118,5 +118,16 @@
     "valid_from": "2026-05-17",
     "valid_to": "2027-05-15",
     "licence": "National Rail timetable (Rail Delivery Group, Rail Data Marketplace, \"Timetable - Full Refresh - Weekly\", RSPS5046 CIF)"
+  },
+  {
+    "path": "data/codepo_gb.zip",
+    "source": "https://api.os.uk/downloads/v1/products/CodePointOpen/downloads?area=GB&format=CSV&redirect",
+    "downloaded": "2026-09-14",
+    "bytes": 14461176,
+    "sha256": "fc266d063e4d8c27bd23ea8a65c6855162942cf6b9fc73c91d0930d442a0eefb",
+    "md5": "42ecd9a7db141608dc6ab63f2dfb0bc3",
+    "valid_from": null,
+    "valid_to": null,
+    "licence": "Ordnance Survey Code-Point Open (postcode mask for the origin grid)"
   }
 ]
