@@ -10,6 +10,10 @@ import zipfile
 from audit_feeds import rows
 
 
+def clock(t):
+    return f'{t // 3600:02}:{t // 60 % 60:02}:{t % 60:02}'
+
+
 def check():
     source = io.BytesIO()
     with zipfile.ZipFile(source, 'w') as z:
@@ -69,7 +73,6 @@ def morning(source, wanted):
                 continue
             key = (trips[trip]['route_id'], first['stop_id'], last['stop_id'])
             counts[key] = counts.get(key, 0) + 1
-            clock = lambda t: f'{t // 3600:02}:{t // 60 % 60:02}:{t % 60:02}'
             candidate = dict(route=key[0], trip=trip, service=trips[trip]['service_id'], service_date=date,
                              from_stop=key[1], to_stop=key[2], origin=stops[key[1]], destination=stops[key[2]],
                              departure=clock(departure - offset), arrival=clock(arrival - offset))

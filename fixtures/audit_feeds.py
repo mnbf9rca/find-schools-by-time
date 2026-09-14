@@ -33,7 +33,7 @@ def audit(source, output):
                 destinations[route].add(row['trip_headsign'])
     by_type, by_agency = defaultdict(Counter), defaultdict(Counter)
     for key, row in routes.items():
-        agency = row.get('agency_id') or (next(iter(agencies)) if len(agencies) == 1 else '')
+        agency = row['agency_id']
         row['agency_id'] = agency
         row['agency_name'] = agencies[agency]
         for counts in (by_type[int(row['route_type'])], by_agency[agency]):
