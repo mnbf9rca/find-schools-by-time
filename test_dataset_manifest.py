@@ -36,8 +36,7 @@ class DatasetManifestTests(unittest.TestCase):
         manifest['run'].update(requests_retried=1, transpose_seconds=0.25,
                                schools_completed=4373, school_bytes=100,
                                record_bytes=200, walk_missing_pairs=0,
-                               walk_nearby_pairs=10, walk_gapfill_requests=2,
-                               walk_gapfill_recovered=3)
+                               walk_nearby_pairs=10)
         self.assertEqual(validate(manifest), [])
 
     def test_rejects_invalid_fields_at_every_level(self):
