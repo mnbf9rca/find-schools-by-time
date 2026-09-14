@@ -108,7 +108,7 @@ These are candidates based on their location and route descriptions, not claims 
 
 The seven expected services absent from BODS are supplied by rail: the Elizabeth line and the Liberty, Lioness, Mildmay, Suffragette, Weaver and Windrush Overground lines. Every comparison row is present in at least one feed and resolves to no action, already present. The eleven Underground lines and seven named crossings also pass the dated morning check. No supplement is required; the two routing responses are recorded below.
 
-Milestone 1 already found London journeys close to the user's TfL comparison, while rail-dependent journeys were slower. Its seven schools with no transit reach are a separate routing question, not evidence of a missing ferry or Underground line. The Grammar School At Leeds and Lord Wandsworth College remain candidates for coordinate or stop-matching checks recorded on issue #9. No supplement, timetable conversion, graph import or server run was performed for this half.
+Milestone 1 already found London journeys close to the user's TfL comparison, while rail-dependent journeys were slower. Its seven schools with no transit reach are a separate routing question, not evidence of a missing ferry or Underground line. The Grammar School At Leeds and Lord Wandsworth College remain candidates for coordinate or stop-matching checks recorded on issue #9. The second half uses the existing combined graph from issue #8 for the two routing checks below.
 
 ## Rail audit
 
@@ -130,3 +130,69 @@ The check joins calendar bounds and weekday flags with calendar_dates additions 
 Run uv run fixtures/check_morning.py --check for the calendar, cancellation, overnight and ordering checks. Run uv run fixtures/check_morning.py /Users/rob/git/find-schools-by-time/motis-spike/feeds/bods.zip followed by the Underground and seven crossing route identifiers in the comparison rows to reproduce the scan. The complete result is saved locally in motis-spike/bods-morning-audit.json. The scanner stores only selected trip endpoints, rather than the 5.1 GB stop-times table. These are timetable checks, not a guarantee of operation or school reachability from every departure.
 
 All eleven Underground lines have at least one complete qualifying trip. All seven named crossings have sailings in both directions arriving before 08:30. The Mersey commuter service is route 12459557; the other Mersey route need not operate that morning for the crossing to be covered. No new raw input or supplement is needed, so there is no new licence row, manifest entry, dataset configuration or import.
+
+## Routing checks
+
+The existing combined graph from issue #8 was served from motis-spike with ./motis server -d data.rail. No graph was renamed, overwritten or reimported. Requests used GET /api/v6/plan with arriveBy=true and timetableView=false, and time=2026-09-16T08:30:00%2B01%3A00. The older spec's version 1 endpoint and graph-renaming instructions have been corrected to match the tested version 6 API and separate configuration and data directories.
+
+Ryde School with Upper Chine is present in schools.json, establishment 118223, at latitude 50.72824 and longitude -1.167747. The island request ran from Portsmouth Harbour station, 50.7967,-1.1082, to that school. The London request ran from Oxford Circus, 51.5152,-0.1419, to Canary Wharf, 51.5054,-0.0235. Both returned HTTP 200 in about 0.03 seconds and two itineraries each, saved locally as motis-spike/gap-plan-island.json and motis-spike/gap-plan-london.json.
+
+The first island itinerary meets the ferry check, reaching Ryde School at 08:28. The second London itinerary meets the Underground check, using only Bakerloo and Jubilee transit legs and arriving at 08:30. The London response also offers the Elizabeth line via a walk to Bond Street, so this example does not uniquely favour the Underground; the actual Underground-only alternative establishes the requested routing result. All legs of both returned alternatives are recorded below. Times are British Summer Time on Wednesday 16 September 2026.
+
+### Island itinerary 1
+
+Departure 07:29, arrival 08:28.
+
+| Leg | Mode | Route name | Dataset | Departure | Arrival |
+|---|---|---|---|---|---|
+| START to The Hard Interchange | Walk | Street walk | OpenStreetMap | 07:29 | 07:35 |
+| The Hard Interchange to Clarence Pier | Bus | 25 | BODS | 07:35 | 07:47 |
+| Clarence Pier to Southsea Hoverport | Walk | Street walk | OpenStreetMap | 07:47 | 07:49 |
+| Southsea Hoverport to Ryde Hoverport | Ferry | IOW Hovercraft | BODS | 08:00 | 08:10 |
+| Ryde Hoverport to Transport Interchange | Walk | Street walk | OpenStreetMap | 08:10 | 08:12 |
+| Transport Interchange to Parish Church | Bus | 9 | BODS | 08:20 | 08:26 |
+| Parish Church to END | Walk | Street walk | OpenStreetMap | 08:26 | 08:28 |
+
+### Island itinerary 2
+
+Departure 07:31, arrival 08:28.
+
+| Leg | Mode | Route name | Dataset | Departure | Arrival |
+|---|---|---|---|---|---|
+| START to The Hard Interchange | Walk | Street walk | OpenStreetMap | 07:31 | 07:37 |
+| The Hard Interchange to Kings Road Junction | Bus | 3 | BODS | 07:37 | 07:41 |
+| Kings Road Junction to Kings Road Junction | Walk | Street walk | OpenStreetMap | 07:41 | 07:43 |
+| Kings Road Junction to Hovertravel Stop | Bus | H1 | BODS | 07:45 | 07:47 |
+| Hovertravel Stop to Southsea Hoverport | Walk | Street walk | OpenStreetMap | 07:47 | 07:49 |
+| Southsea Hoverport to Ryde Hoverport | Ferry | IOW Hovercraft | BODS | 08:00 | 08:10 |
+| Ryde Hoverport to Transport Interchange | Walk | Street walk | OpenStreetMap | 08:10 | 08:12 |
+| Transport Interchange to Parish Church | Bus | 9 | BODS | 08:20 | 08:26 |
+| Parish Church to END | Walk | Street walk | OpenStreetMap | 08:26 | 08:28 |
+
+### London itinerary 1
+
+Departure 07:55, arrival 08:28.
+
+| Leg | Mode | Route name | Dataset | Departure | Arrival |
+|---|---|---|---|---|---|
+| START to BOND STREET | Walk | Street walk | OpenStreetMap | 07:55 | 08:07 |
+| BOND STREET to CANARY WHARF | Regional rail | Train from Heathrow Terminal 4 to ABBEY WOOD (CROSSRAIL) | Rail | 08:07 | 08:21 |
+| CANARY WHARF to END | Walk | Street walk | OpenStreetMap | 08:21 | 08:28 |
+
+### London itinerary 2
+
+Departure 07:57, arrival 08:30.
+
+| Leg | Mode | Route name | Dataset | Departure | Arrival |
+|---|---|---|---|---|---|
+| START to Oxford Circus Underground Station | Walk | Street walk | OpenStreetMap | 07:57 | 08:02 |
+| Oxford Circus Underground Station to Waterloo Underground Station | Underground | Bakerloo | BODS | 08:02 | 08:09 |
+| Waterloo Underground Station to Waterloo Underground Station | Walk | Street walk | OpenStreetMap | 08:09 | 08:11 |
+| Waterloo Underground Station to Canary Wharf Underground Station | Underground | Jubilee | BODS | 08:11 | 08:22 |
+| Canary Wharf Underground Station to END | Walk | Street walk | OpenStreetMap | 08:22 | 08:30 |
+
+The ferry is the BODS Hovertravel service from Southsea Hoverport to Ryde Hoverport, 08:00 to 08:10. Its trip identifier is 20260916_08:00_bods_VJ95d556bad01ac9c3462626362b50be5630fa4205. The Underground-only itinerary uses Bakerloo from Oxford Circus at 08:02 to Waterloo at 08:09, then Jubilee from Waterloo at 08:11 to Canary Wharf at 08:22. Both transit legs identify London Underground as their agency and carry the BODS namespace in their trip and stop identifiers. Walking and interchange time bring the final arrival to 08:30.
+
+No genuine gap was found among the comparison rows, so no supplement was built. The additional ferry services remain presence checks; this audit does not assert a school-morning timetable for all of them. Issue #8 separately recorded the removal of 42 calls at the Barnstaple station bus stop on the test date; that bus-stop coverage question is outside this London and ferry comparison and remains an explicit limitation.
+
+Both script self-checks, all 58 Python unit tests and the JavaScript sorting checks pass. The controlled server was stopped after both requests. No MOTIS executable remains; the final process check is recorded in the scratch notes.

@@ -30,11 +30,11 @@ The Elizabeth line and London Overground are National Rail services and appear i
 
 Add nothing that is already present. For a missing London service, take the registered TfL Journey Planner TransXChange feed and convert only the missing services with `transxchange2gtfs()`, writing the result to `motis-spike/feeds/tfl.zip`. For a missing ferry, type the operator's published weekday timetable by hand into a small GTFS zip under `motis-spike/feeds/`, holding one agency, its piers, one route and one calendar per crossing, and enough morning sailings in each direction to support an arrival by 08:30. Do not import the Traveline National Dataset, because BODS already includes it.
 
-Before any new source is downloaded, it gets a row in `LICENSES/README.md` and its verbatim licence text in `LICENSES/`. Each new zip is registered as its own dataset under `timetable.datasets` in `motis-spike/data/config.yml`, and the existing graph directory is renamed rather than overwritten so the milestone 1 measurements stay reproducible.
+Before any new source is downloaded, it gets a row in `LICENSES/README.md` and its verbatim licence text in `LICENSES/`. Each new zip is registered as its own dataset under `timetable.datasets` in a copy of the existing configuration. Import with `-c` for that configuration and `-d` for a new data directory, preserving every existing graph.
 
 ## Done when
 
-The gap list exists with a resolution on every row, and two plan requests through `GET /api/v1/plan`, both arriving by 08:30 on Wednesday 2026-09-16, return itineraries of the right shape.
+The gap list exists with a resolution on every row, and two plan requests through `GET /api/v6/plan`, both arriving by 08:30 on Wednesday 2026-09-16, return itineraries of the right shape.
 
 1. Portsmouth to a sixth form on the Isle of Wight, returning an itinerary that contains a ferry leg.
 2. A journey between two central London points whose only sensible route is the Underground, returning an itinerary whose transit legs are all London Underground.
