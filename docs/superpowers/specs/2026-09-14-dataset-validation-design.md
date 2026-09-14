@@ -24,7 +24,7 @@ A band is `seconds // 600`, so band 6 covers 3,600 up to but not including 4,200
 
 5. **Reach distance.** Measuring from the cell centre, the one speed bound worth asserting is walking: 7.5 km in 90 minutes, because MOTIS walks at about 4.15 km/h in issue #4 journey 8 and the runner does not pin the walk speed. The cycling, driving and transit bounds are dropped, having no figure behind them.
 
-    Asserting the radius cannot fail, so report instead the greatest distance per mode at which a value was stored, and fail if it reaches the pre-margin measurement in `docs/decisions/2026-09-14-per-mode-pruning-radii.md`: 81.2 km public transport, 22.1 km cycling, 122.8 km driving. A value out at the measured edge is what radius truncation looks like.
+    Report the greatest distance per mode at which a value was stored. Only cycling carries a threshold: fail if it reaches 27 km, the distance an 18 km/h bike covers in 90 minutes, which sits inside the 30 km radius that `docs/decisions/2026-09-14-per-mode-pruning-radii.md` keeps. Public transport, walking and driving send every origin, so no radius can truncate them and their figures are reported, not asserted.
 
 6. **Walk coverage.** Read `walk_missing_pairs` from the manifest first: the runner counts the same gap, so a non-zero figure says where to look before any record is opened. Every origin whose centre is within 2 km straight line of a school has a walking value. Milestone 1 left four nearby schools with empty street durations; this check would have caught it. Two exclusions prevent failures on correct data.
 
