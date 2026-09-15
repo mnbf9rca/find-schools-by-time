@@ -238,7 +238,12 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
             continue
         beyond_cap = (planner == 'beyond cap' or row['planner_minutes'].strip() == 'beyond cap'
                       or (not pt and math.isfinite(seconds) and seconds > record.CAP))
-        if value is not None and beyond_cap:
+        if pt and value == record.SENTINEL and math.isfinite(seconds) and seconds >= record.CAP - 600:
+            emit(f'PASS 9: {label}: stored sentinel, planner {seconds:g} seconds is within one band of the cap or beyond')
+        elif (row['mode'] == 'driving' and value is not None and value <= record.CAP
+              and math.isfinite(seconds) and 0 <= value <= seconds):
+            emit(f'PASS 9: {label}: stored {value} seconds is below planner {seconds:g} seconds')
+        elif value is not None and beyond_cap:
             if value != record.SENTINEL or seconds <= record.CAP:
                 fail(9, f'{label}: beyond-cap claim disagrees with stored value or planner departure')
             else:

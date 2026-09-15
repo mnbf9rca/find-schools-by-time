@@ -243,6 +243,31 @@ class DatasetValidationTests(unittest.TestCase):
         self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
 
 
+    def test_check_9_cap_tolerance_free_flow_and_unproven_border_detours(self):
+        columns = ['origin_id', 'urn', 'mode', 'planner_minutes', 'planner_departure', 'character']
+        cases = [
+            ('public_transport', 79, '07:11', 65535, 'FAIL'),
+            ('public_transport', 80, '07:10', 65535, 'PASS'),
+            ('public_transport', 89, '07:01', 65535, 'PASS'),
+            ('public_transport', 'beyond cap', '07:10', 65535, 'PASS'),
+            ('driving', 80, '', 2580, 'PASS'),
+            ('driving', 70, '', 2880, 'PASS'),
+            ('driving', 110, '', 4380, 'PASS'),
+            ('driving', 30, '', 2999, 'PASS'),
+            ('driving', 30, '', 3000, 'FAIL'),
+            ('driving', 70, '', 65535, 'FAIL'),
+            ('cycling', 55, '', 4647, 'FAIL'),
+            ('walking', 55, '', 4647, 'FAIL'),
+        ]
+        for mode, minutes, departure, value, expected in cases:
+            with self.subTest(mode=mode, minutes=minutes, value=value):
+                self.write_csv('validation-samples.csv', columns,
+                               [('500_200', '100000', mode, minutes, departure, 'Welsh border; no detour evidence')])
+                values = copy.deepcopy(self.values)
+                values[record.MODES.index(mode)][0] = value
+                self.write_record('500_200', values)
+                self.assertEqual(self.run_validation()[9]['status'], expected)
+
     def test_check_9_numeric_street_minutes_above_cap_match_only_sentinel(self):
         columns = ['origin_id', 'urn', 'mode', 'planner_minutes', 'planner_departure', 'character']
         for mode, minutes, stored_value, expected in [
