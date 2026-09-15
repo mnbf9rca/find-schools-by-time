@@ -20,11 +20,17 @@ Public transport, the walking plane that shares its request, and driving send ev
 
 The caps carry three units: `maxTravelTime: 90` minutes on the transit leg, `maxDirectTime: 5400` seconds on the direct leg, `max: 5400` seconds for driving. All three set `arriveBy: true` and `maxMatchingDistance: 250` metres; the intermodal pair also set `time: "2026-09-16T08:30:00+01:00"`.
 
-Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: ["WALK"]`, `maxPreTransitTime: 900`, `maxPostTransitTime: 900` and `useRoutedTransfers: true`. `fixtures/measure_reach.py` sent those five when it measured the reach, so the radii in `docs/decisions/2026-09-14-per-mode-pruning-radii.md` hold only under them: the two 15 minute limits bound the walk to and from transit, and changing either changes which origins reach a school.
+Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: ["WALK"]`, `maxPreTransitTime: 1800`, `maxPostTransitTime: 900` and `useRoutedTransfers: true`. `docs/decisions/2026-09-15-thirty-minute-access-walk.md` sets the 1,800 seconds at the home end; the school end stays at 900. `fixtures/measure_reach.py` sent 900 at both ends when it measured the reach, so the cycling radius predates this change.
 
 Three requests fill four planes: the public transport response's `street_durations` entry per origin is the direct walk, so the walking plane needs no fourth request and inherits the 90 kilometre transit radius. That leg is the intermodal endpoint's, not the street endpoint the spike used, and `motis-spike/NOTES.md` records empty `street_durations` for four nearby schools with no follow-up. Hence the explicit `maxMatchingDistance`, the runbook's sample run checking walk coverage against straight-line distance, and the same check in the issue #18 validator: an origin within 2 km of a school with no walk value is a defect to chase.
 
 In the 100-school sample, 42 of the 1,161 origin and school pairs within 2 km have no walking value, and a school-outward request at 500 metres matching recovered one and was dropped. The remaining misses are origin and school pairs that MOTIS cannot match to the street network, reported per pair by the issue #18 validator and tracked in issue #57.
+
+A fallback pass runs once every school file is written and before the transpose. For each origin whose four planes are all sentinel, send one origin-outward street request per street mode: `POST /api/v1/one-to-many` with `arriveBy: false`, the origin as `one` and every school as `many`, the same caps and 250 metre matching, cycling through the intermodal endpoint as before. Fill the walking, cycling and driving planes from the replies. Public transport is not filled, because a departure-time search cannot express arrive-by.
+
+The reverse street search returns nothing for about 1,120 origins that route normally outward: of twenty random empty origins, eight route outward at 250 metre matching, and all twenty fail in the orientation the runner uses. One outward request per empty origin costs about 1,120 requests per mode.
+
+The manifest's `run` block records `fallback_origins` and `fallback_requests`.
 
 Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone; discard anything over 5,400 seconds. On a non-200 or a dropped connection, halve the batch and retry each half down to a single origin, which is a hard error.
 
@@ -76,7 +82,8 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
           "requests": 26238, "requests_retried": 12, "peak_server_rss_bytes": 9448928051,
           "transpose_seconds": 214.5, "schools_completed": 4373, "school_bytes": 500000000,
           "record_bytes": 3261103528, "output_bytes": 3761103528,
-          "walk_missing_pairs": 42, "walk_nearby_pairs": 1161}
+          "walk_missing_pairs": 42, "walk_nearby_pairs": 1161,
+          "fallback_origins": 1120, "fallback_requests": 3360}
 }
 ```
 
