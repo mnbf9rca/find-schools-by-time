@@ -243,6 +243,32 @@ class DatasetValidationTests(unittest.TestCase):
         self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
 
 
+    def test_check_9_allows_only_one_documented_disagreement(self):
+        columns = ['origin_id', 'urn', 'mode', 'planner_minutes', 'planner_departure', 'character', 'note']
+        for first_note, second_note, second_value, expected in [
+                ('route choice', '', 3000, 'PASS'),
+                ('', '', 3000, 'FAIL'),
+                ('   ', '', 3000, 'FAIL'),
+                ('', 'unrelated note on an agreeing row', 3000, 'FAIL'),
+                ('route choice', 'another cause', 4647, 'FAIL'),
+                ('route choice', '', 4647, 'FAIL')]:
+            with self.subTest(first_note=first_note, second_note=second_note, second_value=second_value):
+                self.write_csv('validation-samples.csv', columns, [
+                    ('500_200', '100000', 'cycling', 55, '', 'border', first_note),
+                    ('500_200', '100001', 'cycling', 55, '', 'rural', second_note)])
+                values = copy.deepcopy(self.values)
+                values[2][:2] = [4647, second_value]
+                self.write_record('500_200', values)
+                self.assertEqual(self.run_validation()[9]['status'], expected)
+                if expected == 'PASS':
+                    self.assertTrue(any('DOCUMENTED 9' in line and first_note in line for line in self.messages))
+        self.write_csv('validation-samples.csv', columns,
+                       [('500_200', '100000', 'cycling', -1, '', 'border', 'route choice')])
+        self.assertEqual(self.run_validation()[9]['status'], 'FAIL')
+        self.write_csv('validation-samples.csv', columns,
+                       [('500_200', '100000', 'cycling', 95, '', 'border', 'route choice')])
+        self.assertEqual(self.run_validation()[9]['status'], 'PASS')
+
     def test_check_9_cap_tolerance_free_flow_and_unproven_border_detours(self):
         columns = ['origin_id', 'urn', 'mode', 'planner_minutes', 'planner_departure', 'character']
         cases = [

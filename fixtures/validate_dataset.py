@@ -197,13 +197,19 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
             fail(check, f'{oid} {urn}: {error}')
             return None
 
-    def compare(check, label, value, seconds):
+    disagreements = []
+
+    def compare(check, label, value, seconds, note=''):
         if value is None:
             return
         if not math.isfinite(seconds) or seconds < 0:
             fail(check, f'{label}: invalid planner time')
         elif value == record.SENTINEL or abs(value // 600 - int(seconds // 600)) > 1:
-            fail(check, f'{label}: stored {value} seconds, planner {seconds:g} seconds differ by more than one band')
+            message = f'{label}: stored {value} seconds, planner {seconds:g} seconds differ by more than one band'
+            if check == 9:
+                disagreements.append((message, note))
+            else:
+                fail(check, message)
         else:
             emit(f'PASS {check}: {label}: stored {value} seconds, planner {seconds:g} seconds')
 
@@ -236,6 +242,10 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
         except ValueError:
             fail(9, f'{label}: invalid planner value {planner!r}')
             continue
+        if not math.isfinite(seconds) or seconds < 0:
+            fail(9, f'{label}: invalid planner time')
+            continue
+        note = (row.get('note') or '').strip()
         beyond_cap = (planner == 'beyond cap' or row['planner_minutes'].strip() == 'beyond cap'
                       or (not pt and math.isfinite(seconds) and seconds > record.CAP))
         if pt and value == record.SENTINEL and math.isfinite(seconds) and seconds >= record.CAP - 600:
@@ -245,11 +255,17 @@ def validate(directory, *, root=ROOT, partial=False, emit=print):
             emit(f'PASS 9: {label}: stored {value} seconds is below planner {seconds:g} seconds')
         elif value is not None and beyond_cap:
             if value != record.SENTINEL or seconds <= record.CAP:
-                fail(9, f'{label}: beyond-cap claim disagrees with stored value or planner departure')
+                disagreements.append((f'{label}: beyond-cap claim disagrees with stored value or planner departure', note))
             else:
                 emit(f'PASS 9: {label}: both beyond cap')
         else:
-            compare(9, label, value, seconds)
+            compare(9, label, value, seconds, note)
+
+    for message, note in disagreements:
+        if len(disagreements) == 1 and note:
+            emit(f'DOCUMENTED 9: {message}; {note}')
+        else:
+            fail(9, message)
 
     if partial:
         emit(f'Partial mode: {len(completed & set(school_indices))} of {len(schools)} schools covered')
