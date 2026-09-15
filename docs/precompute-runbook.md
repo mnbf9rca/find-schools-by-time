@@ -22,6 +22,8 @@ Run 3, version 20260915T011918Z, added the 1,800 second access walk and the fall
 
 To re-measure the pruning radii rather than trust them, use `fixtures/measure_reach.py`. The issue #18 validator checks the published data.
 
+Keep each version's local directory until `--delete-version` has run for it, because deletion reads that version's manifest for its keys.
+
 Public transport allows 1,800 seconds of walking before transit and 900 afterwards. Both limits are recorded in the manifest and resume parameters.
 
 After the school sweeps, empty origins receive outward walking, cycling and driving requests to the schools selected for this run. Completed origins, including those still unreachable, are saved atomically under `fallback/<origin-id>.bin`. Each file uses the school checkpoint layout with full school indices in place of origin indices; its public transport section stays empty. Resume validates and reuses these files before writing origin records. A fallback version change discards only fallback checkpoints and reruns them at 1,000 metre matching. Request and wall-time counters remain cumulative across resumes.

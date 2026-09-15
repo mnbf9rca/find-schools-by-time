@@ -40,7 +40,9 @@ One pass over the school files builds the whole matrix in memory, then writes on
 
 ## Manifest and publishing
 
-`<out-dir>/<version>/manifest.json`, with `<out-dir>/current.json` holding `{"version": "..."}` alone. Publish records first, the manifest second, `current.json` last, so no version is named before it is complete. Locally `current.json` also goes through a temporary file and a rename.
+`<out-dir>/<version>/manifest.json`, with `<out-dir>/current.json` holding `{"version": "..."}` alone. Locally `current.json` also goes through a temporary file and a rename.
+
+The runner's local output layout is unchanged: one file per origin at `<out-dir>/<version>/<origin-id>.bin`. Uploading is `fixtures/publish.py`'s job, specified in `docs/superpowers/specs/2026-09-14-publish-design.md`. It packs those files into shards of 8,000 records and publishes `<version>/shard-<nn>.bin`, `<version>/origins.txt` and `<version>/manifest.json`, records first, the manifest second and `current.json` at the bucket root last, so no version is named before it is complete. `current.json` is unchanged. See `docs/decisions/2026-09-14-publish-sharded-objects.md` for why the objects are shards.
 
 ```json
 {
@@ -57,6 +59,9 @@ One pass over the school files builds the whole matrix in memory, then writes on
   "rounding": "half up to whole seconds, then compared with 5400",
   "cycling_speed_mps": 5.0,
   "pruning_radii_km": [90, 90, 25, 136],
+  "shards": {"records_per_shard": 8000, "count": 12, "record_bytes": 34984},
+  "keys": {"shard": "<version>/shard-{nn}.bin", "origins": "<version>/origins.txt",
+           "manifest": "<version>/manifest.json", "current": "current.json"},
   "origin_count": 93217,
   "origins_sha256": "2f1c...",
   "school_count": 4373,
@@ -68,7 +73,7 @@ One pass over the school files builds the whole matrix in memory, then writes on
 }
 ```
 
-The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
+The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
 
 `fixtures/manifest.schema.json` is the contract; `fixtures/check_dataset_manifest.py` validates against it before the run exits, in about thirty lines of standard library with a `--check` self-test like `fixtures/check_manifest.py`. It walks the schema recursively, honouring `required`, `properties`, `type`, `enum`, `items` and `minItems` at every level, so a `feeds` entry missing its checksum fails, the `run` object is checked and `pruning_radii_km` must hold four numbers. `enum` applies to each array element, not the array.
 
