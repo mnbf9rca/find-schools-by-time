@@ -26,6 +26,7 @@ MANIFEST = {
     'feeds': [{'path': 'motis-spike/feeds/bods.zip', 'sha256': 'c' * 64}],
     'run': {'started': '2026-09-14T09:30:00Z', 'wall_seconds': 4412, 'workers': 8,
             'requests': 26238, 'peak_server_rss_bytes': 9448928051,
+            'fallback_origins': 1120, 'fallback_requests': 3360,
             'output_bytes': 3761103528},
 }
 
@@ -59,6 +60,9 @@ class DatasetManifestTests(unittest.TestCase):
             (('feeds', 0), 'sha256', None, '$.feeds[0].sha256'),
             (('feeds', 0), 'unexpected', 1, '$.feeds[0].unexpected'),
             (('run',), 'requests', None, '$.run.requests'),
+            (('run',), 'fallback_origins', None, '$.run.fallback_origins'),
+            (('run',), 'fallback_requests', None, '$.run.fallback_requests'),
+            (('run',), 'fallback_requests', '3', '$.run.fallback_requests'),
             (('run',), 'wall_seconds', '4412', '$.run.wall_seconds'),
             (('run',), 'unexpected', 1, '$.run.unexpected'),
             ((), 'pruning_radii_km', [90, 90, 25], '$.pruning_radii_km'),

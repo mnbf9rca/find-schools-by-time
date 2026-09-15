@@ -19,3 +19,7 @@ Record two numbers against the prediction, in `motis-spike/NOTES.md` and in a co
 The run of version 20260914T220224Z started 2026-09-14T22:02:24Z and finished 2026-09-15T00:35:38Z: 9,194 seconds of wall time, 2 hours 33 minutes, against the 2.5 hours predicted. Peak server resident set was 9.95 GB against 9.7 GB predicted, and 8.8 GB in the original four-school projection. It issued 48,103 requests with none retried, and the transpose took 25.5 seconds. Output was 3,261,103,528 bytes of records plus 445,633,004 bytes of school files. Walk coverage missed 1,865 of 52,548 near pairs, 3.5 percent.
 
 To re-measure the pruning radii rather than trust them, use `fixtures/measure_reach.py`. The issue #18 validator checks the published data.
+
+Public transport allows 1,800 seconds of walking before transit and 900 afterwards. Both limits are recorded in the manifest and resume parameters.
+
+After the school sweeps, empty origins receive outward walking, cycling and driving requests to the schools selected for this run. Completed origins, including those still unreachable, are saved atomically under `fallback/<origin-id>.bin`. Each file uses the school checkpoint layout with full school indices in place of origin indices; its public transport section stays empty. Resume validates and reuses these files before writing origin records.

@@ -58,7 +58,7 @@
     },
     "run": {
       "type": "object", "additionalProperties": false,
-      "required": ["started", "wall_seconds", "workers", "requests", "peak_server_rss_bytes", "output_bytes"],
+      "required": ["started", "wall_seconds", "workers", "requests", "peak_server_rss_bytes", "output_bytes", "fallback_origins", "fallback_requests"],
       "properties": {
         "started": {"type": "string"},
         "wall_seconds": {"type": "number"},
@@ -66,6 +66,8 @@
         "requests": {"type": "integer"},
         "peak_server_rss_bytes": {"type": "integer"},
         "output_bytes": {"type": "integer"},
+        "fallback_origins": {"type": "integer"},
+        "fallback_requests": {"type": "integer"},
         "requests_retried": {"type": "integer"},
         "transpose_seconds": {"type": "number"},
         "schools_completed": {"type": "integer"},
