@@ -30,11 +30,11 @@ The bucket is `schooltraveltime-cynexia-com`. If `npx --yes wrangler@4.131.1 r2 
 
 Each object goes up as
 
-    npx --yes wrangler@4.131.1 r2 object put <bucket>/<key> --file <path> --content-type <type> -y
+    npx --yes wrangler@4.131.1 r2 object put <bucket>/<key> --file <path> --content-type <type> --remote -y
 
-`-y` is not optional: `r2 object put` and `r2 object delete` prompt without it. The content type is `application/octet-stream` for the shards, `text/plain` for `origins.txt`, and `application/json` for `manifest.json` and `current.json`. The order is records first, meaning the twelve shards and then `origins.txt`, the manifest second, and `current.json` last, so no version is named before it is complete.
+Both flags are required. `--remote` reaches the bucket: without it wrangler 4.131.1 reads and writes local simulated storage, and prints "Use --remote if you want to access the remote instance", so a publish would upload nothing and the verification would read its own local copy back and pass. `-y` skips the data catalog validation prompt. `r2 bucket list` and `r2 bucket create` take neither, being remote already. The content type is `application/octet-stream` for the shards, `text/plain` for `origins.txt`, and `application/json` for `manifest.json` and `current.json`. The order is records first, meaning the twelve shards and then `origins.txt`, the manifest second, and `current.json` last, so no version is named before it is complete.
 
-After each success, touch an empty marker under `<out-dir>/<version>/.uploaded/`, named for the key with slashes replaced by underscores. A rerun skips any key whose marker exists. Comparing `wrangler r2 object get --pipe | wc -c` against the local size would download 267 MiB per shard to learn one number, so the marker is the cheaper check. Delete a marker to force that object up again.
+After each success, touch an empty marker under `<out-dir>/<version>/.uploaded/`, named for the key with slashes replaced by underscores. A rerun skips any key whose marker exists. Comparing `wrangler r2 object get --remote --pipe | wc -c` against the local size would download 267 MiB per shard to learn one number, so the marker is the cheaper check. Delete a marker to force that object up again.
 
 Print the uploaded total in bytes at the end, against R2's 10 GB included storage.
 
@@ -42,7 +42,7 @@ Print the uploaded total in bytes at the end, against R2's 10 GB included storag
 
 The bucket stays private and wrangler 4.131.1 cannot ask for a byte range, so the check downloads one shard once and slices it locally:
 
-    npx --yes wrangler@4.131.1 r2 object get <bucket>/<version>/shard-07.bin --pipe | tail -c +276163697 | head -c 34984 > whitby.bin
+    npx --yes wrangler@4.131.1 r2 object get <bucket>/<version>/shard-07.bin --remote --pipe | tail -c +276163697 | head -c 34984 > whitby.bin
 
 Origin `489_510` near Whitby is index 63,894: shard 7 at offset 276,163,696, which is `tail -c +276163697` in the 1-based counting that flag uses. The download is 267 MiB and one Class B operation, with no egress charge. Decode `whitby.bin` with `decode` from `fixtures/record.py` at mode index 0 and school index 907, Whitby School, assert 957 seconds, and exit non-zero otherwise.
 
@@ -54,11 +54,11 @@ Issue #19's done condition asks for a curl against a signed or Worker-proxied ke
 
 A version is 12 shards totalling 3,261,103,528 bytes, 3.26 GB, plus about 1 MB of indexes. Two versions coexist across a flip, 6.52 GB against the 10 GB allowance.
 
-`--delete-version <version>` removes an old version, never automatically, so a flip that turns out wrong can be undone by pointing `current.json` back. It deletes fourteen objects, the twelve shards plus `origins.txt` and `manifest.json`, one `r2 object delete <bucket>/<key> -y` at a time, because wrangler 4.131.1 offers neither a prefix delete nor an object list. It never touches `current.json`. It also removes that version's local `.uploaded/` markers, so a later rerun cannot skip shards that are no longer in the bucket. `r2 bucket info --json` can be printed afterwards as a sanity line; it does not gate the flip.
+`--delete-version <version>` removes an old version, never automatically, so a flip that turns out wrong can be undone by pointing `current.json` back. It deletes fourteen objects, the twelve shards plus `origins.txt` and `manifest.json`, one `r2 object delete <bucket>/<key> --remote -y` at a time, because wrangler 4.131.1 offers neither a prefix delete nor an object list. It never touches `current.json`. It also removes that version's local `.uploaded/` markers, so a later rerun cannot skip shards that are no longer in the bucket. `r2 bucket info --json` can be printed afterwards as a sanity line; it does not gate the flip.
 
 ## Tests
 
 Written first, offline:
 
 1. Packing: `pack()` over a two-origin fake directory with `records_per_shard` lowered puts each origin's bytes at the shard and offset the formula gives, `origins.txt` matches the origin order, a second run over the existing `shards/` leaves the lengths unchanged rather than doubled, and an origin file that is missing or the wrong length fails the run.
-2. Upload: with the wrangler command replaced by a recording stub, each command line carries the right key, content type and `-y`, the order is the shards, `origins.txt`, the manifest and `current.json`, and a rerun with some markers present skips exactly those keys and uploads the rest.
+2. Upload: with the wrangler command replaced by a recording stub, each command line carries the right key, content type, `--remote` and `-y`, the order is the shards, `origins.txt`, the manifest and `current.json`, and a rerun with some markers present skips exactly those keys and uploads the rest.
