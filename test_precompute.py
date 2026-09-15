@@ -33,7 +33,7 @@ class TestPrecompute(unittest.TestCase):
                 self.assertEqual(endpoint, '/api/experimental/one-to-many-intermodal')
                 self.assertEqual(body['preTransitModes'], ['WALK'])
                 self.assertEqual(body['postTransitModes'], ['WALK'])
-                self.assertEqual(body['maxPreTransitTime'], 900)
+                self.assertEqual(body['maxPreTransitTime'], 1800 if mode == 0 else 900)
                 self.assertEqual(body['maxPostTransitTime'], 900)
                 self.assertTrue(body['useRoutedTransfers'])
                 self.assertEqual(body['maxTravelTime'], 90)
@@ -161,6 +161,8 @@ class TestPrecompute(unittest.TestCase):
                             process.wait()
                 first = json.loads((resumed / 'run.json').read_text())
                 self.assertEqual(first['parameters']['pruning_radii_km'], [None, None, 30, None])
+                self.assertEqual(first['parameters']['max_pre_transit_seconds'], 1800)
+                self.assertEqual(first['parameters']['max_post_transit_seconds'], 900)
                 self.assertGreater(first['requests'], 0)
                 saved_mtime = (resumed / 'schools/100001.bin').stat().st_mtime_ns
                 # Older checkpoints stored the URL; it is not part of dataset identity.
@@ -187,6 +189,8 @@ class TestPrecompute(unittest.TestCase):
                     self.assertEqual(len(a), 3)
                 manifest = json.loads((resumed / versions[0] / 'manifest.json').read_text())
                 self.assertEqual(manifest['pruning_radii_km'], [None, None, 30, None])
+                self.assertEqual(manifest['max_pre_transit_seconds'], 1800)
+                self.assertEqual(manifest['max_post_transit_seconds'], 900)
                 self.assertEqual(manifest['school_count'], record.SCHOOL_COUNT)
                 self.assertEqual(manifest['shards'], {'records_per_shard': 8000, 'count': 1, 'record_bytes': 34984})
                 version = versions[0]
@@ -196,6 +200,11 @@ class TestPrecompute(unittest.TestCase):
                 self.assertFalse(any(body.get('mode') == 'WALK' for body in calls))
                 changed = common + [str(resumed), '--workers', '2']
                 result = subprocess.run(changed, capture_output=True, text=True, timeout=15)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('parameters', result.stdout + result.stderr)
+                second['parameters']['max_pre_transit_seconds'] = 900
+                (resumed / 'run.json').write_text(json.dumps(second))
+                result = subprocess.run(common + [str(resumed)], capture_output=True, text=True, timeout=15)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('parameters', result.stdout + result.stderr)
                 # SIGTERM can interrupt a progress write; the handler must not write again.

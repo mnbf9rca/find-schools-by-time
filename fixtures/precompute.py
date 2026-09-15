@@ -36,6 +36,8 @@ ARRIVE = '2026-09-16T08:30:00+01:00'
 RADII = (None, None, 30, None)
 BATCH_SIZE = 20000
 CAP = 5400
+MAX_PRE_TRANSIT_SECONDS = 1800
+MAX_POST_TRANSIT_SECONDS = 900
 MOTIS_VERSION = '2.11.3'
 FULL_SCHOOLS = json.loads((ROOT / 'schools.json').read_text())
 SCHOOL_INDEX = {s['urn']: i for i, s in enumerate(sorted(FULL_SCHOOLS, key=lambda s: s['urn']))}
@@ -82,7 +84,8 @@ def payload(school, mode, origins):
                 transitModes=['TRANSIT'] if mode == 0 else [],
                 directMode='WALK' if mode == 0 else 'BIKE',
                 preTransitModes=['WALK'], postTransitModes=['WALK'],
-                maxPreTransitTime=900, maxPostTransitTime=900, useRoutedTransfers=True)
+                maxPreTransitTime=MAX_PRE_TRANSIT_SECONDS if mode == 0 else 900,
+                maxPostTransitTime=MAX_POST_TRANSIT_SECONDS, useRoutedTransfers=True)
     if mode == 2:
         body['cyclingSpeed'] = 5.0
     return '/api/experimental/one-to-many-intermodal', body
@@ -252,7 +255,9 @@ def run(args):
                   'cycling_speed_mps': 5.0, 'workers': args.workers, 'motis_version': MOTIS_VERSION,
                   'origins_sha256': sha256(args.origins), 'school_index_sha256': record.school_index_hash(SCHOOL_INDEX),
                   'schools_sha256': sha256(args.schools), 'graph_directory': str(graph),
-                  'arrival': ARRIVE, 'feeds': feeds}
+                  'arrival': ARRIVE, 'feeds': feeds,
+                  'max_pre_transit_seconds': MAX_PRE_TRANSIT_SECONDS,
+                  'max_post_transit_seconds': MAX_POST_TRANSIT_SECONDS}
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     state_path = out / 'run.json'
@@ -378,6 +383,8 @@ def run(args):
                     'timezone': 'Europe/London', 'motis_version': MOTIS_VERSION, 'modes': list(record.MODES),
                     'cap_seconds': CAP, 'display_band_minutes': 10, 'unreachable': record.SENTINEL,
                     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
+                    'max_pre_transit_seconds': MAX_PRE_TRANSIT_SECONDS,
+                    'max_post_transit_seconds': MAX_POST_TRANSIT_SECONDS,
                     'cycling_speed_mps': 5.0, 'pruning_radii_km': list(RADII), 'origin_count': len(origins),
                     'origins_sha256': parameters['origins_sha256'], 'school_count': record.SCHOOL_COUNT,
                     'school_index_sha256': parameters['school_index_sha256'], 'feeds': feeds, 'run': run_stats,

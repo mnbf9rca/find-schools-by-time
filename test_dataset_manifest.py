@@ -15,6 +15,7 @@ MANIFEST = {
     'modes': ['public_transport', 'walking', 'cycling', 'driving'],
     'cap_seconds': 5400, 'display_band_minutes': 10, 'unreachable': 65535,
     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
+    'max_pre_transit_seconds': 1800, 'max_post_transit_seconds': 900,
     'cycling_speed_mps': 5.0, 'pruning_radii_km': [90, 90, 25, 136],
     'origin_count': 93217, 'origins_sha256': 'a' * 64, 'school_count': 4373,
     'school_index_sha256': 'b' * 64,
@@ -44,6 +45,9 @@ class DatasetManifestTests(unittest.TestCase):
     def test_rejects_invalid_fields_at_every_level(self):
         cases = [
             ((), 'version', None, '$.version'),
+            ((), 'max_pre_transit_seconds', None, '$.max_pre_transit_seconds'),
+            ((), 'max_post_transit_seconds', None, '$.max_post_transit_seconds'),
+            ((), 'max_pre_transit_seconds', '1800', '$.max_pre_transit_seconds'),
             ((), 'shards', None, '$.shards'),
             ((), 'keys', None, '$.keys'),
             (('shards',), 'count', '12', '$.shards.count'),
