@@ -7,7 +7,7 @@
     "cap_seconds", "display_band_minutes", "unreachable", "compression", "rounding",
     "cycling_speed_mps", "pruning_radii_km", "origin_count", "origins_sha256",
     "school_count", "school_index_sha256", "feeds", "run", "shards", "keys",
-    "max_pre_transit_seconds", "max_post_transit_seconds"
+    "fallback_matching_metres", "max_pre_transit_seconds", "max_post_transit_seconds"
   ],
   "properties": {
     "version": {"type": "string"},
@@ -24,6 +24,7 @@
     "unreachable": {"type": "integer", "enum": [65535]},
     "compression": {"type": "string", "enum": ["none"]},
     "rounding": {"type": "string", "enum": ["half up to whole seconds, then compared with 5400"]},
+    "fallback_matching_metres": {"type": "integer"},
     "max_pre_transit_seconds": {"type": "integer"},
     "max_post_transit_seconds": {"type": "integer"},
     "cycling_speed_mps": {"type": "number"},
