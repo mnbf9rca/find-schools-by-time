@@ -510,7 +510,7 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('out', type=Path)
-    parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument('--workers', type=int, default=12)
     parser.add_argument('--base-url', default=DEFAULT_URL)
     parser.add_argument('--schools', type=Path, default=ROOT / 'schools.json')
     parser.add_argument('--origins', type=Path, default=ROOT / 'fixtures/origins.csv')
