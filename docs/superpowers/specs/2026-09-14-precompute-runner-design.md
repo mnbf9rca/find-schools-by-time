@@ -26,11 +26,11 @@ Three requests fill four planes: the public transport response's `street_duratio
 
 In the 100-school sample, 42 of the 1,161 origin and school pairs within 2 km have no walking value, and a school-outward request at 500 metres matching recovered one and was dropped. The remaining misses are origin and school pairs that MOTIS cannot match to the street network, reported per pair by the issue #18 validator and tracked in issue #57.
 
-A fallback pass runs once every school file is written and before the transpose. For each origin whose four planes are all sentinel, send one origin-outward street request per street mode: `POST /api/v1/one-to-many` with `arriveBy: false`, the origin as `one` and every school as `many`, the same caps and 250 metre matching, cycling through the intermodal endpoint as before. Fill the walking, cycling and driving planes from the replies. Public transport is not filled, because a departure-time search cannot express arrive-by.
+A fallback pass runs once every school file is written and before the transpose. For each origin whose four planes are all sentinel, send one origin-outward street request per street mode: `POST /api/v1/one-to-many` with `arriveBy: false`, the origin as `one` and every school as `many`, the same caps and 1,000 metre matching, cycling through the intermodal endpoint as before. The main requests stay at 250 metres. Fill the walking, cycling and driving planes from the replies. Public transport is not filled, because a departure-time search cannot express arrive-by.
 
-The reverse street search returns nothing for about 1,120 origins that route normally outward: of twenty random empty origins, eight route outward at 250 metre matching, and all twenty fail in the orientation the runner uses. One outward request per empty origin costs about 1,120 requests per mode.
+The reverse street search returns nothing for about 1,120 origins that route normally outward: of twenty random empty origins, eight route outward at 250 metre matching, and all twenty fail in the orientation the runner uses. One outward request per empty origin costs about 1,120 requests per mode. The fallback matches at 1,000 metres because twelve of those twenty route at 1,000 and fail at 250: a rural cell centre lands in a field, too far from a road for the tighter limit. The server's `max_max_matching_distance` must therefore be 1000.
 
-The manifest's `run` block records `fallback_origins` and `fallback_requests`.
+The manifest's `run` block records `fallback_origins` and `fallback_requests`, and the manifest records `fallback_matching_metres`.
 
 Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone; discard anything over 5,400 seconds. On a non-200 or a dropped connection, halve the batch and retry each half down to a single origin, which is a hard error.
 
@@ -68,6 +68,7 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
   "compression": "none",
   "rounding": "half up to whole seconds, then compared with 5400",
   "max_pre_transit_seconds": 1800,
+  "fallback_matching_metres": 1000,
   "max_post_transit_seconds": 900,
   "cycling_speed_mps": 5.0,
   "pruning_radii_km": [null, null, 30, null],
