@@ -26,4 +26,4 @@ The public transport and driving radii are withdrawn. On the 100-school sample t
 
 The 10 percent margin was the wrong instrument: a margin measured on four schools cannot see rail speed, which belongs to the network, not the sample.
 
-Public transport, the walking plane sharing its request, and driving now send the whole grid. `fixtures/measure_reach.csv` puts a full-grid request at about 3 seconds per school per mode, costing roughly an hour at eight workers. Cycling keeps the only radius, now 30 km, above the 27 km an 18 km/h bike covers in 90 minutes.
+Public transport, the walking plane sharing its request, and driving now send the whole grid. `fixtures/measure_reach.csv` puts a full-grid request at about 3 seconds per school per mode, costing roughly an hour at eight workers. Cycling keeps the only radius, now 30 km, above the 27 km an 18 km/h bike covers in 90 minutes. The unpruned run took 2 hours 33 minutes, so the radius bought about an hour at the cost of truncating real journeys.
