@@ -33,6 +33,8 @@ class DatasetManifestTests(unittest.TestCase):
     def test_valid_manifest(self):
         self.assertEqual(validate(MANIFEST), [])
         manifest = copy.deepcopy(MANIFEST)
+        manifest['pruning_radii_km'] = [None, None, 30, None]
+        self.assertEqual(validate(manifest), [])
         manifest['run'].update(requests_retried=1, transpose_seconds=0.25,
                                schools_completed=4373, school_bytes=100,
                                record_bytes=200, walk_missing_pairs=0,
@@ -58,6 +60,7 @@ class DatasetManifestTests(unittest.TestCase):
             ((), 'pruning_radii_km', [90, 90, 25], '$.pruning_radii_km'),
             ((), 'pruning_radii_km', [90, 90, 25, 136, 1], '$.pruning_radii_km'),
             (('pruning_radii_km',), 0, '90', '$.pruning_radii_km[0]'),
+            (('pruning_radii_km',), 0, True, '$.pruning_radii_km[0]'),
             (('modes',), 0, 'flying', '$.modes[0]'),
             ((), 'feeds', [], '$.feeds'),
             ((), 'feeds', ['invalid'], '$.feeds[0]'),

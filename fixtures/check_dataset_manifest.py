@@ -11,9 +11,11 @@ def validate(value, schema=None, path='$') -> list[str]:
     if schema is None:
         schema = json.loads(Path(__file__).with_name('manifest.schema.json').read_text())
     types = {'object': (dict,), 'array': (list,), 'string': (str,),
-             'integer': (int,), 'number': (int, float)}
-    if 'type' in schema and type(value) not in types[schema['type']]:
-        return [f'{path}: expected {schema["type"]}.']
+             'integer': (int,), 'number': (int, float), 'null': (type(None),)}
+    if 'type' in schema:
+        allowed = schema['type'] if isinstance(schema['type'], list) else [schema['type']]
+        if not any(type(value) in types[kind] for kind in allowed):
+            return [f'{path}: expected {schema["type"]}.']
     errors = []
     if 'enum' in schema and value not in schema['enum']:
         errors.append(f'{path}: expected one of {schema["enum"]!r}.')

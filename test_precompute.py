@@ -52,9 +52,12 @@ class TestPrecompute(unittest.TestCase):
         origins = [{'id': '0_0'}, {'id': '1_0'}, {'id': '2_0'}, {'id': '0_1'}]
         for radius, expected in [(0, [0]), (1, [0, 1, 3]), (2, [0, 1, 2, 3])]:
             self.assertEqual(pc.candidate_indices(origins, 500, 500, radius), expected)
-        for mode, radius in [(0, 90), (2, 25), (3, 136)]:
-            ring = [{'id': f'{radius - 1}_0'}, {'id': f'{radius}_0'}, {'id': f'{radius + 1}_0'}]
-            self.assertEqual(pc.candidate_indices(ring, 500, 500, pc.RADII[mode]), [0, 1])
+        ring = [{'id': '29_0'}, {'id': '30_0'}, {'id': '31_0'}, {'id': '660_660'}]
+        for mode, expected in [(0, [0, 1, 2, 3]), (1, [0, 1, 2, 3]),
+                               (2, [0, 1]), (3, [0, 1, 2, 3])]:
+            with self.subTest(mode=mode):
+                self.assertEqual(pc.candidate_indices(ring, 500, 500, pc.RADII[mode]), expected)
+        self.assertEqual(pc.candidate_indices(ring, 500, 500, None), [0, 1, 2, 3])
 
     def test_leave_by_rounding_cap_and_empty_entries(self):
         data = {'transit_durations': [[{'duration': 4200}], [], [{'duration': 5400.5}]],
@@ -157,6 +160,7 @@ class TestPrecompute(unittest.TestCase):
                             process.kill()
                             process.wait()
                 first = json.loads((resumed / 'run.json').read_text())
+                self.assertEqual(first['parameters']['pruning_radii_km'], [None, None, 30, None])
                 self.assertGreater(first['requests'], 0)
                 saved_mtime = (resumed / 'schools/100001.bin').stat().st_mtime_ns
                 # Older checkpoints stored the URL; it is not part of dataset identity.
@@ -182,6 +186,7 @@ class TestPrecompute(unittest.TestCase):
                     self.assertEqual(a, b)
                     self.assertEqual(len(a), 3)
                 manifest = json.loads((resumed / versions[0] / 'manifest.json').read_text())
+                self.assertEqual(manifest['pruning_radii_km'], [None, None, 30, None])
                 self.assertEqual(manifest['school_count'], record.SCHOOL_COUNT)
                 self.assertEqual(manifest['shards'], {'records_per_shard': 8000, 'count': 1, 'record_bytes': 34984})
                 version = versions[0]
