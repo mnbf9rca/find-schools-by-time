@@ -20,7 +20,7 @@ Public transport, the walking plane that shares its request, and driving send ev
 
 The caps carry three units: `maxTravelTime: 90` minutes on the transit leg, `maxDirectTime: 5400` seconds on the direct leg, `max: 5400` seconds for driving. All three set `arriveBy: true` and `maxMatchingDistance: 250` metres; the intermodal pair also set `time: "2026-09-16T08:30:00+01:00"`.
 
-Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: ["WALK"]`, `maxPreTransitTime: 1800`, `maxPostTransitTime: 900` and `useRoutedTransfers: true`. `docs/decisions/2026-09-15-thirty-minute-access-walk.md` sets the 1,800 seconds at the home end; the school end stays at 900. `fixtures/measure_reach.py` sent 900 at both ends when it measured the reach, so the cycling radius predates this change.
+Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: ["WALK"]`, `maxPostTransitTime: 900` and `useRoutedTransfers: true`. `maxPreTransitTime` is 1,800 on the public transport body, from `docs/decisions/2026-09-15-thirty-minute-access-walk.md`; the school end stays at 900. The cycling body keeps 900 at both ends, where neither limit does anything, because it sends `transitModes: []` and so has no access leg. `fixtures/measure_reach.py` sent 900 at both ends when it measured the reach, so the cycling radius predates this change.
 
 Three requests fill four planes: the public transport response's `street_durations` entry per origin is the direct walk, so the walking plane needs no fourth request and inherits the 90 kilometre transit radius. That leg is the intermodal endpoint's, not the street endpoint the spike used, and `motis-spike/NOTES.md` records empty `street_durations` for four nearby schools with no follow-up. Hence the explicit `maxMatchingDistance`, the runbook's sample run checking walk coverage against straight-line distance, and the same check in the issue #18 validator: an origin within 2 km of a school with no walk value is a defect to chase.
 
@@ -67,6 +67,8 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
   "unreachable": 65535,
   "compression": "none",
   "rounding": "half up to whole seconds, then compared with 5400",
+  "max_pre_transit_seconds": 1800,
+  "max_post_transit_seconds": 900,
   "cycling_speed_mps": 5.0,
   "pruning_radii_km": [null, null, 30, null],
   "shards": {"records_per_shard": 8000, "count": 12, "record_bytes": 34984},
@@ -83,11 +85,11 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
           "transpose_seconds": 214.5, "schools_completed": 4373, "school_bytes": 500000000,
           "record_bytes": 3261103528, "output_bytes": 3761103528,
           "walk_missing_pairs": 42, "walk_nearby_pairs": 1161,
-          "fallback_origins": 1120, "fallback_requests": 3360}
+          "fallback_origins": 1120, "fallback_requests": 3360, "fallback_bytes": 9400000}
 }
 ```
 
-The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order and holds null for a mode that sends every origin, so its schema types the items `["number", "null"]` and `fixtures/check_dataset_manifest.py` accepts a list of types where it accepts one. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files, which `record_bytes` and `school_bytes` also give separately; `requests_retried`, `transpose_seconds`, `schools_completed` and the two walk counts are the run's own figures for issue #17. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
+The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order and holds null for a mode that sends every origin, so its schema types the items `["number", "null"]` and `fixtures/check_dataset_manifest.py` accepts a list of types where it accepts one. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `max_pre_transit_seconds` and `max_post_transit_seconds` record the access limits the dataset was built with, and `fallback_bytes` sizes the fallback files that `output_bytes` already counts. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files, which `record_bytes` and `school_bytes` also give separately; `requests_retried`, `transpose_seconds`, `schools_completed` and the two walk counts are the run's own figures for issue #17. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
 
 `fixtures/manifest.schema.json` is the contract; `fixtures/check_dataset_manifest.py` validates against it before the run exits, in about thirty lines of standard library with a `--check` self-test like `fixtures/check_manifest.py`. It walks the schema recursively, honouring `required`, `properties`, `type`, `enum`, `items` and `minItems` at every level, so a `feeds` entry missing its checksum fails, the `run` object is checked and `pruning_radii_km` must hold four numbers. `enum` applies to each array element, not the array.
 
