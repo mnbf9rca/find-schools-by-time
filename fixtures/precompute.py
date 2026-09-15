@@ -33,9 +33,11 @@ else:
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_URL = 'http://127.0.0.1:8080'
 ARRIVE = '2026-09-16T08:30:00+01:00'
-RADII = (90, 90, 25, 136)
+RADII = (None, None, 30, None)
 BATCH_SIZE = 20000
 CAP = 5400
+MAX_PRE_TRANSIT_SECONDS = 1800
+MAX_POST_TRANSIT_SECONDS = 900
 MOTIS_VERSION = '2.11.3'
 FULL_SCHOOLS = json.loads((ROOT / 'schools.json').read_text())
 SCHOOL_INDEX = {s['urn']: i for i, s in enumerate(sorted(FULL_SCHOOLS, key=lambda s: s['urn']))}
@@ -62,25 +64,28 @@ def batches(values):
 
 
 def candidate_indices(origins, easting, northing, radius_km):
+    if radius_km is None:
+        return list(range(len(origins)))
     limit = (radius_km * 1000) ** 2
     return [i for i, origin in enumerate(origins)
             for e, n in [origin.get('centre') or tuple(int(k) * 1000 + 500 for k in origin['id'].split('_'))]
             if (e - easting) ** 2 + (n - northing) ** 2 <= limit]
 
 
-def payload(school, mode, origins):
-    separator = ';' if mode == 3 else ','
+def payload(school, mode, origins, *, outward=False):
+    separator = ';' if mode in (1, 3) else ','
     body = {'one': f'{school["lat"]}{separator}{school["lng"]}',
             'many': [f'{o["lat"]}{separator}{o["lng"]}' for o in origins],
-            'arriveBy': True, 'maxMatchingDistance': 250}
-    if mode == 3:
-        body.update(mode='CAR', max=CAP)
+            'arriveBy': not outward, 'maxMatchingDistance': 250}
+    if mode in (1, 3):
+        body.update(mode='WALK' if mode == 1 else 'CAR', max=CAP)
         return '/api/v1/one-to-many', body
     body.update(time=ARRIVE, maxTravelTime=90, maxDirectTime=CAP,
                 transitModes=['TRANSIT'] if mode == 0 else [],
                 directMode='WALK' if mode == 0 else 'BIKE',
                 preTransitModes=['WALK'], postTransitModes=['WALK'],
-                maxPreTransitTime=900, maxPostTransitTime=900, useRoutedTransfers=True)
+                maxPreTransitTime=MAX_PRE_TRANSIT_SECONDS if mode == 0 else 900,
+                maxPostTransitTime=MAX_POST_TRANSIT_SECONDS, useRoutedTransfers=True)
     if mode == 2:
         body['cyclingSpeed'] = 5.0
     return '/api/experimental/one-to-many-intermodal', body
@@ -102,7 +107,7 @@ def seconds(entry):
 
 
 def response_values(mode, data, count):
-    street = data if mode == 3 else data['street_durations']
+    street = data if mode in (1, 3) else data['street_durations']
     if len(street) != count:
         raise ValueError('Street response length differs from request')
     direct = [seconds(entry) for entry in street]
@@ -157,6 +162,24 @@ def read_school(path, origin_count):
     return planes
 
 
+def empty_origins(out, urns, origin_count):
+    reached = bytearray(origin_count)
+    for urn in urns:
+        for plane in read_school(out / 'schools' / f'{urn}.bin', origin_count):
+            for origin, value in plane:
+                reached[origin] = 1
+    return [i for i, present in enumerate(reached) if not present]
+
+
+def fallback_records(out, origins):
+    indices = {origin['id']: i for i, origin in enumerate(origins)}
+    for path in (out / 'fallback').glob('*.bin'):
+        planes = read_school(path, record.SCHOOL_COUNT)
+        if planes[0]:
+            raise ValueError('Fallback must leave public transport empty')
+        yield indices[path.stem], planes
+
+
 def transpose(out, version, origins, urns, stop):
     size = 8 * record.SCHOOL_COUNT
     # ponytail: one matrix uses about 3.5 GB; slice origin ranges on a smaller machine.
@@ -169,6 +192,14 @@ def transpose(out, version, origins, urns, stop):
             slot = 2 * (mode * record.SCHOOL_COUNT + SCHOOL_INDEX[urn])
             for origin, value in pairs:
                 struct.pack_into('<H', matrix, origin * size + slot, value)
+    for origin, planes in fallback_records(out, origins):
+        for mode in (1, 2, 3):
+            for school, value in planes[mode]:
+                struct.pack_into('<H', matrix, origin * size + 2 * (mode * record.SCHOOL_COUNT + school), value)
+                if mode == 1:
+                    slot = origin * size + 2 * school
+                    transit = struct.unpack_from('<H', matrix, slot)[0]
+                    struct.pack_into('<H', matrix, slot, min(transit, value))
     directory = out / version
     directory.mkdir(exist_ok=True)
     view = memoryview(matrix)
@@ -220,8 +251,13 @@ def load_schools(path):
 
 def walk_coverage(out, schools, origins):
     missing, nearby = [], 0
+    fallback_walks = {}
+    for origin, planes in fallback_records(out, origins):
+        for school, value in planes[1]:
+            fallback_walks.setdefault(school, set()).add(origin)
     for school in schools:
         walking = {i for i, value in read_school(out / 'schools' / f'{school["urn"]}.bin', len(origins))[1]}
+        walking.update(fallback_walks.get(SCHOOL_INDEX[school['urn']], ()))
         for i in candidate_indices(origins, school['e'], school['n'], 2):
             nearby += 1
             if i not in walking:
@@ -250,7 +286,9 @@ def run(args):
                   'cycling_speed_mps': 5.0, 'workers': args.workers, 'motis_version': MOTIS_VERSION,
                   'origins_sha256': sha256(args.origins), 'school_index_sha256': record.school_index_hash(SCHOOL_INDEX),
                   'schools_sha256': sha256(args.schools), 'graph_directory': str(graph),
-                  'arrival': ARRIVE, 'feeds': feeds}
+                  'arrival': ARRIVE, 'feeds': feeds, 'fallback_version': 1,
+                  'max_pre_transit_seconds': MAX_PRE_TRANSIT_SECONDS,
+                  'max_post_transit_seconds': MAX_POST_TRANSIT_SECONDS}
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     state_path = out / 'run.json'
@@ -263,7 +301,8 @@ def run(args):
         now = datetime.now(timezone.utc)
         state = {'version': now.strftime('%Y%m%dT%H%M%SZ'), 'started': now.strftime('%Y-%m-%dT%H:%M:%SZ'),
                  'parameters': parameters, 'wall_seconds': 0, 'requests': 0, 'requests_retried': 0,
-                 'peak_server_rss_bytes': 0, 'transpose_seconds': 0}
+                 'peak_server_rss_bytes': 0, 'transpose_seconds': 0,
+                 'fallback_origins': 0, 'fallback_requests': 0}
         atomic_json(state_path, state)
     prior_wall = state['wall_seconds']
     lock, stop, sampler_stop = threading.RLock(), threading.Event(), threading.Event()
@@ -303,6 +342,21 @@ def run(args):
     sampler.start()
     (out / 'schools').mkdir(exist_ok=True)
 
+    def post(endpoint, body, *, retried=False, fallback=False):
+        if stop.is_set():
+            raise InterruptedError('Run stopped')
+        with lock:
+            state['requests'] += 1
+            state['requests_retried'] += int(retried)
+            state['fallback_requests'] += int(fallback)
+            save()
+        req = urllib.request.Request(args.base_url + endpoint, data=json.dumps(body).encode(),
+                                     headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=600) as response:
+            if response.status != 200:
+                raise OSError(f'HTTP {response.status}')
+            return json.load(response)
+
     def school_task(school):
         if stop.is_set():
             raise InterruptedError('Run stopped')
@@ -316,18 +370,9 @@ def run(args):
                     if stop.is_set():
                         raise InterruptedError('Run stopped')
                     endpoint, body = payload(school, mode, [origins[i] for i in subset])
-                    with lock:
-                        state['requests'] += 1
-                        state['requests_retried'] += int(attempts > 0)
-                        save()
                     attempts += 1
                     requests += 1
-                    req = urllib.request.Request(args.base_url + endpoint, data=json.dumps(body).encode(),
-                                                 headers={'Content-Type': 'application/json'})
-                    with urllib.request.urlopen(req, timeout=600) as response:
-                        if response.status != 200:
-                            raise OSError(f'HTTP {response.status}')
-                        return json.load(response)
+                    return post(endpoint, body, retried=attempts > 1)
                 for subset, response in halving(batch, request, stop):
                     for plane, values in response_values(mode, response, len(subset)).items():
                         planes[plane].extend((i, value) for i, value in zip(subset, values) if value != record.SENTINEL)
@@ -335,6 +380,34 @@ def run(args):
             raise InterruptedError('Run stopped')
         write_school(out / 'schools' / f'{school["urn"]}.bin', planes)
         return school['urn'], time.monotonic() - t0, requests, sum(map(len, planes))
+
+    def fallback_task(origin_index):
+        origin = origins[origin_index]
+        path = out / 'fallback' / f'{origin["id"]}.bin'
+        try:
+            planes = read_school(path, record.SCHOOL_COUNT)
+            if planes[0]:
+                raise ValueError('Fallback must leave public transport empty')
+        except (FileNotFoundError, ValueError):
+            path.unlink(missing_ok=True)
+        else:
+            return
+        planes = [[], [], [], []]
+        for mode in (1, 2, 3):
+            for batch in batches(list(range(len(schools)))):
+                attempts = 0
+                def request(subset):
+                    nonlocal attempts
+                    endpoint, body = payload(origin, mode, [schools[i] for i in subset], outward=True)
+                    attempts += 1
+                    return post(endpoint, body, retried=attempts > 1, fallback=True)
+                for subset, response in halving(batch, request, stop):
+                    values = response_values(mode, response, len(subset))[mode]
+                    planes[mode].extend((SCHOOL_INDEX[schools[i]['urn']], value)
+                                        for i, value in zip(subset, values) if value != record.SENTINEL)
+        if stop.is_set():
+            raise InterruptedError('Fallback stopped')
+        write_school(path, planes)
 
     pool = ThreadPoolExecutor(max_workers=args.workers)
     try:
@@ -357,6 +430,23 @@ def run(args):
                   f'rss={state["peak_server_rss_bytes"] / 1024**3:.2f}GiB', flush=True)
         if stop.is_set():
             raise InterruptedError('Run stopped')
+        empty = empty_origins(out, [s['urn'] for s in schools], len(origins))
+        state['fallback_origins'] = len(empty)
+        (out / 'fallback').mkdir(exist_ok=True)
+        empty_ids = {origins[i]['id'] for i in empty}
+        for path in (out / 'fallback').glob('*.bin'):
+            if path.stem not in empty_ids:
+                path.unlink()
+        save()
+        print(f'Fallback: {len(empty)} empty origins, {len(schools)} schools each.', flush=True)
+        fallback_futures = [pool.submit(fallback_task, i) for i in empty]
+        for completed, future in enumerate(as_completed(fallback_futures), 1):
+            future.result()
+            if completed % 100 == 0 or completed == len(empty):
+                print(f'Fallback: {completed}/{len(empty)} origins complete; '
+                      f'requests={state["fallback_requests"]}', flush=True)
+        if stop.is_set():
+            raise InterruptedError('Fallback stopped')
         missing, nearby = walk_coverage(out, schools, origins)
         print(f'Walk coverage: {missing}/{nearby} pairs within 2 km have no walking value; see walk-coverage.csv', flush=True)
         print('Transposing all origins using the full school index.', flush=True)
@@ -368,14 +458,19 @@ def run(args):
         school_bytes = sum((out / 'schools' / f'{s["urn"]}.bin').stat().st_size for s in schools)
         save()
         run_stats = {key: state[key] for key in ('started', 'wall_seconds', 'requests', 'requests_retried',
-                                               'peak_server_rss_bytes', 'transpose_seconds')}
-        run_stats.update(workers=args.workers, output_bytes=school_bytes + record_bytes,
-                         school_bytes=school_bytes, record_bytes=record_bytes, schools_completed=complete,
+                                               'peak_server_rss_bytes', 'transpose_seconds',
+                                               'fallback_origins', 'fallback_requests')}
+        fallback_bytes = sum(p.stat().st_size for p in (out / 'fallback').glob('*.bin'))
+        run_stats.update(workers=args.workers, output_bytes=school_bytes + record_bytes + fallback_bytes,
+                         school_bytes=school_bytes, record_bytes=record_bytes, fallback_bytes=fallback_bytes,
+                         schools_completed=complete,
                          walk_missing_pairs=missing, walk_nearby_pairs=nearby)
         manifest = {'version': state['version'], 'routing_date': '2026-09-16', 'routing_time': '08:30',
                     'timezone': 'Europe/London', 'motis_version': MOTIS_VERSION, 'modes': list(record.MODES),
                     'cap_seconds': CAP, 'display_band_minutes': 10, 'unreachable': record.SENTINEL,
                     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
+                    'max_pre_transit_seconds': MAX_PRE_TRANSIT_SECONDS,
+                    'max_post_transit_seconds': MAX_POST_TRANSIT_SECONDS,
                     'cycling_speed_mps': 5.0, 'pruning_radii_km': list(RADII), 'origin_count': len(origins),
                     'origins_sha256': parameters['origins_sha256'], 'school_count': record.SCHOOL_COUNT,
                     'school_index_sha256': parameters['school_index_sha256'], 'feeds': feeds, 'run': run_stats,

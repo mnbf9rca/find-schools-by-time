@@ -33,7 +33,7 @@ class TestPrecompute(unittest.TestCase):
                 self.assertEqual(endpoint, '/api/experimental/one-to-many-intermodal')
                 self.assertEqual(body['preTransitModes'], ['WALK'])
                 self.assertEqual(body['postTransitModes'], ['WALK'])
-                self.assertEqual(body['maxPreTransitTime'], 900)
+                self.assertEqual(body['maxPreTransitTime'], 1800 if mode == 0 else 900)
                 self.assertEqual(body['maxPostTransitTime'], 900)
                 self.assertTrue(body['useRoutedTransfers'])
                 self.assertEqual(body['maxTravelTime'], 90)
@@ -52,9 +52,12 @@ class TestPrecompute(unittest.TestCase):
         origins = [{'id': '0_0'}, {'id': '1_0'}, {'id': '2_0'}, {'id': '0_1'}]
         for radius, expected in [(0, [0]), (1, [0, 1, 3]), (2, [0, 1, 2, 3])]:
             self.assertEqual(pc.candidate_indices(origins, 500, 500, radius), expected)
-        for mode, radius in [(0, 90), (2, 25), (3, 136)]:
-            ring = [{'id': f'{radius - 1}_0'}, {'id': f'{radius}_0'}, {'id': f'{radius + 1}_0'}]
-            self.assertEqual(pc.candidate_indices(ring, 500, 500, pc.RADII[mode]), [0, 1])
+        ring = [{'id': '29_0'}, {'id': '30_0'}, {'id': '31_0'}, {'id': '660_660'}]
+        for mode, expected in [(0, [0, 1, 2, 3]), (1, [0, 1, 2, 3]),
+                               (2, [0, 1]), (3, [0, 1, 2, 3])]:
+            with self.subTest(mode=mode):
+                self.assertEqual(pc.candidate_indices(ring, 500, 500, pc.RADII[mode]), expected)
+        self.assertEqual(pc.candidate_indices(ring, 500, 500, None), [0, 1, 2, 3])
 
     def test_leave_by_rounding_cap_and_empty_entries(self):
         data = {'transit_durations': [[{'duration': 4200}], [], [{'duration': 5400.5}]],
@@ -157,6 +160,9 @@ class TestPrecompute(unittest.TestCase):
                             process.kill()
                             process.wait()
                 first = json.loads((resumed / 'run.json').read_text())
+                self.assertEqual(first['parameters']['pruning_radii_km'], [None, None, 30, None])
+                self.assertEqual(first['parameters']['max_pre_transit_seconds'], 1800)
+                self.assertEqual(first['parameters']['max_post_transit_seconds'], 900)
                 self.assertGreater(first['requests'], 0)
                 saved_mtime = (resumed / 'schools/100001.bin').stat().st_mtime_ns
                 # Older checkpoints stored the URL; it is not part of dataset identity.
@@ -182,6 +188,9 @@ class TestPrecompute(unittest.TestCase):
                     self.assertEqual(a, b)
                     self.assertEqual(len(a), 3)
                 manifest = json.loads((resumed / versions[0] / 'manifest.json').read_text())
+                self.assertEqual(manifest['pruning_radii_km'], [None, None, 30, None])
+                self.assertEqual(manifest['max_pre_transit_seconds'], 1800)
+                self.assertEqual(manifest['max_post_transit_seconds'], 900)
                 self.assertEqual(manifest['school_count'], record.SCHOOL_COUNT)
                 self.assertEqual(manifest['shards'], {'records_per_shard': 8000, 'count': 1, 'record_bytes': 34984})
                 version = versions[0]
@@ -191,6 +200,11 @@ class TestPrecompute(unittest.TestCase):
                 self.assertFalse(any(body.get('mode') == 'WALK' for body in calls))
                 changed = common + [str(resumed), '--workers', '2']
                 result = subprocess.run(changed, capture_output=True, text=True, timeout=15)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('parameters', result.stdout + result.stderr)
+                second['parameters']['max_pre_transit_seconds'] = 900
+                (resumed / 'run.json').write_text(json.dumps(second))
+                result = subprocess.run(common + [str(resumed)], capture_output=True, text=True, timeout=15)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('parameters', result.stdout + result.stderr)
                 # SIGTERM can interrupt a progress write; the handler must not write again.
@@ -223,6 +237,96 @@ raise SystemExit(precompute.main())
             second_server.shutdown()
             second_thread.join()
             second_server.server_close()
+
+    def test_fallback_fills_only_empty_origins_and_resumes_without_requests(self):
+        calls = []
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                calls.append(body)
+                if body['arriveBy']:
+                    entries = [{'duration': 600} if item.startswith('54.48') else {} for item in body['many']]
+                elif body['one'].startswith('49.95'):
+                    entries = [{} for item in body['many']]
+                else:
+                    entries = ([{'duration': 600.5}, {'duration': 5400.5}] if body.get('mode') == 'WALK'
+                               else [{'duration': 1200.4}, {}] if body.get('mode') == 'CAR'
+                               else [{'duration': 5400}, {'duration': 0.49}])
+                result = entries if 'mode' in body else {'street_durations': entries,
+                            'transit_durations': [[{'duration': 4200}] if e else [] for e in entries]}
+                data = json.dumps(result).encode()
+                self.send_response(200)
+                self.send_header('Content-Length', str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+            def log_message(self, *args):
+                pass
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                base = Path(directory)
+                origins = base / 'origins.csv'
+                origins.write_text('id,lat,lng\n489_510,54.481966,-0.620123\n530_180,51.508,-0.128\n87_15,49.957693,-6.358553\n')
+                schools = base / 'schools.csv'
+                schools.write_text('urn,lat,lng\n100001,51.508,-0.128\n121667,54.481915,-0.624338\n')
+                graph = base / 'data.rail'
+                graph.mkdir()
+                (base / 'feeds').mkdir()
+                (base / 'feeds/rail.zip').write_bytes(b'test feed')
+                out = base / 'out'
+                command = [sys.executable, str(ROOT / 'fixtures/precompute.py'), str(out),
+                           '--workers', '2', '--base-url', f'http://127.0.0.1:{server.server_port}',
+                           '--origins', str(origins), '--schools', str(schools), '--graph-dir', str(graph)]
+                result = subprocess.run(command, capture_output=True, text=True, timeout=30)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                version = json.loads((out / 'current.json').read_text())['version']
+                empty = (out / version / '530_180.bin').read_bytes()
+                for urn, expected in [('100001', [601, 601, 5400, 1200]), ('121667', [65535, 65535, 0, 65535])]:
+                    self.assertEqual([record.decode(empty, m, pc.SCHOOL_INDEX[urn]) for m in range(4)], expected)
+                unchanged = (out / version / '489_510.bin').read_bytes()
+                self.assertEqual(record.decode(unchanged, 1, pc.SCHOOL_INDEX['121667']), 600)
+                self.assertEqual((out / version / '87_15.bin').read_bytes(), b'\xff' * (8 * record.SCHOOL_COUNT))
+                outward = [b for b in calls if not b['arriveBy']]
+                self.assertEqual(len(outward), 6)
+                self.assertFalse(any(b['one'].startswith('54.48') for b in outward))
+                for b in outward:
+                    self.assertEqual(b['maxMatchingDistance'], 250)
+                    if 'mode' in b:
+                        self.assertIn(b['mode'], ['WALK', 'CAR'])
+                        self.assertEqual(b['max'], 5400)
+                        self.assertEqual(b['many'], ['51.508;-0.128', '54.481915;-0.624338'])
+                    else:
+                        self.assertEqual(b['directMode'], 'BIKE')
+                        self.assertEqual(b['transitModes'], [])
+                        self.assertEqual(b['cyclingSpeed'], 5.0)
+                        self.assertEqual(b['maxDirectTime'], 5400)
+                        self.assertEqual(b['many'], ['51.508,-0.128', '54.481915,-0.624338'])
+                manifest = json.loads((out / version / 'manifest.json').read_text())
+                self.assertEqual(manifest['run']['fallback_origins'], 2)
+                self.assertEqual(manifest['run']['fallback_requests'], 6)
+                self.assertEqual(manifest['run'].get('fallback_bytes'),
+                                 sum(p.stat().st_size for p in (out / 'fallback').glob('*.bin')))
+                self.assertEqual(manifest['run']['output_bytes'],
+                                 sum(manifest['run'][k] for k in ('school_bytes', 'record_bytes', 'fallback_bytes')))
+                self.assertEqual(manifest['run']['requests'], len(calls))
+                self.assertEqual(manifest['run']['walk_missing_pairs'], 0)
+                saved = {p.name: p.read_bytes() for p in (out / 'schools').glob('*.bin')}
+                pc.write_school(out / 'fallback' / '489_510.bin',
+                                [[], [(pc.SCHOOL_INDEX['121667'], 1234)], [], []])
+                calls.clear()
+                result = subprocess.run(command, capture_output=True, text=True, timeout=30)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(calls, [])
+                self.assertEqual((out / version / '530_180.bin').read_bytes(), empty)
+                self.assertEqual((out / version / '489_510.bin').read_bytes(), unchanged)
+                self.assertEqual({p.name: p.read_bytes() for p in (out / 'schools').glob('*.bin')}, saved)
+                self.assertEqual(json.loads((out / version / 'manifest.json').read_text())['run']['fallback_requests'], 6)
+        finally:
+            server.shutdown()
+            thread.join()
+            server.server_close()
 
 
 if __name__ == '__main__':
