@@ -196,6 +196,10 @@ def transpose(out, version, origins, urns, stop):
         for mode in (1, 2, 3):
             for school, value in planes[mode]:
                 struct.pack_into('<H', matrix, origin * size + 2 * (mode * record.SCHOOL_COUNT + school), value)
+                if mode == 1:
+                    slot = origin * size + 2 * school
+                    transit = struct.unpack_from('<H', matrix, slot)[0]
+                    struct.pack_into('<H', matrix, slot, min(transit, value))
     directory = out / version
     directory.mkdir(exist_ok=True)
     view = memoryview(matrix)
@@ -458,7 +462,8 @@ def run(args):
                                                'fallback_origins', 'fallback_requests')}
         fallback_bytes = sum(p.stat().st_size for p in (out / 'fallback').glob('*.bin'))
         run_stats.update(workers=args.workers, output_bytes=school_bytes + record_bytes + fallback_bytes,
-                         school_bytes=school_bytes, record_bytes=record_bytes, schools_completed=complete,
+                         school_bytes=school_bytes, record_bytes=record_bytes, fallback_bytes=fallback_bytes,
+                         schools_completed=complete,
                          walk_missing_pairs=missing, walk_nearby_pairs=nearby)
         manifest = {'version': state['version'], 'routing_date': '2026-09-16', 'routing_time': '08:30',
                     'timezone': 'Europe/London', 'motis_version': MOTIS_VERSION, 'modes': list(record.MODES),

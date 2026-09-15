@@ -39,7 +39,7 @@ class DatasetManifestTests(unittest.TestCase):
         self.assertEqual(validate(manifest), [])
         manifest['run'].update(requests_retried=1, transpose_seconds=0.25,
                                schools_completed=4373, school_bytes=100,
-                               record_bytes=200, walk_missing_pairs=0,
+                               record_bytes=200, fallback_bytes=10, walk_missing_pairs=0,
                                walk_nearby_pairs=10)
         self.assertEqual(validate(manifest), [])
 
@@ -63,6 +63,7 @@ class DatasetManifestTests(unittest.TestCase):
             (('run',), 'fallback_origins', None, '$.run.fallback_origins'),
             (('run',), 'fallback_requests', None, '$.run.fallback_requests'),
             (('run',), 'fallback_requests', '3', '$.run.fallback_requests'),
+            (('run',), 'fallback_bytes', '10', '$.run.fallback_bytes'),
             (('run',), 'wall_seconds', '4412', '$.run.wall_seconds'),
             (('run',), 'unexpected', 1, '$.run.unexpected'),
             ((), 'pruning_radii_km', [90, 90, 25], '$.pruning_radii_km'),

@@ -283,7 +283,7 @@ raise SystemExit(precompute.main())
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 version = json.loads((out / 'current.json').read_text())['version']
                 empty = (out / version / '530_180.bin').read_bytes()
-                for urn, expected in [('100001', [65535, 601, 5400, 1200]), ('121667', [65535, 65535, 0, 65535])]:
+                for urn, expected in [('100001', [601, 601, 5400, 1200]), ('121667', [65535, 65535, 0, 65535])]:
                     self.assertEqual([record.decode(empty, m, pc.SCHOOL_INDEX[urn]) for m in range(4)], expected)
                 unchanged = (out / version / '489_510.bin').read_bytes()
                 self.assertEqual(record.decode(unchanged, 1, pc.SCHOOL_INDEX['121667']), 600)
@@ -306,6 +306,10 @@ raise SystemExit(precompute.main())
                 manifest = json.loads((out / version / 'manifest.json').read_text())
                 self.assertEqual(manifest['run']['fallback_origins'], 2)
                 self.assertEqual(manifest['run']['fallback_requests'], 6)
+                self.assertEqual(manifest['run'].get('fallback_bytes'),
+                                 sum(p.stat().st_size for p in (out / 'fallback').glob('*.bin')))
+                self.assertEqual(manifest['run']['output_bytes'],
+                                 sum(manifest['run'][k] for k in ('school_bytes', 'record_bytes', 'fallback_bytes')))
                 self.assertEqual(manifest['run']['requests'], len(calls))
                 self.assertEqual(manifest['run']['walk_missing_pairs'], 0)
                 saved = {p.name: p.read_bytes() for p in (out / 'schools').glob('*.bin')}

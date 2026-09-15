@@ -73,6 +73,7 @@
         "schools_completed": {"type": "integer"},
         "school_bytes": {"type": "integer"},
         "record_bytes": {"type": "integer"},
+        "fallback_bytes": {"type": "integer"},
         "walk_missing_pairs": {"type": "integer"},
         "walk_nearby_pairs": {"type": "integer"}
       }
