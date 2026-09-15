@@ -4,6 +4,8 @@ Version 20260915T010905Z ran 100 schools with eight workers into motis-spike/run
 
 The run took 6.60 times the 71 second baseline, projecting 16 hours 51 minutes from run two's 2 hours 33 minutes. This comparison includes fallback and unpruned candidates; the old baseline used 382 requests. It does not isolate access cost. MOTIS stopped and escalated process checks were clean.
 
+The September 15 worker sweep, excluding fallback and transpose, took 311 seconds at eight workers, 243 at twelve and 222 at sixteen, with byte-identical school files and approximately 9.2 GiB peak server RSS.
+
 Command, run from issue-18-runner-fixes at commit 770af63:
 
 ```sh
