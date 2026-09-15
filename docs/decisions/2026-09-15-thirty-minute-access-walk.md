@@ -14,9 +14,9 @@ That is the rural pattern, not one origin. In the full dataset the median origin
 
 ## Cost
 
-Measured on the 100-school sample before the rerun. The coordinator records the measured figure here.
+About 1 hour 35 minutes of wall time on the full grid. Run 3, version 20260915T011918Z, took 4 hours 8 minutes at eight workers against run 2's 2 hours 33 minutes, with everything else equal apart from the fallback pass over 887 origins, which issued 2,661 requests and took a few minutes. Peak server resident set rose from 9.95 GB to 11.77 GB.
 
-The measurement matters because the paired extrapolations from the September 15 probes put a full run somewhere between 54 and 132 hours at eight workers, with wide uncertainty, against the 2 hours 33 minutes the run with 900 seconds took.
+The longer access walk also does the work it was meant to do: the count of origins reaching nothing at all fell from 1,120 to 887 before the fallback ran.
 
 ## What it changes
 
