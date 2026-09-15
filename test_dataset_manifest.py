@@ -15,6 +15,8 @@ MANIFEST = {
     'modes': ['public_transport', 'walking', 'cycling', 'driving'],
     'cap_seconds': 5400, 'display_band_minutes': 10, 'unreachable': 65535,
     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
+    'fallback_matching_metres': 1000,
+    'max_pre_transit_seconds': 1800, 'max_post_transit_seconds': 900,
     'cycling_speed_mps': 5.0, 'pruning_radii_km': [90, 90, 25, 136],
     'origin_count': 93217, 'origins_sha256': 'a' * 64, 'school_count': 4373,
     'school_index_sha256': 'b' * 64,
@@ -25,6 +27,7 @@ MANIFEST = {
     'feeds': [{'path': 'motis-spike/feeds/bods.zip', 'sha256': 'c' * 64}],
     'run': {'started': '2026-09-14T09:30:00Z', 'wall_seconds': 4412, 'workers': 8,
             'requests': 26238, 'peak_server_rss_bytes': 9448928051,
+            'fallback_origins': 1120, 'fallback_requests': 3360,
             'output_bytes': 3761103528},
 }
 
@@ -37,13 +40,18 @@ class DatasetManifestTests(unittest.TestCase):
         self.assertEqual(validate(manifest), [])
         manifest['run'].update(requests_retried=1, transpose_seconds=0.25,
                                schools_completed=4373, school_bytes=100,
-                               record_bytes=200, walk_missing_pairs=0,
+                               record_bytes=200, fallback_bytes=10, walk_missing_pairs=0,
                                walk_nearby_pairs=10)
         self.assertEqual(validate(manifest), [])
 
     def test_rejects_invalid_fields_at_every_level(self):
         cases = [
             ((), 'version', None, '$.version'),
+            ((), 'fallback_matching_metres', None, '$.fallback_matching_metres'),
+            ((), 'fallback_matching_metres', '1000', '$.fallback_matching_metres'),
+            ((), 'max_pre_transit_seconds', None, '$.max_pre_transit_seconds'),
+            ((), 'max_post_transit_seconds', None, '$.max_post_transit_seconds'),
+            ((), 'max_pre_transit_seconds', '1800', '$.max_pre_transit_seconds'),
             ((), 'shards', None, '$.shards'),
             ((), 'keys', None, '$.keys'),
             (('shards',), 'count', '12', '$.shards.count'),
@@ -55,6 +63,10 @@ class DatasetManifestTests(unittest.TestCase):
             (('feeds', 0), 'sha256', None, '$.feeds[0].sha256'),
             (('feeds', 0), 'unexpected', 1, '$.feeds[0].unexpected'),
             (('run',), 'requests', None, '$.run.requests'),
+            (('run',), 'fallback_origins', None, '$.run.fallback_origins'),
+            (('run',), 'fallback_requests', None, '$.run.fallback_requests'),
+            (('run',), 'fallback_requests', '3', '$.run.fallback_requests'),
+            (('run',), 'fallback_bytes', '10', '$.run.fallback_bytes'),
             (('run',), 'wall_seconds', '4412', '$.run.wall_seconds'),
             (('run',), 'unexpected', 1, '$.run.unexpected'),
             ((), 'pruning_radii_km', [90, 90, 25], '$.pruning_radii_km'),
