@@ -15,6 +15,7 @@ MANIFEST = {
     'modes': ['public_transport', 'walking', 'cycling', 'driving'],
     'cap_seconds': 5400, 'display_band_minutes': 10, 'unreachable': 65535,
     'compression': 'none', 'rounding': 'half up to whole seconds, then compared with 5400',
+    'fallback_matching_metres': 1000,
     'max_pre_transit_seconds': 1800, 'max_post_transit_seconds': 900,
     'cycling_speed_mps': 5.0, 'pruning_radii_km': [90, 90, 25, 136],
     'origin_count': 93217, 'origins_sha256': 'a' * 64, 'school_count': 4373,
@@ -46,6 +47,8 @@ class DatasetManifestTests(unittest.TestCase):
     def test_rejects_invalid_fields_at_every_level(self):
         cases = [
             ((), 'version', None, '$.version'),
+            ((), 'fallback_matching_metres', None, '$.fallback_matching_metres'),
+            ((), 'fallback_matching_metres', '1000', '$.fallback_matching_metres'),
             ((), 'max_pre_transit_seconds', None, '$.max_pre_transit_seconds'),
             ((), 'max_post_transit_seconds', None, '$.max_post_transit_seconds'),
             ((), 'max_pre_transit_seconds', '1800', '$.max_pre_transit_seconds'),
