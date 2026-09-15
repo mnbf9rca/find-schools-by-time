@@ -18,6 +18,8 @@ Record two numbers against the prediction, in `motis-spike/NOTES.md` and in a co
 
 The run of version 20260914T220224Z started 2026-09-14T22:02:24Z and finished 2026-09-15T00:35:38Z: 9,194 seconds of wall time, 2 hours 33 minutes, against the 2.5 hours predicted. Peak server resident set was 9.95 GB against 9.7 GB predicted, and 8.8 GB in the original four-school projection. It issued 48,103 requests with none retried, and the transpose took 25.5 seconds. Output was 3,261,103,528 bytes of records plus 445,633,004 bytes of school files. Walk coverage missed 1,865 of 52,548 near pairs, 3.5 percent.
 
+Run 3, version 20260915T011918Z, added the 1,800 second access walk and the fallback pass: 4 hours 8 minutes of wall time at eight workers and a peak server resident set of 11.77 GB, with the fallback covering 887 origins in 2,661 requests. Expect about 4 hours and 12 GB for a refresh.
+
 To re-measure the pruning radii rather than trust them, use `fixtures/measure_reach.py`. The issue #18 validator checks the published data.
 
 Keep each version's local directory until `--delete-version` has run for it, because deletion reads that version's manifest for its keys.

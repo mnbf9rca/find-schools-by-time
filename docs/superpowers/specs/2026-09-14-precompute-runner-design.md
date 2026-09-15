@@ -4,15 +4,15 @@ Date: September 14, 2026
 
 ## Goal
 
-`fixtures/precompute.py` turns the school list and the origin grid into the published dataset: `uv run --with pyproj fixtures/precompute.py <out-dir>`, with `--workers N` default 8, `--base-url` default `http://127.0.0.1:8080`, and `--schools PATH` default `schools.json`, also taking a CSV of `urn`, `lat` and `lng` so the runbook can use `fixtures/spike-sample.csv`. `--origins PATH` and `--graph-dir PATH` default to `fixtures/origins.csv` and `motis-spike/data.rail`, and exist so the resume test can run offline against a small grid and a stub server. Standard library plus pyproj, used only to project the school coordinates to EPSG:27700 at startup, because an origin identifier already carries its easting and northing.
+`fixtures/precompute.py` turns the school list and the origin grid into the published dataset: `uv run --with pyproj fixtures/precompute.py <out-dir>`, with `--workers N` default 8, `--base-url` default `http://127.0.0.1:8080`, and `--schools PATH` default `schools.json`, also taking a CSV of `urn`, `lat` and `lng` so the runbook can use `fixtures/spike-sample.csv`. Standard library plus pyproj, used only to project the school coordinates to EPSG:27700 at startup, because an origin identifier already carries its easting and northing.
 
 The script is self-contained. It imports neither `sweep_spike.py`, unreachable by a bare `import` under the `from fixtures import ...` convention, nor `measure_reach.py`, which returns index sets rather than seconds. It carries its own grid, payload and request code.
 
 ## Requests
 
-Three request groups per school, split into batches of at most 20,000 in origin order.
+Three request groups per school, each holding the origins within its mode's radius from `docs/decisions/2026-09-14-per-mode-pruning-radii.md`, split into batches of at most 20,000 in origin order.
 
-Public transport, the walking plane that shares its request, and driving send every origin. `docs/decisions/2026-09-14-per-mode-pruning-radii.md` withdraws their radii, because the 100-school sample stored values at 88.229 km and 133.333 km against radii of 90 km and 136 km. Cycling keeps the only radius, 30 km, measured from the cell centre: easting is 1,000 times the identifier's kilometre easting plus 500, northing likewise. That 30 km sits 3 km above the 27 km an 18 km/h bike covers in 90 minutes, so the 707 metre corner-to-centre displacement no longer threatens a reachable origin.
+Measure distance from the cell centre: easting is 1,000 times the identifier's kilometre easting plus 500, northing likewise. The rounded radii leave margins of 669, 644 and 915 metres, two of them under the 707 metre corner-to-centre displacement, so measuring from anywhere else drops reachable origins.
 
 - Public transport: `POST /api/experimental/one-to-many-intermodal`, `transitModes: ["TRANSIT"]`, `directMode: "WALK"`, `lat,lng`.
 - Cycling: same endpoint, `transitModes: []`, `directMode: "BIKE"`, `cyclingSpeed: 5.0`, `lat,lng`.
@@ -20,17 +20,7 @@ Public transport, the walking plane that shares its request, and driving send ev
 
 The caps carry three units: `maxTravelTime: 90` minutes on the transit leg, `maxDirectTime: 5400` seconds on the direct leg, `max: 5400` seconds for driving. All three set `arriveBy: true` and `maxMatchingDistance: 250` metres; the intermodal pair also set `time: "2026-09-16T08:30:00+01:00"`.
 
-Both intermodal bodies also set `preTransitModes: ["WALK"]`, `postTransitModes: ["WALK"]`, `maxPostTransitTime: 900` and `useRoutedTransfers: true`. `maxPreTransitTime` is 1,800 on the public transport body, from `docs/decisions/2026-09-15-thirty-minute-access-walk.md`; the school end stays at 900. The cycling body keeps 900 at both ends, where neither limit does anything, because it sends `transitModes: []` and so has no access leg. `fixtures/measure_reach.py` sent 900 at both ends when it measured the reach, so the cycling radius predates this change.
-
 Three requests fill four planes: the public transport response's `street_durations` entry per origin is the direct walk, so the walking plane needs no fourth request and inherits the 90 kilometre transit radius. That leg is the intermodal endpoint's, not the street endpoint the spike used, and `motis-spike/NOTES.md` records empty `street_durations` for four nearby schools with no follow-up. Hence the explicit `maxMatchingDistance`, the runbook's sample run checking walk coverage against straight-line distance, and the same check in the issue #18 validator: an origin within 2 km of a school with no walk value is a defect to chase.
-
-In the 100-school sample, 42 of the 1,161 origin and school pairs within 2 km have no walking value, and a school-outward request at 500 metres matching recovered one and was dropped. The remaining misses are origin and school pairs that MOTIS cannot match to the street network, reported per pair by the issue #18 validator and tracked in issue #57.
-
-A fallback pass runs once every school file is written and before the transpose. For each origin whose four planes are all sentinel, send one origin-outward street request per street mode: `POST /api/v1/one-to-many` with `arriveBy: false`, the origin as `one` and every school as `many`, the same caps and 1,000 metre matching, cycling through the intermodal endpoint as before. The main requests stay at 250 metres. Fill the walking, cycling and driving planes from the replies. Public transport is not filled, because a departure-time search cannot express arrive-by.
-
-The reverse street search returns nothing for about 1,120 origins that route normally outward: of twenty random empty origins, eight route outward at 250 metre matching, and all twenty fail in the orientation the runner uses. One outward request per empty origin costs about 1,120 requests per mode. The fallback matches at 1,000 metres because twelve of those twenty route at 1,000 and fail at 250: a rural cell centre lands in a field, too far from a road for the tighter limit. The server's `max_max_matching_distance` must therefore be 1000.
-
-The manifest's `run` block records `fallback_origins` and `fallback_requests`, and the manifest records `fallback_matching_metres`.
 
 Apply `docs/decisions/2026-09-14-store-leave-by-minutes.md`: public transport takes the smaller of the `transit_durations` Pareto minimum and the `street_durations` entry, the other three their street durations alone; discard anything over 5,400 seconds. On a non-200 or a dropped connection, halve the batch and retry each half down to a single origin, which is a hard error.
 
@@ -67,11 +57,8 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
   "unreachable": 65535,
   "compression": "none",
   "rounding": "half up to whole seconds, then compared with 5400",
-  "max_pre_transit_seconds": 1800,
-  "fallback_matching_metres": 1000,
-  "max_post_transit_seconds": 900,
   "cycling_speed_mps": 5.0,
-  "pruning_radii_km": [null, null, 30, null],
+  "pruning_radii_km": [90, 90, 25, 136],
   "shards": {"records_per_shard": 8000, "count": 12, "record_bytes": 34984},
   "keys": {"shard": "<version>/shard-{nn}.bin", "origins": "<version>/origins.txt",
            "manifest": "<version>/manifest.json", "current": "current.json"},
@@ -82,15 +69,11 @@ The runner's local output layout is unchanged: one file per origin at `<out-dir>
   "feeds": [{"path": "motis-spike/feeds/bods.zip", "sha256": "d69d71ec..."},
             {"path": "motis-spike/feeds/rail.zip", "sha256": "..."}],
   "run": {"started": "2026-09-14T09:30:00Z", "wall_seconds": 4412, "workers": 8,
-          "requests": 26238, "requests_retried": 12, "peak_server_rss_bytes": 9448928051,
-          "transpose_seconds": 214.5, "schools_completed": 4373, "school_bytes": 500000000,
-          "record_bytes": 3261103528, "output_bytes": 3761103528,
-          "walk_missing_pairs": 42, "walk_nearby_pairs": 1161,
-          "fallback_origins": 1120, "fallback_requests": 3360, "fallback_bytes": 9400000}
+          "requests": 26238, "peak_server_rss_bytes": 9448928051, "output_bytes": 3761103528}
 }
 ```
 
-The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order and holds null for a mode that sends every origin, so its schema types the items `["number", "null"]` and `fixtures/check_dataset_manifest.py` accepts a list of types where it accepts one. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `max_pre_transit_seconds` and `max_post_transit_seconds` record the access limits the dataset was built with, and `fallback_bytes` sizes the fallback files that `output_bytes` already counts. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files, which `record_bytes` and `school_bytes` also give separately; `requests_retried`, `transpose_seconds`, `schools_completed` and the two walk counts are the run's own figures for issue #17. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
+The version is the run's start time in UTC. MOTIS returns durations as floats, hence `rounding`. `pruning_radii_km` is in plane order. `shards` describes the published objects: `count` is the origin count divided by `records_per_shard` and rounded up, and `record_bytes` is twice four times the school count. `keys` gives the published key templates, `{nn}` being the two-digit zero-based shard number, so the Worker reads the scheme rather than inferring it from prose. The runner computes both objects; `fixtures/publish.py` checks its packing against them. `origins_sha256` hashes the committed `fixtures/origins.csv` bytes. `output_bytes` is measured at the end, covering the records, 3.26 GB, plus the school files. The `bods.zip` checksum comes from `fixtures/feed-manifest.json`; `rail.zip` is a converted output, so the feed manifest holds the nine CIF files behind it and the runner hashes the zip itself.
 
 `fixtures/manifest.schema.json` is the contract; `fixtures/check_dataset_manifest.py` validates against it before the run exits, in about thirty lines of standard library with a `--check` self-test like `fixtures/check_manifest.py`. It walks the schema recursively, honouring `required`, `properties`, `type`, `enum`, `items` and `minItems` at every level, so a `feeds` entry missing its checksum fails, the `run` object is checked and `pruning_radii_km` must hold four numbers. `enum` applies to each array element, not the array.
 

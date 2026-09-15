@@ -1,0 +1,13 @@
+origin_id,urn,mode,planner_minutes,planner_departure,character,note
+405_301,103584,public_transport,89,07:01,Birmingham urban,
+459_90,150099,public_transport,67,07:20,Isle of Wight island,
+415_635,137598,public_transport,124,beyond cap,"Bamburgh, 22 km from Berwick",
+621_333,121241,public_transport,89,beyond cap,Norfolk rural,
+433_389,107140,walking,53,,Sheffield urban,
+352_315,123608,walking,96,,Shrewsbury town,
+351_253,117036,cycling,55,,"Hereford, Welsh border","route choice: MOTIS forward route 20.2 km in 4,647 seconds against a shorter planner route; no border detour"
+419_539,130657,cycling,51,,County Durham,
+191_53,112076,cycling,58,,Cornwall rural,
+484_201,145244,driving,80,,"Buckinghamshire, 38 km from Edgbarrow School",
+192_78,112076,driving,70,,Cornwall rural coast,
+623_243,121242,driving,110,,"Norfolk, long",
